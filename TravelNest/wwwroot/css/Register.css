@@ -1,0 +1,37 @@
+﻿body {
+    background: linear-gradient(to top, #87ceeb, #ffffff);
+    background-size: auto;
+    height: 100%;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#registerSubmit {
+    background-color: #fff !important;
+    color: black !important;
+    border-radius: 30vh;
+    width: 15%;
+    border: 1px black solid !important;
+}
+#registerSubmit:hover {
+    border: 1px black solid !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+    background-color: #90EE90 !important;
+    transition: linear 0.2s;
+}
+h2{
+    color: limegreen;
+    align-items: center;
+}
+#dejaCont a{
+    text-decoration: none;
+    color: black;
+}
+#dejaCont a:hover{
+    color: red;
+}
