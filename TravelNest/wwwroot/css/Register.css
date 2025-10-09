@@ -11,14 +11,15 @@
     height: 100vh;
 }
 
-#registerSubmit {
+#registerSubmit, #login-submit {
     background-color: #fff !important;
     color: black !important;
     border-radius: 30vh;
     width: 15%;
     border: 1px black solid !important;
 }
-#registerSubmit:hover {
+
+#registerSubmit:hover, #login-submit:hover {
     border: 1px black solid !important;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
     background-color: #90EE90 !important;
@@ -32,6 +33,13 @@ h2{
     text-decoration: none;
     color: black;
 }
-#dejaCont a:hover{
+#butoaneRecover p a {
+    text-decoration: none;
+    color: black;
+}
+#dejaCont a:hover {
+    color: red;
+}
+#butoaneRecover p a:hover{
     color: red;
 }

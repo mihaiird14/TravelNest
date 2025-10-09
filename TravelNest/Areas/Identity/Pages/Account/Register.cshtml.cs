@@ -129,6 +129,12 @@ namespace TravelNest.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            var existingEmail = await _userManager.FindByEmailAsync(Input.Email);
+            if (existingEmail != null)
+            {
+                ModelState.AddModelError("Input.Email", "Email is already registered.");
+                return Page();
+            }
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
@@ -144,6 +150,7 @@ namespace TravelNest.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -152,11 +159,15 @@ namespace TravelNest.Areas.Identity.Pages.Account
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        values: new { area = "Identity", userId = userId, code = code },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(
+                        Input.Email,
+                        "Confirm your email",
+                        $"Hello {user.UserName},<br>Please confirm your account by " +
+                        $"<a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

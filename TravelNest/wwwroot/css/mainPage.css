@@ -57,13 +57,6 @@ body {
     -webkit-backdrop-filter: none !important;
 }
 
-# {
-    background-color: #fff !important;
-    color: black !important;
-    border-radius: 100px;
-    width: 10vw;
-    border: 1px black solid !important;
-}
 
 #LoginButton:hover {
     border: 1px black solid !important;
