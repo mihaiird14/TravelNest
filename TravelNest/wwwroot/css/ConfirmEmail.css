@@ -1,5 +1,41 @@
-body {
+body, html {
+    margin: 0;
+    padding: 0;
     background: linear-gradient(to top, #87ceeb, #ffffff);
     background-size: auto;
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+#boxNotificare {
+    width: 60vh;
+    height: 40vh;
+    background-color: white;
+    box-shadow: 0 10px 20px limegreen;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    animation-name: AnimatieUmbra;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+@keyframes AnimatieUmbra{
+    from {
+        box-shadow: none;
+    }
+    to {
+        box-shadow: 0 10px 20px limegreen;
+    }
+}
+#boxNotificare i {
+    font-size: 40px;
+    color: lime;
+}
+#boxNotificare a:hover {
+    color: red;
+
+}
+

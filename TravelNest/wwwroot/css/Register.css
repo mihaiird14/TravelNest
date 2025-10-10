@@ -11,7 +11,7 @@
     height: 100vh;
 }
 
-#registerSubmit, #login-submit {
+#registerSubmit, #login-submit, #forgotPass {
     background-color: #fff !important;
     color: black !important;
     border-radius: 30vh;
@@ -19,7 +19,7 @@
     border: 1px black solid !important;
 }
 
-#registerSubmit:hover, #login-submit:hover {
+#registerSubmit:hover, #login-submit:hover, #forgotPass:hover {
     border: 1px black solid !important;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
     background-color: #90EE90 !important;

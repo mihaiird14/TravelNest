@@ -7,11 +7,11 @@
     using MimeKit;
     using TravelNest.Models;
 
-    public class SmtpEmailSender : IEmailSender
+    public class MailSend : IEmailSender
     {
         private readonly EmailSettings _settings;
 
-        public SmtpEmailSender(IOptions<EmailSettings> options)
+        public MailSend(IOptions<EmailSettings> options)
         {
             _settings = options.Value;
         }
