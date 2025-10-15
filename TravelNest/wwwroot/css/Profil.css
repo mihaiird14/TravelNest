@@ -8,8 +8,10 @@
     left: 0;
     border: 1px solid limegreen;
     background-color: aquamarine;
-    justify-content: center;
-    align-items: start;
+    justify-content: start;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 #xBtn{
     color: red;
@@ -29,6 +31,42 @@
     right: 10vw;
     margin-top: 40px;
 }
+#butonMeniu {
+    height: 5vh;
+    width: 100%;
+    background-color: aquamarine;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    padding: 0;
+    margin: 8px;
+}
+#butonMeniu:hover{
+    background-color: oldlace;
+}
+#butonMeniu p {
+    margin: 0;
+    color: black;
+    font-weight: 400;
+}
+#butonMeniu #paginaCurenta {
+    font-weight: 800;
+}
+.butoaneJos {
+    width:100%;
+    padding:0;
+    margin: 0;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+.logoutBtn:hover{
+    background-color: red !important;
+    opacity: 0.8;
+}
 @media only screen and (max-width: 500px) {
     #xBtn {
         visibility: visible;
@@ -38,6 +76,9 @@
     }
     .sideMenu {
         width: 100%;
+    }
+    .butoaneJos{
+        margin-top:0;
     }
 }
 @media only screen and (min-width: 600px) and (max-width: 800px) {
@@ -50,5 +91,8 @@
         position: absolute;
         right: 10vw;
         margin-top: 20px;
+    }
+    .butoaneJos {
+        margin-top: 0;
     }
 }
