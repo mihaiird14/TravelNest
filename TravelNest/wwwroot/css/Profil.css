@@ -67,6 +67,13 @@
     background-color: red !important;
     opacity: 0.8;
 }
+#imgProf{
+    border: 2px solid green;
+    border-radius: 50%;
+    height: 25vh;
+    margin-left: 5vw;
+    margin-top: 2vh;
+}
 @media only screen and (max-width: 500px) {
     #xBtn {
         visibility: visible;
@@ -81,7 +88,7 @@
         margin-top:0;
     }
 }
-@media only screen and (min-width: 600px) and (max-width: 800px) {
+@media only screen and (min-width: 600px) and (max-width: 900px) {
     .sideMenu {
         width: 100%;
     }

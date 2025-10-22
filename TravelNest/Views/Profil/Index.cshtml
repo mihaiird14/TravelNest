@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
+@model Profil
 <html>
     <head>
         <link rel="stylesheet" href="~/css/Profil.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     </head>
-
     <body>
         <i id="menuBtn" class="fa-solid fa-bars"></i>
         <div class="sideMenu">
@@ -45,7 +45,9 @@
                 </div>
             </div>
         </div>
-        
+        <div id="PaginaProfil">
+            <img id="imgProf" src="@Model.ImagineProfil" />
+        </div>
     </body>
     <script src="~/js/profil.js"></script>
 </html>

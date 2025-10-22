@@ -20,5 +20,7 @@ namespace TravelNest.Models
         [DataType(DataType.Date)]
         [Display(Name = "Date Of Birth")]
         public DateTime DateOfBirth { get; set; }
+
+        public Profil Profil { get; set; }
     }
 }

@@ -10,4 +10,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
+    public DbSet<Profil> Profils { set; get; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Profil>()
+            .HasOne(p => p.User)
+            .WithOne(u => u.Profil)
+            .HasForeignKey<Profil>(a => a.UserId)
+            .IsRequired();
+    }
 }
