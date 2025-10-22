@@ -19,11 +19,12 @@ namespace TravelNest.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
-            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            var profil = await _context.Profils.Include(p=>p.User).FirstOrDefaultAsync(p => p.UserId == user.Id);
             if(profil == null)
             {
                 profil = new Profil

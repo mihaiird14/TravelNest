@@ -1,4 +1,8 @@
-.sideMenu{
+body {
+    display: flex;
+
+}
+.sideMenu {
     height: 100vh;
     width: 13vw;
     min-width: 200px;
@@ -6,12 +10,15 @@
     display: flex;
     position: absolute;
     left: 0;
-    border: 1px solid limegreen;
+    border: 1px solid aquamarine;
     background-color: aquamarine;
     justify-content: start;
     align-items: center;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
 #xBtn{
     color: red;
@@ -67,15 +74,96 @@
     background-color: red !important;
     opacity: 0.8;
 }
-#imgProf{
-    border: 2px solid green;
+#imgProf {
     border-radius: 50%;
     height: 25vh;
-    margin-left: 5vw;
     margin-top: 2vh;
+    flex-grow: 1;
+    border: 1px solid aquamarine;
+}
+#sectiuneSus{
+    position: absolute;
+    display: flex;
+    margin-left: 8vw;
+}
+#sectiuneSus h5 {
+    font-weight: 800;
+    margin-top: 7vh;
+}
+#stats {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2vw;
+}
+#bio{
+    width: 20vw;
+    height: 12vh;
+    margin-top: 25px;
+}
+#PaginaProfil {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    height: 95vh;
+    width: 70vw;
+    right: -25%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+hr{
+    margin-top: 35vh;
+}
+#editPr, #arhivaPr {
+    position: absolute;
+    height: 4vh;
+    width: 15vw;
+    min-width: 40px;
+    right: 0;
+    margin-right: -10vw;
+    margin-top: 7vh;
+    background-color: #fff !important;
+    color: black !important;
+    border-radius: 30vh;
+    width: 15%;
+    border: 1px black solid !important;
+}
+#arhivaPr{
+    margin-right: -17vw;
+}
+#editPr:hover, #arhivaPr:hover {
+    border: 1px black solid !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+    background-color: #90EE90 !important;
+    transition: linear 0.2s;
+}
+#dateFllw{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+#butoane{
+    display: flex;
+    flex-direction: row;
+}
+#butoanePaginiProfil{
+    position: absolute;
+    margin-top: 31vh;
+    display: flex;
+    flex-direction: row;
+    gap:0;
+
+}
+#butoanePaginiProfil button{
+    width: 8vw;
+    height: 4vh;
+    background: none;
+    border: none;
+}
+#butoanePaginiProfil button:hover {
+    background-color: rgba(127, 255, 212,0.1);
 }
 @media only screen and (max-width: 500px) {
-    #xBtn {
+        #xBtn {
         visibility: visible;
         position: absolute;
         right: 10vw;

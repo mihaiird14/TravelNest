@@ -46,7 +46,49 @@
             </div>
         </div>
         <div id="PaginaProfil">
-            <img id="imgProf" src="@Model.ImagineProfil" />
+            <div id="sectiuneSus">
+                <img id="imgProf" src="@Model.ImagineProfil" />
+                <div id="stats">
+                    <h5>@Model.User.UserName</h5>
+                    <div id="dateFllw">
+                        <p>0 postari </p>
+                        <p>0 followrs</p>
+                        <p>0 following</p>
+                    </div>
+                    <p id="bio">@Model.Bio</p>
+                </div>
+                <div id="butoane">
+                    <button id="editPr">Edit</button>
+                    <button id="arhivaPr">Arhiva</button>
+                </div>
+
+            </div>
+            <div id="butoanePaginiProfil">
+                <button id="PostsProfil">Posts</button>
+                <button id="TravelGrProfil">Travel Groups</button>
+                <button id="MentionedProfil">Tagged</button>
+            </div>
+            <script>
+                window.onload=function(){
+                    document.getElementById("PostsProfil").style.borderBottom = "1px solid aquamarine";
+                };
+              document.getElementById("PostsProfil").addEventListener("click", () => {
+              document.getElementById("PostsProfil").style.borderBottom = "1px solid aquamarine";
+              document.getElementById("TravelGrProfil").style.borderBottom = "none";
+              document.getElementById("MentionedProfil").style.borderBottom = "none";
+            });
+                          document.getElementById("TravelGrProfil").addEventListener("click", () => {
+              document.getElementById("TravelGrProfil").style.borderBottom = "1px solid aquamarine";
+              document.getElementById("PostsProfil").style.borderBottom = "none";
+              document.getElementById("MentionedProfil").style.borderBottom = "none";
+            });
+                                      document.getElementById("MentionedProfil").addEventListener("click", () => {
+              document.getElementById("MentionedProfil").style.borderBottom = "1px solid aquamarine";
+              document.getElementById("PostsProfil").style.borderBottom = "none";
+              document.getElementById("TravelGrProfil").style.borderBottom = "none";
+            });
+            </script>
+            <hr />
         </div>
     </body>
     <script src="~/js/profil.js"></script>
