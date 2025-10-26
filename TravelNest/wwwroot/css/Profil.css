@@ -38,7 +38,7 @@ body {
     right: 10vw;
     margin-top: 40px;
 }
-#butonMeniu {
+#butonMeniu, #butonMeniu a {
     height: 5vh;
     width: 100%;
     background-color: aquamarine;
@@ -49,8 +49,10 @@ body {
     align-items: center;
     padding: 0;
     margin: 8px;
+    color: black;
+    text-decoration:none;
 }
-#butonMeniu:hover{
+#butonMeniu:hover, #butonMeniu a:hover{
     background-color: oldlace;
 }
 #butonMeniu p {
@@ -61,14 +63,29 @@ body {
 #butonMeniu #paginaCurenta {
     font-weight: 800;
 }
+#butoaneJos a {
+    padding: 0;
+    text-decoration: none;
+}
 .butoaneJos {
-    width:100%;
-    padding:0;
+    width: 100%;
+    padding: 0;
     margin: 0;
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    align-items: center; 
+    align-items: center;
+}
+.butoaneJos a {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+    text-decoration: none;
 }
 .logoutBtn:hover{
     background-color: red !important;
@@ -90,7 +107,7 @@ body {
     font-weight: 800;
     margin-top: 7vh;
 }
-#stats {
+#stats { 
     display: flex;
     flex-direction: column;
     margin-left: 2vw;
@@ -113,33 +130,11 @@ body {
 hr{
     margin-top: 35vh;
 }
-#editPr, #arhivaPr {
-    position: absolute;
-    height: 4vh;
-    width: 15vw;
-    min-width: 40px;
-    right: 0;
-    margin-right: -10vw;
-    margin-top: 7vh;
-    background-color: #fff !important;
-    color: black !important;
-    border-radius: 30vh;
-    width: 15%;
-    border: 1px black solid !important;
-}
-#arhivaPr{
-    margin-right: -17vw;
-}
-#editPr:hover, #arhivaPr:hover {
-    border: 1px black solid !important;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
-    background-color: #90EE90 !important;
-    transition: linear 0.2s;
-}
+
 #dateFllw{
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 15px;
 }
 #butoane{
     display: flex;
@@ -154,7 +149,7 @@ hr{
 
 }
 #butoanePaginiProfil button{
-    width: 8vw;
+    width: 10vw;
     height: 4vh;
     background: none;
     border: none;
@@ -162,8 +157,37 @@ hr{
 #butoanePaginiProfil button:hover {
     background-color: rgba(127, 255, 212,0.1);
 }
+#paginaPostari, #paginaTravelGr {
+    height: auto;
+    min-height: 30vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+#paginaPostari img, #paginaTravelGr img{
+    width: 200px;
+    margin-top: 10%;
+}
+#addPost {
+    background-color: #fff !important;
+    color: black !important;
+    border-radius: 30vh;
+    width: 200px;
+    border: 1px black solid !important;
+}
+
+#addPost:hover {
+    border: 1px black solid !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+    background-color: #90EE90 !important;
+    transition: linear 0.2s;
+}
+#MentionedProfil{
+    display:none;
+}
 @media only screen and (max-width: 500px) {
-        #xBtn {
+    #xBtn {
         visibility: visible;
         position: absolute;
         right: 10vw;

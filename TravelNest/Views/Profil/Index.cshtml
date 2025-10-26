@@ -35,10 +35,10 @@
                 <p>Travel Map</p>
             </div>
             <div class="butoaneJos">
-                <div id="butonMeniu">
+                <a asp-controller="Settings" asp-action="Index"><div id="butonMeniu">
                 <i class="fa-solid fa-gear"></i>
                     <p>Settings</p>
-                </div>
+                </div></a>
                 <div id="butonMeniu" class="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i>
                     <p>Logout</p>
@@ -51,44 +51,57 @@
                 <div id="stats">
                     <h5>@Model.User.UserName</h5>
                     <div id="dateFllw">
-                        <p>0 postari </p>
-                        <p>0 followrs</p>
+                        <p>0 posts </p>
+                        <p>0 followers</p>
                         <p>0 following</p>
                     </div>
                     <p id="bio">@Model.Bio</p>
                 </div>
-                <div id="butoane">
-                    <button id="editPr">Edit</button>
-                    <button id="arhivaPr">Arhiva</button>
-                </div>
-
             </div>
             <div id="butoanePaginiProfil">
                 <button id="PostsProfil">Posts</button>
                 <button id="TravelGrProfil">Travel Groups</button>
                 <button id="MentionedProfil">Tagged</button>
             </div>
-            <script>
-                window.onload=function(){
-                    document.getElementById("PostsProfil").style.borderBottom = "1px solid aquamarine";
-                };
+            <hr />
+            <div id="paginaPostari">
+                <img src="~/images/nophoto.png" />
+                <br />
+                <button id="addPost">New Post</button>
+            </div>
+        <div id="paginaTravelGr">
+            <img src="~/images/notrGr.png" />
+            <br />
+            <button id="addPost">New Travel Group</button>
+        </div>
+        <script>
+            window.onload=function(){
+                document.getElementById("PostsProfil").style.borderBottom = "1px solid aquamarine";
+                document.getElementById("paginaPostari").style.display="flex";
+                document.getElementById("paginaTravelGr").style.display="none";
+            };
               document.getElementById("PostsProfil").addEventListener("click", () => {
               document.getElementById("PostsProfil").style.borderBottom = "1px solid aquamarine";
               document.getElementById("TravelGrProfil").style.borderBottom = "none";
               document.getElementById("MentionedProfil").style.borderBottom = "none";
+              document.getElementById("paginaPostari").style.display="flex";
+              document.getElementById("paginaTravelGr").style.display="none";
             });
-                          document.getElementById("TravelGrProfil").addEventListener("click", () => {
+              document.getElementById("TravelGrProfil").addEventListener("click", () => {
               document.getElementById("TravelGrProfil").style.borderBottom = "1px solid aquamarine";
               document.getElementById("PostsProfil").style.borderBottom = "none";
               document.getElementById("MentionedProfil").style.borderBottom = "none";
+              document.getElementById("paginaPostari").style.display="none";
+              document.getElementById("paginaTravelGr").style.display="flex";
             });
-                                      document.getElementById("MentionedProfil").addEventListener("click", () => {
+              document.getElementById("MentionedProfil").addEventListener("click", () => {
               document.getElementById("MentionedProfil").style.borderBottom = "1px solid aquamarine";
               document.getElementById("PostsProfil").style.borderBottom = "none";
               document.getElementById("TravelGrProfil").style.borderBottom = "none";
+              document.getElementById("paginaPostari").style.display="none";
+              document.getElementById("paginaTravelGr").style.display="none";
             });
-            </script>
-            <hr />
+        </script>
         </div>
     </body>
     <script src="~/js/profil.js"></script>
