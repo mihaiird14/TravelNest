@@ -11,8 +11,10 @@
             <i id="xBtn" class="fa-solid fa-x"></i>
             <img id="logoMenu" src="~/images/logoMenu.png" />
             <div id="butonMeniu">
-                <i class="fa-solid fa-circle-user"></i>
-                <p id="paginaCurenta">Profil</p>
+                <a asp-controller="Profil" asp-action="Index">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <p>Profil</p>
+                </a>
             </div>
             <div id="butonMeniu">
                 <i class="fas fa-home"></i>

@@ -2,6 +2,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="~/css/Profil.css">
+    <link rel="stylesheet" href="~/css/Settings.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -10,7 +11,7 @@
         <i id="xBtn" class="fa-solid fa-x"></i>
         <img id="logoMenu" src="~/images/logoMenu.png" />
         <div id="butonMeniu">
-            <a asp-controller="Home" asp-action="Index">
+            <a asp-controller="Profil" asp-action="Index">
             <i class="fa-solid fa-circle-user"></i>
             <p>Profil</p></a>
         </div>
@@ -46,6 +47,34 @@
                 <p>Logout</p>
             </div>
         </div>
+    </div>
+    <div id="setariPage">
+        <h2 id="titluSet">Settings</h2>
+        <div id="setBtn">
+            <button id="ProfilSet">Profile</button>
+            <button id="ConfSet">Privacy</button>
+            <button id="Arhive">Arhive</button>
+        </div>
+    <script>
+        window.onload=function(){
+            document.getElementById("ProfilSet").style.borderBottom="2px solid green";
+        }
+        document.getElementById("ProfilSet").addEventListener("click",function(){
+                document.getElementById("ProfilSet").style.borderBottom="2px solid green";
+                document.getElementById("ConfSet").style.borderBottom="none";
+                document.getElementById("Arhive").style.borderBottom="none";
+        })
+        document.getElementById("ConfSet").addEventListener("click",function(){
+                document.getElementById("ConfSet").style.borderBottom="2px solid green";
+                document.getElementById("ProfilSet").style.borderBottom="none";
+                document.getElementById("Arhive").style.borderBottom="none";
+        })
+        document.getElementById("Arhive").addEventListener("click",function(){
+                document.getElementById("Arhive").style.borderBottom="2px solid green";
+                document.getElementById("ProfilSet").style.borderBottom="none";
+                document.getElementById("ConfSet").style.borderBottom="none";
+        })
+    </script>
     </div>
 </body>
 </html>

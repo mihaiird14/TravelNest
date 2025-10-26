@@ -1,0 +1,27 @@
+#setariPage {
+    height: 90vh;
+    width: 100%;
+}
+#titluSet {
+    position: absolute;
+    font-family: 'Poppins', 'Montserrat', sans-serif;
+    font-size: 2.75rem; 
+    font-weight: 700; 
+    color: #0A333D; 
+    margin-left: 5vw;
+    margin-top: 5vh;
+}
+#setBtn {
+    position: absolute;
+    margin-top: 13vh;
+    margin-left: 5vw;
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+}
+#setBtn button {
+    width: 4vw;
+    height: 4vh;
+    background: none;
+    border: none;
+}
