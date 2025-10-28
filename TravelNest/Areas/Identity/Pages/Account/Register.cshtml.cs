@@ -73,7 +73,7 @@ namespace TravelNest.Areas.Identity.Pages.Account
         {
             [Required]
             [Display(Name = "Username")]
-            [StringLength(20)]
+            [StringLength(50)]
             [MinLength(5, ErrorMessage = "Numele trebuie să aibă cel puțin 5 caractere.")]
             public string Username { set; get; }
 

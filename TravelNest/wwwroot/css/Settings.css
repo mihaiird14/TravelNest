@@ -1,6 +1,7 @@
 #setariPage {
     height: 90vh;
     width: 100%;
+    display: flex;
 }
 #titluSet {
     position: absolute;
@@ -24,4 +25,89 @@
     height: 4vh;
     background: none;
     border: none;
+}
+#paginaProfilSet{
+    margin-top: 16vh;
+    display: flex;
+    flex-direction: column;
+}
+#paginaProfilSet h5 {
+    font-family: 'Poppins', 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #0A333D;
+    margin-left: 5vw;
+    margin-top: 5vh;
+}
+#paginaProfilSet img{
+    width: 180px;
+    margin-left: 5vw;
+    border: 2px solid aquamarine;
+    border-radius: 50%;
+    margin-top: 2vh;
+}
+#paginaProfilSet input{
+    margin-left: 5vw;
+    border-radius: 25px;
+    text-align: center;
+    margin-top: 2vh;
+    border: 2px solid green;
+    width: 16vw;
+}
+#paginaProfilSet input:focus {
+    border: 2px solid aquamarine;
+}
+#paginaProfilSet textarea{
+    resize: none;
+    margin-left: 5vw;
+    margin-top: 2vh;
+    width: 16vw;
+    overflow-y: auto;
+    border: 2px solid green;
+}
+#paginaProfilSet button {
+    background-color: #fff !important;
+    color: black !important;
+    border-radius: 30vh;
+    width: 10vw;
+    min-width: 150px;
+    border: 1px solid #0A333D !important;
+    margin-left: 5vw;
+    margin-top: 2vh;
+}
+#paginaProfilSet button:hover {
+    border: 1px black solid !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+    background-color: #90EE90 !important;
+    transition: linear 0.2s;
+}
+#schimbaImagine{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+#schimbaImagine label {
+    background-color: #fff !important;
+    color: black !important;
+    border-radius: 30vh;
+    width: 10vw;
+    min-width: 150px;
+    border: 1px #0A333D solid !important;
+    margin-left: 5vw;
+    height: 3vh;
+    text-align: center;
+}
+#schimbaImagine input{
+    display: none;
+}
+#schimbaImagine label:hover {
+    border: 1px black solid !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+    background-color: #90EE90 !important;
+    transition: linear 0.2s;
+}
+#pozeSet {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }

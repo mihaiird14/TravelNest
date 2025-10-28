@@ -1,4 +1,5 @@
 ﻿<!DOCTYPE html>
+@model Profil
 <html>
 <head>
     <link rel="stylesheet" href="~/css/Profil.css">
@@ -55,6 +56,25 @@
             <button id="ConfSet">Privacy</button>
             <button id="Arhive">Arhive</button>
         </div>
+        <div id="paginaProfilSet">
+            <h5>Edit Profile</h5>
+            <div id="schimbaImagine">
+                <img src="@Model.ImagineProfil" />
+                <input type="file" id="imageUpload" accept="image/png, image/jpeg" />
+                <div id="pozeSet">
+                    <label for="imageUpload">Select A Photo</label>
+                    <label>Delete Profile Photo</label>
+                </div>
+            </div>
+            <br />
+            <h5>Username</h5>
+            <input type="text" maxlength="50" value="@Model.User.UserName"/>
+            <br />
+            <h5>Bio</h5>
+            <textarea maxlength="255" value="@Model.Bio" placeholder="Bio"></textarea>
+            <br />
+            <button type="submit">Save Changes</button>
+        </div>
     <script>
         window.onload=function(){
             document.getElementById("ProfilSet").style.borderBottom="2px solid green";
@@ -76,5 +96,6 @@
         })
     </script>
     </div>
+   
 </body>
 </html>
