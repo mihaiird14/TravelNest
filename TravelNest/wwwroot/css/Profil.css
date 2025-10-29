@@ -94,6 +94,7 @@ body {
 #imgProf {
     border-radius: 50%;
     height: 25vh;
+    width: 13vw;
     margin-top: 2vh;
     flex-grow: 1;
     border: 1px solid aquamarine;

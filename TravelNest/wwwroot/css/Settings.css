@@ -44,13 +44,14 @@
 }
 
 #paginaProfilSet img {
-    width: 180px;
+    width: 170px;
+    height: 160px;
     margin-left: 5vw;
     border: 2px solid aquamarine;
     border-radius: 50%;
     margin-top: 2vh;
 }
-#paginaProfilSet input{
+#paginaProfilSet input {
     margin-left: 5vw;
     border-radius: 25px;
     text-align: center;

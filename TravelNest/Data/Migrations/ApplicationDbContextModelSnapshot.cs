@@ -250,7 +250,6 @@ namespace TravelNest.Data.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("ImagineProfil")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")

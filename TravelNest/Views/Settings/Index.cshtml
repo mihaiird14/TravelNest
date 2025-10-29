@@ -58,17 +58,20 @@
         </div>
         <div id="paginaProfilSet">
             <h5>Edit Profile</h5>
-            <div id="schimbaImagine">
-                <img src="@Model.ImagineProfil" />
-                <input type="file" id="imageUpload" accept="image/png, image/jpeg" />
-                <div id="pozeSet">
-                    <label for="imageUpload">Select A Photo</label>
-                    <label>Delete Profile Photo</label>
-                </div>
-            </div>
-            <form method="post" asp-controller="Settings" asp-action="EditProfil">
+
+            <form method="post" enctype="multipart/form-data" asp-controller="Settings" asp-action="EditProfil">
                 <input type="hidden" asp-for="UserId" />
                 <input type="hidden" asp-for="Id" />
+                <div id="schimbaImagine">
+                    <img id="previzualizare" src="@Model.ImagineProfil" />
+                    <input name="ImagineProfil" type="file" id="ImagineProfil" accept="image/png, image/jpg, image/jpeg" />
+                    <div id="pozeSet">
+                        <label for="ImagineProfil">Select A Photo</label>
+                        <input type="hidden" id="ResetImage" name="ResetImage" value="false" />
+                        <label id="removeProfileImg">Delete Profile Photo</label>
+                    </div>
+                    <span asp-validation-for="ImagineProfil" class="text-danger"></span>
+                </div>
                 <br />
                 <div id="inputUsername">
                     <label asp-for="User.UserName">Username</label>
@@ -109,5 +112,5 @@
     </div>
 
 </body>
-
+<script src="~/js/settings.js"></script>
 </html>

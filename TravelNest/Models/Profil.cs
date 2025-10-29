@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TravelNest.Data;
+using Microsoft.AspNetCore.Http;
 
 namespace TravelNest.Models
 {
@@ -15,8 +16,9 @@ namespace TravelNest.Models
         public string UserId { set; get; }
         [ValidateNever]
         public ApplicationUser User { set; get; }
-        [ValidateNever]
-        public string ImagineProfil { set; get; } = "/images/profilDefault.png";
+        
+        public string? ImagineProfil { set; get; } = "/images/profilDefault.png";
+
         [MaxLength(255)]
         public string? Bio { set; get; }
 
