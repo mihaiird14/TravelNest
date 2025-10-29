@@ -66,14 +66,25 @@
                     <label>Delete Profile Photo</label>
                 </div>
             </div>
-            <br />
-            <h5>Username</h5>
-            <input type="text" maxlength="50" value="@Model.User.UserName"/>
-            <br />
-            <h5>Bio</h5>
-            <textarea maxlength="255" value="@Model.Bio" placeholder="Bio"></textarea>
-            <br />
-            <button type="submit">Save Changes</button>
+            <form method="post" asp-controller="Settings" asp-action="EditProfil">
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="Id" />
+                <br />
+                <div id="inputUsername">
+                    <label asp-for="User.UserName">Username</label>
+                    <input asp-for="User.UserName" type="text" maxlength="50" />
+                    <span asp-validation-for="User.UserName" class="text-danger"></span>
+                </div>
+      
+                <br />
+                <h5>Bio</h5>
+                <textarea asp-for="Bio" maxlength="255" value="@Model.Bio" placeholder="Bio"></textarea>
+                <br />
+                <button type="submit">Save Changes</button>
+            </form>
+            @section Scripts {
+                <partial name="_ValidationScriptsPartial" />
+            }
         </div>
     <script>
         window.onload=function(){
@@ -96,6 +107,7 @@
         })
     </script>
     </div>
-   
+
 </body>
+
 </html>

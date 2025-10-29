@@ -112,7 +112,8 @@ body {
     flex-direction: column;
     margin-left: 2vw;
 }
-#bio{
+#bio {
+    white-space: pre-wrap;
     width: 20vw;
     height: 12vh;
     margin-top: 25px;
