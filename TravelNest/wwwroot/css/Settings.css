@@ -121,3 +121,29 @@
     margin-left: 5vw;
     margin-top: 2vh;
 }
+@media screen and (min-width: 1024px){
+    #setariPage{
+        width: 90%;
+        margin-left: 10vw;
+    }
+    #setBtn {
+        gap: 20px;
+
+    }
+    #setBtn button{
+        width: 100%;
+    }
+    #inputUsername{
+        margin-top: -5vh;
+    }
+    #paginaProfilSet #bioh5{
+        margin-top: -2vh;
+    }
+    #schimbaImagine label {
+        display: flex;
+        height: 35px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+    }
+}
