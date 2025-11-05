@@ -82,9 +82,12 @@
                         </div>
                         <div id="descrierePoze">
                             <label id="addLocatie">Location</label>
-                            <input type="text" />
+                            <input id="inputLocatie" type="text" maxlength="255"/>
                             <label id="addDescriere">Description</label>
                             <textarea placeholder="Add a Description"></textarea>
+                            <label id="tagUseri">Tag Users</label>
+                            <input id="inputTag" type="text" />
+                            <div id="rezultateTag"></div>
                         </div>
                     </form>
                 </div>
@@ -125,4 +128,5 @@
         </div>
     </body>
     <script src="~/js/profil.js"></script>
+    <script src="~/js/tagSearch.js"></script>
 </html>

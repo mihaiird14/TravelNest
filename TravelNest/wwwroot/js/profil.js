@@ -14,6 +14,8 @@ document.getElementById("menuBtn").addEventListener("click", function () {
 document.getElementById("addPost").addEventListener("click", function (event) {
     event.stopPropagation();
     document.getElementById("newPostForm").style.display = "flex";
+    document.getElementById('inputTag').value = '';
+    document.getElementById('rezultateTag').innerHTML = '';
 })
 document.addEventListener('click', (event) => {
     const button = document.getElementById("addPost");
