@@ -11,6 +11,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
     }
     public DbSet<Profil> Profils { set; get; }
+    public DbSet<Postare> Postares { set; get; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -19,5 +20,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithOne(u => u.Profil)
             .HasForeignKey<Profil>(a => a.UserId)
             .IsRequired();
+        modelBuilder.Entity<Postare>()
+            .HasOne(p=> p.Profil)
+            .WithMany(b=> b.Posts)
+            .HasForeignKey(p=> p.CreatorId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<FisierMedia>()
+            .HasOne(f => f.Postare)
+            .WithMany(p => p.FisiereMedia)
+            .HasForeignKey(f => f.PostareId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
