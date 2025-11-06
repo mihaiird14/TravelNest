@@ -4,6 +4,7 @@ using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.EntityFrameworkCore;
 using TravelNest.Data;
 using TravelNest.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TravelNest.Controllers
 {
@@ -36,6 +37,21 @@ namespace TravelNest.Controllers
                 await _context.SaveChangesAsync();
             }
             return View(profil);
+        }
+        [HttpGet]
+        public JsonResult CautareTag(string val)
+        {
+            var users = _context.Profils 
+                           .Where(p => p.User.UserName.ToLower().Contains(val))
+                           .Select(p => new {
+                               Id = p.User.Id,      
+                               Name = p.User.UserName,
+                               Poza = p.ImagineProfil  
+                           })
+                           .Take(3)
+                           .ToList();
+
+            return Json(users);
         }
     }
 }

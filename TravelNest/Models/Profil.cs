@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TravelNest.Data;
-using Microsoft.AspNetCore.Http;
 
 namespace TravelNest.Models
 {
@@ -21,6 +22,6 @@ namespace TravelNest.Models
 
         [MaxLength(255)]
         public string? Bio { set; get; }
-
+        public List<Postare> Posts { get; set; } = new List<Postare>();
     }
 }

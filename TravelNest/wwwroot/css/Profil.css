@@ -1,4 +1,4 @@
-body {
+﻿body {
     display: flex;
 
 }
@@ -189,8 +189,112 @@ hr{
 #MentionedProfil{
     display:none;
 }
+#newPostForm {
+    width: 70vw;
+    min-width: 500px;
+    height: 70vh;
+    background-color: aliceblue;
+    border: 2px solid aquamarine;
+    display: none;
+    position: relative;
+    margin-top: -65vh;
+    flex-direction: row;
+}
+#newPostForm i {
+    position: absolute;
+    top: 10px;
+    right: 10px; 
+    cursor: pointer;
+}
+#newPostForm i:hover{
+    color: red;
+}
+#newPostForm form {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+#addPhotos {
+    width: 35vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#descrierePoze {
+    border-left: 2px solid black;
+    width: 35vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+#addMedia{
+    display: none;
+}
+#AddPozePostareForm{
+    cursor: pointer;
+}
+#AddPozePostareForm:hover {
+    opacity: 0.8
+}
+#addLocatie, #addDescriere, #tagUseri {
+    margin-top: 20px;
+    font-size: 20px;
+    color: #0A333D;
+}
+#descrierePoze #inputLocatie, #descrierePoze #inputTag {
+    border-radius: 25px;
+    width: 15vw;
+    border: 2px solid blue;
+    text-align: center;
+}
+#descrierePoze textarea{
+    resize:none;
+    border: 2px solid blue;
+    width: 15vw;
+    height: 10vh;
+    background: none;
+}
+#rezultateTag{
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.tagRezultat {
+    margin: 0;
+    border: 1px solid black;
+    border-radius: 25px;
+    width: 16vw;
+    text-align: center;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px;
+    padding: 2px;
+}
+.tagRezultat img {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50%;
+    align-self: center !important;
+    margin-top: 0px !important;
+}
+.tagRezultat:hover{
+    border: 1px solid white;
+    color: white;
+    background-color: black;
+}
 @media only screen and (max-width: 500px) {
-    #xBtn {
+        #xBtn {
         visibility: visible;
         position: absolute;
         right: 10vw;
