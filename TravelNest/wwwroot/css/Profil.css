@@ -196,8 +196,10 @@ hr{
     background-color: aliceblue;
     border: 2px solid aquamarine;
     display: none;
-    position: relative;
-    margin-top: -65vh;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); /* aduce elementul exact în centru */
     flex-direction: row;
 }
 #newPostForm i {
