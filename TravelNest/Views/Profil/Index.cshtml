@@ -75,10 +75,21 @@
                     <form method="post" enctype="multipart/form-data">
                         <div id="addPhotos">
                             <input name="FisiereMedia" type="file" id="addMedia" accept="image/*,video/*" multiple />  
-                            <label for="addMedia">
+                            <label id="labelAddPoze" for="addMedia">
                                 <img for="FisiereMedia" id="AddPozePostareForm" src="~/images/addPoza.png" />   
                             </label>
+                            <div id="caruselSelectie" style="display: none">
+                                
+                                <div class="carousel-wrapper" id="carouselWrapper">
+                                </div>
+                                <div id="butoaneCarusel">
+                                    <button id="prevBtn" class="nav-btn prev">&#10094;</button>
+                                    <button id="nextBtn" class="nav-btn next">&#10095;</button>
+                                    <div id="counter">0 / 0</div>
+                                    <i id="xBtnFormPostCarusel" class="fa-solid fa-x"></i>
+                                </div>
 
+                            </div>
                         </div>
                         <div id="descrierePoze">
                             <label id="addLocatie">Location</label>
@@ -88,6 +99,7 @@
                             <label id="tagUseri">Tag Users</label>
                             <input id="inputTag" type="text" />
                             <div id="rezultateTag"></div>
+                            <button id="PostFormPoze" type="submit">Post</button>
                         </div>
                     </form>
                 </div>
