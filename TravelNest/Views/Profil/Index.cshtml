@@ -67,9 +67,41 @@
             </div>
             <hr />
             <div id="paginaPostari">
-                <img src="~/images/nophoto.png" />
-                <br />
-                <button id="addPost">New Post</button>
+                @if (Model.Posts.Count() == 0)
+                    {
+                        <img src="~/images/nophoto.png" />
+                        <br />
+                        <button id="addPost">New Post</button>
+                    }
+                else
+                {
+                    <div id="rezultatPostari">
+       
+                        @foreach (var postare in Model.Posts.OrderByDescending(p => p.DataCr))
+                        {
+                            var primaImagine = postare.FisiereMedia
+                                .Where(f => f.fisier == Tip.Image)
+                                .FirstOrDefault();
+                        var primulVideo = postare.FisiereMedia
+                                .Where(f => f.fisier == Tip.Video)
+                                .FirstOrDefault();
+                            <div class="postare">
+                                @if (primaImagine != null)
+                                {
+                                    <img src="@primaImagine.Url" class="thumbnail" />
+                                }
+                                else if (primulVideo != null)
+                                {
+                                    <video class="thumbnail" muted>
+                                        <source src="@primulVideo.Url" type="video/mp4" />
+                                    </video>
+                                }
+                            </div>
+                        }
+
+                        
+                    </div>
+                }
                 <div id="newPostForm">
                     <i id="xBtnFormPost" class="fa-solid fa-x"></i>
                      <form method="post" enctype="multipart/form-data" asp-controller="Profil" asp-action="AddPostare">

@@ -349,6 +349,22 @@ hr{
     background-color: #90EE90 !important;
     transition: linear 0.2s;
 }
+.thumbnail {
+    width: 200px;
+    height: 300px;
+    object-fit: fill;
+    border-radius: 12px;
+}
+#rezultatPostari {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border: 2px solid green;
+    width: 100%;
+    gap: 10px;
+    overflow-y: auto; /* scroll vertical doar în div */
+    overflow-x: hidden; /* nu vrem scroll orizontal */
+}
 @media only screen and (max-width: 500px) {
     #xBtn {
         visibility: visible;
@@ -356,11 +372,13 @@ hr{
         right: 10vw;
         margin-top: 40px;
     }
+
     .sideMenu {
         width: 100%;
     }
-    .butoaneJos{
-        margin-top:0;
+
+    .butoaneJos {
+        margin-top: 0;
     }
 }
 @media only screen and (min-width: 600px) and (max-width: 900px) {
