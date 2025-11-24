@@ -259,7 +259,7 @@ namespace TravelNest.Data.Migrations
 
                     b.HasIndex("PostareId");
 
-                    b.ToTable("FisierMedia");
+                    b.ToTable("FisierMedias");
                 });
 
             modelBuilder.Entity("TravelNest.Models.Postare", b =>

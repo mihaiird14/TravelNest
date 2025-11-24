@@ -12,6 +12,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     }
     public DbSet<Profil> Profils { set; get; }
     public DbSet<Postare> Postares { set; get; }
+    public DbSet<FisierMedia> FisierMedias { set; get; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
