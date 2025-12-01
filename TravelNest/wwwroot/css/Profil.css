@@ -362,8 +362,8 @@ hr{
     border: 2px solid green;
     width: 100%;
     gap: 10px;
-    overflow-y: auto; /* scroll vertical doar în div */
-    overflow-x: hidden; /* nu vrem scroll orizontal */
+    overflow-y: auto; 
+    overflow-x: hidden; 
 }
 @media only screen and (max-width: 500px) {
     #xBtn {
