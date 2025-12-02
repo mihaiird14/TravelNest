@@ -219,136 +219,6 @@ hr{
     padding: 0;
     margin: 0;
 }
-#addPhotos {
-    width: 35vw;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-#descrierePoze {
-    border-left: 2px solid black;
-    width: 35vw;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
-}
-#addMedia{
-    display: none;
-}
-#AddPozePostareForm{
-    cursor: pointer;
-}
-#AddPozePostareForm:hover {
-    opacity: 0.8
-}
-#addLocatie, #addDescriere, #tagUseri {
-    margin-top: 20px;
-    font-size: 20px;
-    color: #0A333D;
-}
-#descrierePoze #inputLocatie, #descrierePoze #inputTag {
-    border-radius: 25px;
-    width: 15vw;
-    border: 2px solid blue;
-    text-align: center;
-}
-#descrierePoze textarea{
-    resize:none;
-    border: 2px solid blue;
-    width: 15vw;
-    height: 10vh;
-    background: none;
-}
-#rezultateTag{
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.tagRezultat {
-    margin: 0;
-    border: 1px solid black;
-    border-radius: 25px;
-    width: 16vw;
-    text-align: center;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 10px;
-    padding: 2px;
-}
-.tagRezultat img {
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 50%;
-    align-self: center !important;
-    margin-top: 0px !important;
-}
-.tagRezultat:hover{
-    border: 1px solid white;
-    color: white;
-    background-color: black;
-}
-#caruselSelectie{
-    display: flex;
-    width: 100%;
-    height: 100%;
-    flex-direction:column;
-    justify-content: center;
-    align-items: center;
-}
-#carouselWrapper {
-    display: flex;
-    height: 70%;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-}
-.carousel-item.active{
-    display: flex;
-    padding: 0;
-    margin: 0;
-    max-height: 70%;
-    max-width: 70%;
-}
-#butoaneCarusel {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
-#butoaneCarusel button{
-    border-radius: 25px;
-    width: 35px;
-    background: none;
-    border: 2px solid green;
-}
-#butoaneCarusel button:hover{
-    background-color: rgba(0,0,0,0.1);
-
-}
-#PostFormPoze {
-    background-color: #fff !important;
-    color: black !important;
-    border-radius: 30vh;
-    width: 25%;
-    border: 1px black solid !important;
-    margin-top: auto;
-    margin-bottom: 13%;
-}
-#PostFormPoze:hover{
-    border: 1px black solid !important;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
-    background-color: #90EE90 !important;
-    transition: linear 0.2s;
-}
 .thumbnail {
     width: 200px;
     height: 300px;
@@ -364,6 +234,309 @@ hr{
     gap: 10px;
     overflow-y: auto; 
     overflow-x: hidden; 
+}
+#addPhotos {
+    position: relative !important; 
+    background: #eef7ff;
+    flex: 0 0 50% !important; 
+    max-width: 50% !important;
+    border-right: 1px solid #e1e1e1;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: hidden !important; 
+}
+.modern-upload-form,
+.modern-upload-form * {
+    box-sizing: border-box;
+}
+.modern-upload-form {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    overflow: hidden; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+.upload-container {
+    display: flex !important;
+    width: 100% !important;
+    flex-direction: row !important;
+}
+
+.left-column,
+.right-column {
+    flex: 0 0 50%; 
+    max-width: 50%; 
+    width: 50%;
+    box-sizing: border-box;
+}
+
+.left-column {
+    background: #eef7ff;
+    position: relative;
+    border-right: 1px solid #e1e1e1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%; 
+}
+#addMedia {
+    display: none;
+}
+.drop-zone {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center; 
+    cursor: pointer;
+    transition: background 0.3s;
+    text-align: center; 
+}
+
+.drop-zone:hover {
+    background: #e0f0ff;
+}
+
+.drop-zone-content {
+    text-align: center;
+    color: #4a5568;
+}
+
+#AddPozePostareForm {
+    font-size: 4rem;
+    color: #5596f5; 
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.drop-zone-content h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.drop-zone-content p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    color: #8898aa;
+}
+
+#caruselSelectie {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #eef7ff;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+}
+.carousel-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    padding: 10px;
+    width: 50%;
+}
+.carousel-wrapper img,.carousel-wrapper video {
+    max-width: 90%; 
+    max-height: 90%; 
+    object-fit: contain; 
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+#butoaneCarusel {
+    position: static; 
+    height: 50px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255,255,255,0.5);
+    margin-bottom: 10px;
+    background: none;
+}
+.nav-btn,#xBtnFormPostCarusel {
+    background: #fff;
+    color: #5596f5;
+    border: 1px solid #cbd5e1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+}
+
+.nav-btn:hover,#xBtnFormPostCarusel:hover {
+    background: #5596f5;
+    color: white;
+    border-color: #5596f5;
+    transform: scale(1.1);
+}
+#counter {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    min-width: 50px;
+    text-align: center;
+}
+
+#xBtnFormPostCarusel:hover {
+    background: #ff4d4d;
+    border-color: #ff4d4d;
+    color: white;
+}
+
+.right-column {
+    background: #fff;
+    padding: 6.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%; 
+    overflow-y: auto; 
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative; 
+}
+
+label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+input[type="text"],textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #f8fafc;
+    resize: none !important;
+}
+
+input[type="text"]:focus,textarea:focus {
+    border-color: #5596f5;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(85, 150, 245, 0.1);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.tag-input-wrapper {
+    position: relative;
+}
+
+.tag-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+#inputTag {
+    padding-left: 35px; 
+}
+#rezultateTag {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none; 
+}
+#rezultateTag .user-suggestion {
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+#rezultateTag .user-suggestion:hover {
+    background: #f1f5f9;
+}
+
+#rezultateTag img.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#PostFormPoze {
+    margin-top: auto; 
+    background: #5596f5; 
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 50px; 
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#PostFormPoze:hover {
+    background: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+@media (max-width: 768px) {
+    .upload-container {
+        flex-direction: column;
+    }
+
+    .left-column {
+        height: 300px;
+        border-right: none;
+        border-bottom: 1px solid #e1e1e1;
+    }
 }
 @media only screen and (max-width: 500px) {
     #xBtn {

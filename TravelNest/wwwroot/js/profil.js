@@ -33,8 +33,8 @@ document.getElementById("xBtnFormPost").addEventListener("click", function () {
     currentIndex = 0;
     totalSlides = 0;
     document.getElementById('caruselSelectie').style.display = 'none';
-    document.getElementById("addMedia").style.display = "hidden"
-    document.getElementById("labelAddPoze").style.display = "block"
+    document.getElementById("addMedia").style.display = "none"
+    document.getElementById("labelAddPoze").style.display = "flex"
 })
 
 document.getElementById("addMedia").addEventListener("change", (event) => {
@@ -107,6 +107,6 @@ document.getElementById("xBtnFormPostCarusel").addEventListener("click", functio
     currentIndex = 0;
     totalSlides = 0;
     document.getElementById('caruselSelectie').style.display = 'none';
-    document.getElementById("addMedia").style.display = "hidden"
-    document.getElementById("labelAddPoze").style.display = "block"
+    document.getElementById("addMedia").style.display = "none"
+    document.getElementById("labelAddPoze").style.display = "flex"
 })

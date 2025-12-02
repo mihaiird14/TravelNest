@@ -104,37 +104,60 @@
                 }
                 <div id="newPostForm">
                     <i id="xBtnFormPost" class="fa-solid fa-x"></i>
-                     <form method="post" enctype="multipart/form-data" asp-controller="Profil" asp-action="AddPostare">
-                        <div id="addPhotos">
+                <form method="post" enctype="multipart/form-data" asp-controller="Profil" asp-action="AddPostare" class="modern-upload-form">
+
+                    <div class="upload-container">
+                        <div id="addPhotos" class="left-column">
                             <input type="hidden" name="profilId" value="@Model.Id" />
-                            <input name="FisiereMedia" type="file" id="addMedia" accept="image/*,video/*" multiple />  
-                            <label id="labelAddPoze" for="addMedia">
-                                <img for="FisiereMedia" id="AddPozePostareForm" src="~/images/addPoza.png" />   
+                            <input name="FisiereMedia" type="file" id="addMedia" accept="image/*,video/*" multiple />
+
+                            <label id="labelAddPoze" for="addMedia" class="drop-zone">
+                                <div class="drop-zone-content">
+                                    <i class="fa-solid fa-camera" id="AddPozePostareForm"></i>
+                                    <h3>Drag and Drop</h3>
+                                    <p>Click or Drag to Upload</p>
+                                </div>
                             </label>
+
                             <div id="caruselSelectie" style="display: none">
-                                
                                 <div class="carousel-wrapper" id="carouselWrapper">
                                 </div>
                                 <div id="butoaneCarusel">
-                                    <button id="prevBtn" class="nav-btn prev">&#10094;</button>
-                                    <button id="nextBtn" class="nav-btn next">&#10095;</button>
+                                    <button id="prevBtn" type="button" class="nav-btn prev">&#10094;</button>
+                                    <button id="nextBtn" type="button" class="nav-btn next">&#10095;</button>
                                     <div id="counter">0 / 0</div>
                                     <i id="xBtnFormPostCarusel" class="fa-solid fa-x"></i>
                                 </div>
-
                             </div>
                         </div>
-                        <div id="descrierePoze">
-                            <label id="addLocatie" >Location</label>
-                            <input id="inputLocatie" name="locatie" type="text" maxlength="255" />
-                            <label id="addDescriere">Description</label>
-                            <textarea name="descriere" placeholder="Add a Description"></textarea>
-                            <label id="tagUseri">Tag Users</label>
-                            <input id="inputTag" type="text" name="tagUseri" />
-                            <div id="rezultateTag"></div>
-                            <button id="PostFormPoze" type="submit">Post</button>
+
+                        <div id="descrierePoze" class="right-column">
+
+                            <div class="input-group">
+                                <label id="addLocatie" for="inputLocatie">Location</label>
+                                <input id="inputLocatie" name="locatie" type="text" maxlength="255" placeholder="Add location" />
+                            </div>
+
+                            <div class="input-group">
+                                <label id="addDescriere" for="descriere">Description</label>
+                                <textarea name="descriere" placeholder="Write a caption..."></textarea>
+                            </div>
+
+                            <div class="input-group tag-section">
+                                <label id="tagUseri" for="inputTag">Tag Users</label>
+                                <div class="tag-input-wrapper">
+                                    <i class="fa-solid fa-at tag-icon"></i>
+                                    <input id="inputTag" type="text" name="tagUseri" placeholder="Search for users..." autocomplete="off" />
+                                </div>
+                                <div id="rezultateTag" class="tag-dropdown"></div>
+                            </div>
+
+                            <button id="PostFormPoze" type="submit">
+                                Post <i class="fa-solid fa-arrow-right"></i>
+                            </button>
                         </div>
-                    </form>
+                    </div>
+                </form>
                 </div>
             </div>
         <div id="paginaTravelGr">
