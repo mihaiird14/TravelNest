@@ -1,0 +1,1 @@
+Invoke-RestMethod -Uri "http://localhost:7044/faceEmb" -Method POST -ContentType "application/json" -Body '{"image_path": "C:/Users/mihai/OneDrive/Desktop/poza_test.jpg"}'

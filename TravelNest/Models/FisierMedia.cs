@@ -20,5 +20,6 @@ namespace TravelNest.Models
 
         public int PostareId { set; get; }
         public Postare Postare { set; get; }
+        public List<FaceEmbeddings> FaceEmbeddings { get; set; }
     }
 }

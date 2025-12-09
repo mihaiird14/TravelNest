@@ -23,5 +23,6 @@ namespace TravelNest.Models
         [MaxLength(255)]
         public string? Bio { set; get; }
         public List<Postare> Posts { get; set; } = new List<Postare>();
+        public List<FaceEmbeddings> FaceEmbeddings { get; set; }
     }
 }

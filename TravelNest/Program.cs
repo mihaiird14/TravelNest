@@ -25,6 +25,8 @@ builder.Services.AddTransient<IEmailSender, MailSend>();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
 .AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+//Adaugare serviciu Python
+builder.Services.AddHttpClient<PythonFaceService>();
 
 //Add baza de date MongoDB
 builder.Services.Configure<MongoSettings>(

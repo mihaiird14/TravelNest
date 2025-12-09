@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Text.Json;
 using TravelNest.Data;
 using TravelNest.Data.Migrations;
 using TravelNest.Models;
@@ -26,9 +28,9 @@ namespace TravelNest.Controllers
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
-            var profil = await _context.Profils.Include(p=>p.User)
-                                            .Include(p=>p.Posts).ThenInclude(post=>post.FisiereMedia).FirstOrDefaultAsync(p => p.UserId == user.Id);
-            if(profil == null)
+            var profil = await _context.Profils.Include(p => p.User)
+                                            .Include(p => p.Posts).ThenInclude(post => post.FisiereMedia).FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (profil == null)
             {
                 profil = new Models.Profil
                 {
@@ -43,23 +45,25 @@ namespace TravelNest.Controllers
         [HttpGet]
         public JsonResult CautareTag(string val)
         {
-            var users = _context.Profils 
+            var users = _context.Profils
                            .Where(p => p.User.UserName.ToLower().Contains(val))
-                           .Select(p => new {
-                               Id = p.User.Id,      
+                           .Select(p => new
+                           {
+                               Id = p.User.Id,
                                Name = p.User.UserName,
-                               Poza = p.ImagineProfil  
+                               Poza = p.ImagineProfil
                            })
                            .Take(3)
                            .ToList();
 
             return Json(users);
         }
-        public async Task<IActionResult> AddPostare(int profilId, List<IFormFile> FisiereMedia,string locatie,string descriere,string tagUseri)
+        public async Task<IActionResult> AddPostare(int profilId, List<IFormFile> FisiereMedia, string locatie, string descriere, string tagUseri)
         {
             var profil = await _context.Profils.FindAsync(profilId);
             if (profil == null)
                 return NotFound("Profilul nu există!");
+
             Postare postare = new Postare
             {
                 CreatorId = profilId,
@@ -67,8 +71,10 @@ namespace TravelNest.Controllers
                 Descriere = descriere,
                 DataCr = DateTime.Now
             };
+
             _context.Postares.Add(postare);
             await _context.SaveChangesAsync();
+
             string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/upload");
             if (!Directory.Exists(uploadPath))
                 Directory.CreateDirectory(uploadPath);
@@ -101,11 +107,80 @@ namespace TravelNest.Controllers
                 };
 
                 _context.FisierMedias.Add(media);
+                await _context.SaveChangesAsync();
+
+                // ▌───────────────────────────────────────────────
+                // ▌  COD ADAUGAT – generăm embeddings pentru imagini
+                // ▌───────────────────────────────────────────────
+                if (type == Tip.Image)
+                {
+                    string CaleFisier = Path.Combine(uploadPath, newFile);
+
+                    // apelăm microserviciul Python
+                    var body = new
+                    {
+                        image_path = CaleFisier.Replace("\\", "/")
+                    };
+
+                    using var http = new HttpClient();
+                    string json = JsonSerializer.Serialize(body);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = null;
+
+                    try
+                    {
+                        // debug
+                        //Console.WriteLine("TRIMIT LA PYTHON: " + body.image_path);
+
+                        response = await http.PostAsync("http://localhost:5001/faceEmb", content);
+
+                        //Console.WriteLine("STATUS PYTHON: " + response.StatusCode);
+                        //debug
+                        var responseJson = await response.Content.ReadAsStringAsync();
+
+                        //Console.WriteLine("RASPUNS PYTHON RAW: " + responseJson);
+                        /* DEBUG
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine("PYTHON A DAT EROARE!");
+                            return RedirectToAction("Index");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(responseJson))
+                        {
+                            Console.WriteLine("PYTHON A TRIMIS RASPUNS GOL!");
+                            return RedirectToAction("Index");
+                        }*/
+
+                        var embeddingResponse = JsonSerializer.Deserialize<FaceEmbeddingResponse>(responseJson);
+
+                        if (embeddingResponse != null && embeddingResponse.FacesEmb.Any())
+                        {
+                            var emb = embeddingResponse.FacesEmb[0];
+
+                            var faceEmb = new FaceEmbeddings
+                            {
+                                FisierMediaId = media.Id,
+                                PersonId = null,
+                                Embedding = JsonSerializer.Serialize(emb)
+                            };
+
+                            _context.FaceEmbeddings.Add(faceEmb);
+                            await _context.SaveChangesAsync();
+
+                            //Console.WriteLine("SALVAT EMBEDDING PENTRU MEDIA: " + media.Id);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("EROARE : " + ex.ToString());
+                    }
+                }
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
-
         }
+
     }
 }

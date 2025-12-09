@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelNest.Data;
 
@@ -11,9 +12,11 @@ using TravelNest.Data;
 namespace TravelNest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203105154_FaceEmb")]
+    partial class FaceEmb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,10 +248,6 @@ namespace TravelNest.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Embedding")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("FisierMediaId")
                         .HasColumnType("int");
 
@@ -261,7 +260,7 @@ namespace TravelNest.Data.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("FaceEmbeddings", (string)null);
+                    b.ToTable("FaceEmbeddings");
                 });
 
             modelBuilder.Entity("TravelNest.Models.FisierMedia", b =>
@@ -286,7 +285,7 @@ namespace TravelNest.Data.Migrations
 
                     b.HasIndex("PostareId");
 
-                    b.ToTable("FisierMedias", (string)null);
+                    b.ToTable("FisierMedias");
                 });
 
             modelBuilder.Entity("TravelNest.Models.Postare", b =>
@@ -319,7 +318,7 @@ namespace TravelNest.Data.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("Postares", (string)null);
+                    b.ToTable("Postares");
                 });
 
             modelBuilder.Entity("TravelNest.Models.Profil", b =>
@@ -346,7 +345,7 @@ namespace TravelNest.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Profils", (string)null);
+                    b.ToTable("Profils");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
