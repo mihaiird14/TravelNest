@@ -109,14 +109,10 @@ namespace TravelNest.Controllers
                 _context.FisierMedias.Add(media);
                 await _context.SaveChangesAsync();
 
-                // ▌───────────────────────────────────────────────
-                // ▌  COD ADAUGAT – generăm embeddings pentru imagini
-                // ▌───────────────────────────────────────────────
+                //python face embeddings
                 if (type == Tip.Image)
                 {
                     string CaleFisier = Path.Combine(uploadPath, newFile);
-
-                    // apelăm microserviciul Python
                     var body = new
                     {
                         image_path = CaleFisier.Replace("\\", "/")
@@ -130,16 +126,12 @@ namespace TravelNest.Controllers
 
                     try
                     {
-                        // debug
-                        //Console.WriteLine("TRIMIT LA PYTHON: " + body.image_path);
-
+       
                         response = await http.PostAsync("http://localhost:5001/faceEmb", content);
 
-                        //Console.WriteLine("STATUS PYTHON: " + response.StatusCode);
-                        //debug
                         var responseJson = await response.Content.ReadAsStringAsync();
 
-                        //Console.WriteLine("RASPUNS PYTHON RAW: " + responseJson);
+                        //Console.WriteLine("RASPUNS PYTHON: " + responseJson);
                         /* DEBUG
                         if (!response.IsSuccessStatusCode)
                         {
