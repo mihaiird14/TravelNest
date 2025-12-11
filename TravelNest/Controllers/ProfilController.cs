@@ -131,8 +131,8 @@ namespace TravelNest.Controllers
 
                         var responseJson = await response.Content.ReadAsStringAsync();
 
-                        //Console.WriteLine("RASPUNS PYTHON: " + responseJson);
-                        /* DEBUG
+                        Console.WriteLine("RASPUNS PYTHON: " + responseJson);
+                         //DEBUG
                         if (!response.IsSuccessStatusCode)
                         {
                             Console.WriteLine("PYTHON A DAT EROARE!");
@@ -143,11 +143,17 @@ namespace TravelNest.Controllers
                         {
                             Console.WriteLine("PYTHON A TRIMIS RASPUNS GOL!");
                             return RedirectToAction("Index");
-                        }*/
+                        }
 
-                        var embeddingResponse = JsonSerializer.Deserialize<FaceEmbeddingResponse>(responseJson);
+                        var embeddingResponse = JsonSerializer.Deserialize<FaceEmbeddingResponse>(
+                            responseJson,
+                            new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            }
+                        );
 
-                        if (embeddingResponse != null && embeddingResponse.FacesEmb.Any())
+                        if (embeddingResponse != null && embeddingResponse.FacesEmb != null && embeddingResponse.FacesEmb.Any())
                         {
                             var emb = embeddingResponse.FacesEmb[0];
 
@@ -160,9 +166,8 @@ namespace TravelNest.Controllers
 
                             _context.FaceEmbeddings.Add(faceEmb);
                             await _context.SaveChangesAsync();
-
-                            //Console.WriteLine("SALVAT EMBEDDING PENTRU MEDIA: " + media.Id);
                         }
+
 
                     }
                     catch (Exception ex)
