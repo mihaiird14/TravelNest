@@ -526,7 +526,63 @@ textarea {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
+#sugestiiAutomate {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+}
 
+.user-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 50px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: 0.2s;
+}
+
+.user-chip:hover {
+    transform: translateY(-2px);
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.user-chip.active {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-color: transparent;
+}
+
+.user-chip img {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    flex-shrink: 0;
+    display: block;
+    margin: 0;
+    position: relative;
+    top: -8px;
+}
+
+.user-chip span {
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0;
+    line-height: normal;
+}
 @media (max-width: 768px) {
     .upload-container {
         flex-direction: column;

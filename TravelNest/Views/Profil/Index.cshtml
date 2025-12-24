@@ -76,7 +76,7 @@
                 else
                 {
                     <div id="rezultatPostari">
-       
+                    <button id="addPost">New Post</button>
                         @foreach (var postare in Model.Posts.OrderByDescending(p => p.DataCr))
                         {
                             var primaImagine = postare.FisiereMedia
@@ -145,11 +145,23 @@
 
                             <div class="input-group tag-section">
                                 <label id="tagUseri" for="inputTag">Tag Users</label>
+
                                 <div class="tag-input-wrapper">
                                     <i class="fa-solid fa-at tag-icon"></i>
-                                    <input id="inputTag" type="text" name="tagUseri" placeholder="Search for users..." autocomplete="off" />
+                                    <input id="inputTag" type="text" placeholder="Search for users..." autocomplete="off" />
+
+                                    <input type="hidden" id="finalTagList" name="tagUseri" value="" />
                                 </div>
+
                                 <div id="rezultateTag" class="tag-dropdown"></div>
+
+                                <div id="selectedTagsContainer" style="margin-top:5px; display:flex; flex-wrap:wrap; gap:5px;"></div>
+
+                                <div id="loadingFaces" style="display:none; color: #666; font-size: 0.9em; margin-top:10px;">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Analyzing photo...
+                                </div>
+
+                                <div id="sugestiiAutomate" style="margin-top:10px;"></div>
                             </div>
 
                             <button id="PostFormPoze" type="submit">
@@ -195,6 +207,6 @@
         </script>
         </div>
     </body>
-    <script src="~/js/profil.js"></script>
-    <script src="~/js/tagSearch.js"></script>
+    <script src="~/js/profil.js" asp-append-version="true"></script>
+    <script src="~/js/tagSearch.js" asp-append-version="true"></script>
 </html>

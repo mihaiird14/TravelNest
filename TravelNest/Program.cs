@@ -27,6 +27,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddControllersWithViews();
 //Adaugare serviciu Python
 builder.Services.AddHttpClient<PythonFaceService>();
+builder.Services.AddScoped<CalculFaceRec>();
 
 //Add baza de date MongoDB
 builder.Services.Configure<MongoSettings>(

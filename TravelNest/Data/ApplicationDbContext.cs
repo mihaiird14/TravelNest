@@ -14,6 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Postare> Postares { set; get; }
     public DbSet<FisierMedia> FisierMedias { set; get; }
     public DbSet<FaceEmbeddings> FaceEmbeddings { get; set; }
+    public DbSet<SugestieTag> SugestieTags { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -42,5 +43,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(p => p.FaceEmbeddings)
             .HasForeignKey(e => e.PersonId)
             .OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<SugestieTag>()
+            .HasOne(s => s.FaceEmbedding)
+            .WithMany() 
+            .HasForeignKey(s => s.FaceEmbeddingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SugestieTag>()
+            .HasOne(s => s.SuggestedPerson)
+            .WithMany() 
+            .HasForeignKey(s => s.SuggestedPersonId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }
