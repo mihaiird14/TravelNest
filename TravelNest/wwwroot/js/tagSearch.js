@@ -1,5 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", function() {
     let activeTags = new Set();
+    
     var fileInput = document.getElementById('addMedia');
     var hiddenInput = document.getElementById('finalTagList');
     var suggestionsArea = document.getElementById('sugestiiAutomate');
@@ -21,206 +22,152 @@
     if(fileInput) {
         fileInput.addEventListener("change", function(e) {
             var files = Array.from(e.target.files);
-            var imageFiles = files.filter(function(f) {
-                return f.type.indexOf('image') !== -1;
-            });
-            
-            if (imageFiles.length > 0) {
-                scaneazaPoze(imageFiles);
-            }
+            var imageFiles = files.filter(f => f.type.indexOf('image') !== -1);
+            if (imageFiles.length > 0) scanAllPhotos(imageFiles);
         });
     }
 
-    function scaneazaPoze(files) {
+    function scanAllPhotos(files) {
         if(loadingMsg) loadingMsg.style.display = 'block';
         if(suggestionsArea) suggestionsArea.innerHTML = '';
 
-        var promises = files.map(function(file) {
+        var promises = files.map(file => {
             var formData = new FormData();
             formData.append('file', file);
-
-            return fetch('/Profil/CheckFacesInPhoto', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .catch(function(err) {
-                return { success: false, suggestions: [] };
-            });
+            return fetch('/Profil/CheckFacesInPhoto', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .catch(err => ({ success: false, suggestions: [] }));
         });
 
-        Promise.all(promises).then(function(results) {
+        Promise.all(promises).then(results => {
             if(loadingMsg) loadingMsg.style.display = 'none';
-            
-            var uniqueUsersMap = {};
             var uniqueList = [];
+            var uniqueMap = {};
 
-            for(var i = 0; i < results.length; i++) {
-                var data = results[i];
-                if (data.success && data.suggestions && data.suggestions.length > 0) {
-                    for(var j = 0; j < data.suggestions.length; j++) {
-                        var user = data.suggestions[j];
-                        if (!uniqueUsersMap[user.userName]) {
-                            uniqueUsersMap[user.userName] = true;
-                            uniqueList.push(user);
+            results.forEach(data => {
+                if (data.success && data.suggestions) {
+                    data.suggestions.forEach(u => {
+                        var name = u.userName || u.UserName || u.name;
+                        if (name && !uniqueMap[name]) {
+                            uniqueMap[name] = true;
+                            uniqueList.push({ userName: name, poza: u.poza || u.Poza });
                         }
-                    }
+                    });
                 }
-            }
+            });
 
-            if (uniqueList.length > 0) {
-                afiseazaSugestii(uniqueList);
-            }
+            if (uniqueList.length > 0) showChips(uniqueList, suggestionsArea, "Suggested Users:");
         });
     }
-
-    function afiseazaSugestii(users) {
-        suggestionsArea.innerHTML = '';
-        var label = document.createElement('p');
-        label.innerText = 'Suggested Users:';
-        label.style.width = '100%';
-        label.style.color = '#666';
-        label.style.fontSize = '12px';
-        label.style.marginBottom = '5px';
-        label.style.fontWeight = 'bold';
-        suggestionsArea.appendChild(label);
-
-        for (var i = 0; i < users.length; i++) {
-            createChip(users[i]);
-        }
-    }
-
-    function createChip(user) {
-        var div = document.createElement('div');
-        div.className = 'user-chip';
-
-        var img = document.createElement('img');
-        if (user.poza) {
-            img.src = user.poza;
-        } else {
-            img.src = '/images/profilDefault.png';
-        }
-
-        var span = document.createElement('span');
-        span.innerText = user.userName;
-
-        div.appendChild(img);
-        div.appendChild(span);
-
-        div.onclick = function(e) {
-            if(e) e.stopPropagation();
-
-            if (div.classList.contains('active')) {
-                div.classList.remove('active');
-                manageTags(user.userName, false);
-            } else {
-                div.classList.add('active');
-                manageTags(user.userName, true);
-            }
-        };
-
-        suggestionsArea.appendChild(div);
-    }
-
     if(inputTagManual) {
         inputTagManual.addEventListener("keyup", function() {
             var val = this.value;
+            
             if (val.length >= 1) {
                 fetch('/Profil/CautareTag?val=' + encodeURIComponent(val))
-                .then(function(res) { return res.json(); })
-                .then(function(users) {
-                    rezultateTagManual.innerHTML = '';
-                    for (var i = 0; i < users.length; i++) {
-                        var u = users[i];
-                        var resDiv = document.createElement('div');
-                        resDiv.style.display = 'flex';
-                        resDiv.style.alignItems = 'center';
-                        resDiv.style.padding = '10px';
-                        resDiv.style.cursor = 'pointer';
-                        resDiv.style.borderBottom = '1px solid #eee';
-                        resDiv.style.background = 'white';
-
-                        var resImg = document.createElement('img');
-                        resImg.src = u.poza;
-                        resImg.style.width = '30px';
-                        resImg.style.height = '30px';
-                        resImg.style.borderRadius = '50%';
-                        resImg.style.marginRight = '10px';
-
-                        var resName = document.createElement('span');
-                        resName.innerText = u.name;
-
-                        resDiv.appendChild(resImg);
-                        resDiv.appendChild(resName);
-
-                        (function(n) {
-                            resDiv.onclick = function(e) {
-                                if(e) e.stopPropagation();
-                                manageTags(n, true);
-                                rezultateTagManual.innerHTML = '';
-                                inputTagManual.value = '';
-                            };
-                        })(u.name);
-
-                        rezultateTagManual.appendChild(resDiv);
+                .then(r => r.json())
+                .then(users => {
+                    rezultateTagManual.innerHTML = ''; 
+                    
+                    if(users && users.length > 0) {
+                        var normalizedUsers = users.map(u => ({
+                            userName: u.userName || u.UserName || u.name,
+                            poza: u.poza || u.Poza
+                        }));
+                       
+                        showChips(normalizedUsers, rezultateTagManual, "Search Results:"); 
                     }
-                });
+                })
+                .catch(err => console.error(err));
             } else {
                 rezultateTagManual.innerHTML = '';
             }
         });
     }
+    function showChips(users, container, titleText) {
+        if(titleText) {
+            var label = document.createElement('p');
+            label.innerText = titleText;
+            label.style.cssText = 'width:100%; color:#666; font-size:12px; margin-bottom:5px; font-weight:bold; margin-left: 5px;';
+            container.appendChild(label);
+        }
+
+        users.forEach(function(user) {
+            var div = document.createElement('div');
+            div.className = 'user-chip';
+
+            if(activeTags.has(user.userName)) {
+                div.classList.add('active');
+            }
+
+            var img = document.createElement('img');
+            img.src = user.poza || '/images/profilDefault.png';
+
+            var span = document.createElement('span');
+            span.innerText = user.userName;
+
+            div.appendChild(img);
+            div.appendChild(span);
+
+            div.onclick = function(e) {
+                if(e) e.stopPropagation();
+
+                if (div.classList.contains('active')) {
+                    div.classList.remove('active');
+                    manageTags(user.userName, false);
+                } else {
+                    div.classList.add('active');
+                    manageTags(user.userName, true);
+                }
+                
+                syncVisuals(user.userName, div.classList.contains('active'));
+            };
+            
+            container.appendChild(div);
+        });
+    }
+
+    function syncVisuals(name, isActive) {
+        var allChips = document.querySelectorAll('.user-chip');
+        allChips.forEach(chip => {
+            var span = chip.querySelector('span');
+            if(span && span.innerText === name) {
+                if(isActive) chip.classList.add('active');
+                else chip.classList.remove('active');
+            }
+        });
+    }
 
     function manageTags(name, add) {
-        if (add) {
-            activeTags.add(name);
-        } else {
-            activeTags.delete(name);
-        }
+        if (add) activeTags.add(name);
+        else activeTags.delete(name);
         
-        var tagsArray = Array.from(activeTags);
-        hiddenInput.value = tagsArray.join(',');
-        
-        selectedTagsContainer.innerHTML = '';
-        
-        for (var k = 0; k < tagsArray.length; k++) {
-            var tagName = tagsArray[k];
-            var tagEl = document.createElement('div');
-            tagEl.style.background = '#007bff';
-            tagEl.style.color = 'white';
-            tagEl.style.padding = '4px 8px';
-            tagEl.style.borderRadius = '5px';
-            tagEl.style.margin = '2px';
-            tagEl.style.fontSize = '14px';
-            tagEl.style.display = 'flex';
-            tagEl.style.alignItems = 'center';
+        hiddenInput.value = Array.from(activeTags).join(',');
+        renderSelectedTags();
+    }
 
+    function renderSelectedTags() {
+        selectedTagsContainer.innerHTML = '';
+        activeTags.forEach(function(tagName) {
+            var tagEl = document.createElement('div');
+            tagEl.style.cssText = 'background:#007bff; color:white; padding:4px 10px; border-radius:15px; font-size:13px; display:flex; align-items:center; gap:6px;';
+            
             var txt = document.createElement('span');
             txt.innerText = tagName;
             
             var xIcon = document.createElement('i');
             xIcon.className = 'fa-solid fa-xmark';
-            xIcon.style.marginLeft = '5px';
             xIcon.style.cursor = 'pointer';
             
-            (function(n) {
-                xIcon.onclick = function(e) {
-                    if(e) e.stopPropagation();
-                    manageTags(n, false);
-                    var allChips = document.querySelectorAll('.user-chip');
-                    for(var j=0; j<allChips.length; j++) {
-                        if(allChips[j].innerText === n) {
-                            allChips[j].classList.remove('active');
-                        }
-                    }
-                };
-            })(tagName);
+            xIcon.onclick = function(e) {
+                if(e) e.stopPropagation();
+                manageTags(tagName, false);
+                syncVisuals(tagName, false);
+            };
 
             tagEl.appendChild(txt);
             tagEl.appendChild(xIcon);
             selectedTagsContainer.appendChild(tagEl);
-        }
+        });
     }
 });

@@ -526,12 +526,32 @@ textarea {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
-#sugestiiAutomate {
+#rezultateTag,
+.tag-dropdown {
+    position: static !important; 
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 8px;
     width: 100%;
+    margin-bottom: 5px;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    z-index: auto !important;
+    overflow-x: hidden;
+}
+.tag-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+#PostFormPoze {
+    margin-top: 20px; 
+    width: 100%;
+    position: static;
 }
 
 .user-chip {
@@ -565,16 +585,14 @@ textarea {
 .user-chip img {
     width: 30px !important;
     height: 30px !important;
-    min-width: 30px !important;
-    min-height: 30px !important;
+    min-width: 30px;
+    min-height: 30px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid white;
-    flex-shrink: 0;
     display: block;
     margin: 0;
-    position: relative;
-    top: -8px;
+    margin-top: 2px !important;
 }
 
 .user-chip span {
@@ -582,6 +600,32 @@ textarea {
     font-size: 14px;
     margin: 0;
     line-height: normal;
+}
+.tag-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.tag-input-wrapper {
+    order: 1;
+}
+
+#selectedTagsContainer {
+    order: 2;
+    width: 100%;
+    margin-top: 5px; 
+    margin-bottom: 5px; 
+}
+
+#rezultateTag {
+    order: 3;
+}
+#loadingFaces {
+    order: 4;
+}
+
+#sugestiiAutomate {
+    order: 5;
 }
 @media (max-width: 768px) {
     .upload-container {

@@ -16,7 +16,7 @@ namespace TravelNest.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CalculFaceRec _faceService; //functie calcul embeddings
+        private readonly CalculFaceRec _faceService; 
         public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService)
         {
             _userManager = userManager;
@@ -45,22 +45,27 @@ namespace TravelNest.Controllers
             }
             return View(profil);
         }
-        [HttpGet]
-        public JsonResult CautareTag(string val)
-        {
-            var users = _context.Profils
-                           .Where(p => p.User.UserName.ToLower().Contains(val))
-                           .Select(p => new
-                           {
-                               Id = p.User.Id,
-                               Name = p.User.UserName,
-                               Poza = p.ImagineProfil
-                           })
-                           .Take(3)
-                           .ToList();
+ [HttpGet]
+public async Task<IActionResult> CautareTag(string val)
+{
+    if (string.IsNullOrEmpty(val))
+    {
+        return Json(new List<object>());
+    }
 
-            return Json(users);
-        }
+    var users = await _context.Profils 
+        .Where(u => u.User.UserName.Contains(val)) 
+        .Take(5) 
+        .Select(u => new 
+        { 
+    
+            userName = u.User.UserName, 
+            poza = u.ImagineProfil ?? "/images/profilDefault.png" 
+        })
+        .ToListAsync();
+
+    return Json(users);
+}
         public async Task<IActionResult> AddPostare(int profilId, List<IFormFile> FisiereMedia, string locatie, string descriere, string tagUseri)
         {
             var profil = await _context.Profils.FindAsync(profilId);

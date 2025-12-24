@@ -28,7 +28,7 @@ builder.Services.AddControllersWithViews();
 //Adaugare serviciu Python
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();
-
+builder.Services.AddHostedService<TravelNest.Services.PythonRunnerService>();
 //Add baza de date MongoDB
 builder.Services.Configure<MongoSettings>(
     builder.Configuration.GetSection("MongoSettings"));
