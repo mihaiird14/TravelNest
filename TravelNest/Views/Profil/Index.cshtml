@@ -53,7 +53,7 @@
                 <div id="stats">
                     <h5>@Model.User.UserName</h5>
                     <div id="dateFllw">
-                        <p>0 posts </p>
+                        <p>@Model.Posts.Count() posts </p>
                         <p>0 followers</p>
                         <p>0 following</p>
                     </div>
@@ -64,6 +64,11 @@
                 <button id="PostsProfil">Posts</button>
                 <button id="TravelGrProfil">Travel Groups</button>
                 <button id="MentionedProfil">Tagged</button>
+                @if (Model.Posts.Count() != 0)
+                {
+                    <button id="addPost2">New Post</button>
+                }
+
             </div>
             <hr />
             <div id="paginaPostari">
@@ -73,35 +78,35 @@
                         <br />
                         <button id="addPost">New Post</button>
                     }
-                else
-                {
-                    <div id="rezultatPostari">
-                    <button id="addPost">New Post</button>
-                        @foreach (var postare in Model.Posts.OrderByDescending(p => p.DataCr))
-                        {
-                            var primaImagine = postare.FisiereMedia
-                                .Where(f => f.fisier == Tip.Image)
-                                .FirstOrDefault();
-                        var primulVideo = postare.FisiereMedia
-                                .Where(f => f.fisier == Tip.Video)
-                                .FirstOrDefault();
-                            <div class="postare">
-                                @if (primaImagine != null)
-                                {
-                                    <img src="@primaImagine.Url" class="thumbnail" />
-                                }
-                                else if (primulVideo != null)
-                                {
-                                    <video class="thumbnail" muted>
-                                        <source src="@primulVideo.Url" type="video/mp4" />
-                                    </video>
-                                }
-                            </div>
-                        }
+            else
+            {
+                <div id="rezultatPostari">
 
-                        
-                    </div>
-                }
+                    @foreach (var postare in Model.Posts.OrderByDescending(p => p.DataCr))
+                    {
+                        var primaImagine = postare.FisiereMedia
+                        .Where(f => f.fisier == Tip.Image)
+                        .FirstOrDefault();
+                        var primulVideo = postare.FisiereMedia
+                        .Where(f => f.fisier == Tip.Video)
+                        .FirstOrDefault();
+
+                        <div class="card-postare">
+                            @if (primaImagine != null)
+                            {
+                                <img src="@primaImagine.Url" class="media-postare" />
+                            }
+                            else if (primulVideo != null)
+                            {
+                                <video class="media-postare" muted>
+                                    <source src="@primulVideo.Url" type="video/mp4" />
+                                </video>
+                                <i class="fa-solid fa-play" style="position:absolute; top:10px; right:10px; color:white; text-shadow: 0 0 5px black;"></i>
+                            }
+                        </div>
+                    }
+                </div>
+            }
                 <div id="newPostForm">
                     <i id="xBtnFormPost" class="fa-solid fa-x"></i>
                 <form method="post" enctype="multipart/form-data" asp-controller="Profil" asp-action="AddPostare" class="modern-upload-form">

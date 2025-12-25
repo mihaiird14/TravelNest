@@ -6,6 +6,7 @@
     const menuBtn = document.getElementById("menuBtn");
     const sideMenus = document.querySelectorAll(".sideMenu");
     const addPostBtn = document.getElementById("addPost");
+    const addPostBtn2 = document.getElementById("addPost2");
     const newPostForm = document.getElementById("newPostForm");
     const xBtnForm = document.getElementById("xBtnFormPost");
     const carouselWrapper = document.getElementById('carouselWrapper');
@@ -33,6 +34,13 @@
 
     if (addPostBtn) {
         addPostBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+            newPostForm.style.display = "flex";
+            if (window.resetTagSystem) window.resetTagSystem();
+        });
+    }
+    if (addPostBtn2) {
+        addPostBtn2.addEventListener("click", function (event) {
             event.stopPropagation();
             newPostForm.style.display = "flex";
             if (window.resetTagSystem) window.resetTagSystem();
