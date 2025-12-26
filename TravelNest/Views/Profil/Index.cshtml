@@ -4,7 +4,9 @@
     <head>
         <link rel="stylesheet" href="~/css/Profil.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    </head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
     <body>
         <i id="menuBtn" class="fa-solid fa-bars"></i>
         <div class="sideMenu">
@@ -141,6 +143,8 @@
                             <div class="input-group">
                                 <label id="addLocatie" for="inputLocatie">Location</label>
                                 <input id="inputLocatie" name="locatie" type="text" maxlength="255" placeholder="Add location" />
+                                <div id="listaLocatii" class="dropdown-locatii"></div>
+                                <div id="miniHarta" style="height: 180px; width: 100%; display: none; margin-top: 10px; border-radius: 8px; z-index: 1;"></div>
                             </div>
 
                             <div class="input-group">
@@ -214,4 +218,5 @@
     </body>
 <script src="~/js/profil.js" asp-append-version="true"></script>
 <script src="~/js/tagSearch.js" asp-append-version="true"></script>
+<script src="~/js/map.js" asp-append-version="true"></script>
 </html>
