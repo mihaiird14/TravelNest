@@ -62,6 +62,10 @@
             <form method="post" enctype="multipart/form-data" asp-controller="Settings" asp-action="EditProfil">
                 <input type="hidden" asp-for="UserId" />
                 <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="User.FirstName" />
+                <input type="hidden" asp-for="User.LastName" />
+                <input type="hidden" asp-for="User.DateOfBirth" value="@Model.User.DateOfBirth.ToString("yyyy-MM-dd")" />
+                <input type="hidden" asp-for="User.Email" />
                 <div id="schimbaImagine">
                     <img id="previzualizare" src="@Model.ImagineProfil" />
                     <input name="ImagineProfil" type="file" id="ImagineProfil" accept="image/png, image/jpg, image/jpeg" />

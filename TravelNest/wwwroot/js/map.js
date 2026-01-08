@@ -1,5 +1,4 @@
-﻿// Am pus totul în DOMContentLoaded ca să fiu sigur că elementele există deja.
-// Probabil mergea și altfel, dar așa e mai safe.
+﻿
 document.addEventListener("DOMContentLoaded", function () {
 
     const inputLocatie = document.getElementById('inputLocatie');
@@ -92,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function afiseazaHarta(lat, lon) {
         miniHarta.style.display = 'block';
 
-        if (!harta) {ă
+        if (!harta) {
             harta = L.map('miniHarta').setView([lat, lon], 10);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
