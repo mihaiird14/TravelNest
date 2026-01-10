@@ -338,5 +338,35 @@ public async Task<IActionResult> CautareTag(string val)
 
             return Json(new { success = true, suggestions = foundUsers });
         }
+        [HttpGet]
+        public async Task<IActionResult> InfoPostari(int postId)
+        {
+            var postare = await _context.Postares
+                .Include(p => p.Profil)      
+                    .ThenInclude(pr => pr.User)  
+                .Include(p => p.FisiereMedia)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+            if (postare == null)
+            {
+                return NotFound();
+            }
+            var rezultatPostare = new
+            {
+                id = postare.Id,
+                descriere = postare.Descriere,
+                locatie = postare.Locatie,
+                data = postare.DataCr.ToString("dd MMM yyyy"),
+                username = postare.Profil.User.UserName,
+                userImage = !string.IsNullOrEmpty(postare.Profil.ImagineProfil)
+                            ? postare.Profil.ImagineProfil
+                            : "/images/profilDefault.png",
+                media = postare.FisiereMedia.Select(f => new {
+                    url = f.Url,
+                    tip = f.fisier.ToString() 
+                }).ToList()
+            };
+
+            return Json(rezultatPostare);
+        }
     }
 }

@@ -7,7 +7,6 @@ using SendGrid.Helpers.Mail;
 using System.Globalization;
 using TravelNest.Data;
 using TravelNest.Models;
-using TravelNest.MongoSettings;
 using TravelNest.Services;
 
 
@@ -29,30 +28,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();
 builder.Services.AddHostedService<TravelNest.Services.PythonRunnerService>();
-//Add baza de date MongoDB
-builder.Services.Configure<MongoSettings>(
-    builder.Configuration.GetSection("MongoSettings"));
-
-builder.Services.AddSingleton<IMongoClient>(sp =>
-{
-    var settings = sp.GetRequiredService<
-        Microsoft.Extensions.Options.IOptions<MongoSettings>>().Value;
-
-    return new MongoClient(settings.ConnectionString);
-});
-
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
-{
-    var config = sp.GetRequiredService<
-        Microsoft.Extensions.Options.IOptions<MongoSettings>>().Value;
-
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(config.DatabaseName);
-});
-
-//add repository mongoi
-builder.Services.AddSingleton<MongoRepository>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

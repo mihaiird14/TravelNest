@@ -747,6 +747,314 @@ textarea {
         margin-top: 0;
     }
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal-container {
+    background-color: aliceblue;
+    width: 90%;
+    max-width: 1100px;
+    height: 85vh; 
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    border: 3px solid aquamarine;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
+
+.buton-inchidere {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: aquamarine;
+    font-size: 35px;
+    font-weight: 800;
+    cursor: pointer;
+    z-index: 10002;
+    line-height: 1;
+    text-shadow: 1px 1px 2px black;
+}
+
+.buton-inchidere:hover {
+    color: red;
+    transform: scale(1.1);
+}
+
+.zona-media {
+    flex: 1.6;
+    background-color: #0f172a;
+    display: flex;
+    flex-direction: column; 
+    border-right: 2px solid aquamarine;
+    position: relative;
+    height: 100%; 
+}
+
+
+.media-wrapper {
+    flex: 1; 
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.element-media-vizual {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+}
+
+
+.media-controls {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(127, 255, 212, 0.2);
+    flex-shrink: 0; 
+}
+
+.nav-btn {
+    width: 40px;
+    height: 40px;
+    background-color: aquamarine;
+    color: black;
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.nav-btn:hover {
+    transform: scale(1.15);
+    background-color: white;
+    color: aquamarine;
+}
+
+.zona-detalii {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #f0f8ff 0%, #e6f2ff 100%);
+    max-width: 450px;
+    height: 100%;
+    position: relative;
+}
+
+.detalii-header {
+    padding: 15px 20px;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    z-index: 10;
+}
+
+.poza-rotunda {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid aquamarine;
+    padding: 2px; 
+    background: white;
+}
+
+.text-header {
+    display: flex;
+    flex-direction: column;
+}
+
+.nume-bold {
+    font-weight: 800;
+    font-size: 15px;
+    color: #2c3e50;
+    letter-spacing: 0.3px;
+}
+
+.locatie-text {
+    display: block;
+    font-size: 11px;
+    color: #008080;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.locatie-text::before {
+    content: '\f3c5'; 
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+}
+
+.detalii-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.rand-descriere {
+    display: flex;
+    align-items: flex-start;
+    background-color: white;
+    padding: 15px;
+    border-radius: 15px;
+    border-top-left-radius: 2px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid rgba(127, 255, 212, 0.3);
+}
+
+.poza-rotunda.mica {
+    width: 35px;
+    height: 35px;
+    margin-right: 12px;
+    border: none;
+    padding: 0;
+}
+
+.continut-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-normal {
+    color: #4a5568;
+    line-height: 1.5;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+.data-text {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 5px;
+    padding-right: 10px;
+}
+
+.detalii-footer {
+    padding: 20px;
+    border-top: none;
+    background-color: white;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+    border-radius: 20px 20px 0 0; 
+}
+
+.iconite-actiune {
+    font-size: 20px;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    color: #334155;
+    background: #f8fafc;
+    padding: 10px 15px;
+    border-radius: 50px;
+    width: fit-content;
+}
+
+.iconite-actiune i:hover {
+    color: aquamarine;
+    transform: translateY(-2px);
+    transition: 0.2s;
+}
+
+.numar-aprecieri {
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: #1e293b;
+    padding-left: 5px;
+}
+.zona-input-comentariu {
+    display: flex;
+    gap: 8px;
+    background-color: #f1f5f9;
+    padding: 5px;
+    border-radius: 30px;
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+
+.zona-input-comentariu:focus-within {
+    border-color: aquamarine;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(127, 255, 212, 0.2);
+}
+
+.zona-input-comentariu input {
+    border: none;
+    background: transparent;
+    padding: 10px 15px;
+    flex: 1;
+    outline: none;
+    font-size: 14px;
+}
+
+
+.zona-input-comentariu button {
+    background-color: aquamarine;
+    border: none;
+    color: #0f172a; 
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.zona-input-comentariu button:hover {
+    background-color: #66cdaa;
+    color: white;
+    transform: scale(1.05);
+}
+
+.nav-btn.disabled {
+    background-color: #cccccc !important; 
+    border-color: #999999 !important;
+    color: #666666 !important;
+    cursor: not-allowed !important; 
+    opacity: 0.5; 
+    pointer-events: none; 
+    box-shadow: none !important;
+    transform: none !important;
+}
 @media (max-width: 768px) {
     .card-postare {
         width: 48%;

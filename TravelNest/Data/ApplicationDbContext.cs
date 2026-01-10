@@ -15,9 +15,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<FisierMedia> FisierMedias { set; get; }
     public DbSet<FaceEmbeddings> FaceEmbeddings { get; set; }
     public DbSet<SugestieTag> SugestieTags { get; set; }
+    public DbSet<Comentariu> Comentarii { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Comentariu>()
+        .HasOne(c => c.Profil)
+        .WithMany()
+        .HasForeignKey(c => c.ProfilId)
+        .OnDelete(DeleteBehavior.Restrict); 
         modelBuilder.Entity<Profil>()
             .HasOne(p => p.User)
             .WithOne(u => u.Profil)

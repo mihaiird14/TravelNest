@@ -93,7 +93,7 @@
                         .Where(f => f.fisier == Tip.Video)
                         .FirstOrDefault();
 
-                        <div class="card-postare">
+                        <div class="card-postare" onclick="deschidePostare(@postare.Id)" style="cursor: pointer;">
                             @if (primaImagine != null)
                             {
                                 <img src="@primaImagine.Url" class="media-postare" />
@@ -215,8 +215,62 @@
             });
         </script>
         </div>
+    <div id="fereastra-postare" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+
+            <span class="buton-inchidere" onclick="inchideFereastra()">&times;</span>
+
+            <div class="zona-media">
+
+                <div class="media-wrapper">
+                    <div id="continut-media"></div>
+                </div>
+
+                <div class="media-controls">
+                    <button id="btn-inapoi" class="nav-btn" onclick="schimbaSlide(-1)">&#10094;</button>
+                    <button id="btn-inainte" class="nav-btn" onclick="schimbaSlide(1)">&#10095;</button>
+                </div>
+            </div>
+
+            <div class="zona-detalii">
+                <div class="detalii-header">
+                    <img id="header-poza-profil" src="" class="poza-rotunda">
+                    <div class="text-header">
+                        <span id="header-username" class="nume-bold"></span>
+                        <span id="header-locatie" class="locatie-text"></span>
+                    </div>
+                </div>
+
+                <div class="detalii-body">
+                    <div class="rand-descriere">
+                        <img id="body-poza-profil" src="" class="poza-rotunda mica">
+                        <div class="continut-text">
+                            <span id="body-username" class="nume-bold"></span>
+                            <span id="descriere-text" class="text-normal"></span>
+                        </div>
+                    </div>
+                    <div id="data-postarii" class="data-text"></div>
+                    <div id="lista-comentarii"></div>
+                </div>
+
+                <div class="detalii-footer">
+                    <div class="iconite-actiune">
+                        <i class="far fa-heart"></i>
+                        <i class="far fa-comment"></i>
+                    </div>
+                    <div class="numar-aprecieri">0 aprecieri</div>
+                    <div class="zona-input-comentariu">
+                        <input type="text" placeholder="Adaugă un comentariu...">
+                        <button>Postează</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </body>
+
 <script src="~/js/profil.js" asp-append-version="true"></script>
 <script src="~/js/tagSearch.js" asp-append-version="true"></script>
 <script src="~/js/map.js" asp-append-version="true"></script>
+<script src="~/js/popUpPostare.js" asp-append-version="true"></script>
 </html>
