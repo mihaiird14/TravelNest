@@ -1,15 +1,15 @@
-    let listaMediaCurenta = [];
+ï»¿    let listaMediaCurenta = [];
     let indexSlideCurent = 0;
     async function deschidePostare(idPostare) {
         const fereastra = document.getElementById('fereastra-postare');
         const containerMedia = document.getElementById('continut-media');
         fereastra.style.display = 'flex';
-        containerMedia.innerHTML = '<p style="color:white;">Se încarcã...</p>';
+        containerMedia.innerHTML = '<p style="color:white;">Se Ã®ncarcÄƒ...</p>';
 
         try {
             const raspuns = await fetch(`/Profil/InfoPostari?postId=${idPostare}`);
 
-            if (!raspuns.ok) throw new Error('Nu am putut încãrca postarea.');
+            if (!raspuns.ok) throw new Error('Nu am putut Ã®ncÄƒrca postarea.');
 
             const date = await raspuns.json();
             populeazaFereastra(date);
@@ -19,7 +19,38 @@
             containerMedia.innerHTML = '<p style="color:red;">Eroare!</p>';
         }
     }
+function genComs(com) {
+    const textRaspunsuri = com.nrRaspunsuri > 0 
+        ? `Vezi ${com.nrRaspunsuri} rÄƒspunsuri` 
+        : 'RÄƒspunde';
 
+    return `
+        <div class="rand-descriere">
+            <i class="fas fa-ellipsis-h optiuni-comentariu" title="OpÈ›iuni"></i>
+
+            <div class="comentariu-top">
+                <img src="${com.poza}" class="poza-rotunda mica">
+                <div class="continut-text">
+                    <span class="nume-bold">${com.username}</span>
+                    <span class="text-normal">${com.continut}</span>
+                </div>
+            </div>
+
+            <div class="zona-actiuni-com">
+                <span class="data-text">${com.data}</span>
+                
+                <div class="btn-like-com">
+                    <i class="far fa-heart"></i> <span>Like</span>
+                </div>
+
+                <div class="btn-raspunsuri">
+                    <span>${textRaspunsuri}</span>
+                    ${com.nrRaspunsuri > 0 ? '<i class="fas fa-chevron-down"></i>' : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
     function populeazaFereastra(date) {
         document.getElementById('header-poza-profil').src = date.userImage;
         document.getElementById('header-username').textContent = date.username;
@@ -32,13 +63,42 @@
         indexSlideCurent = 0; 
 
         afiseazaSlide(0);
+        const listaCom = document.getElementById('lista-comentarii');
+        listaCom.innerHTML = '';
+        if (date.comentarii && date.comentarii.length > 0) {
+        date.comentarii.forEach(com => {
+            const div = document.createElement('div');
+            div.className = 'rand-descriere';
+            div.innerHTML = `
+                <img src="${com.poza}" class="poza-rotunda mica">
+                <div class="continut-text">
+                    <span class="nume-bold">${com.username}</span>
+                    <span class="text-normal">${com.continut}</span>
+                    <span class="data-text" style="text-align:left; margin-top:5px;">${com.data}</span>
+                </div>
+            `;
+            listaCom.appendChild(div);
+        });
+        }
+        const iconCom = document.querySelector('.detalii-footer .fa-comment');
+        if(iconCom) {
+            iconCom.setAttribute('title', `${date.totalComentarii} comentarii`);
+        }
+  
+        listaCom.innerHTML = ''; 
+
+        if (date.comentarii && date.comentarii.length > 0) {
+            date.comentarii.forEach(com => {
+                listaCom.innerHTML += genComs(com);
+            });
+        }
     }
        function afiseazaSlide(index) {
         const container = document.getElementById('continut-media');
         const btnInapoi = document.getElementById('btn-inapoi');
         const btnInainte = document.getElementById('btn-inainte');
         if (!listaMediaCurenta || listaMediaCurenta.length === 0) {
-            container.innerHTML = '<p style="color:white">Fãrã media</p>';
+            container.innerHTML = '<p style="color:white">FÄƒrÄƒ media</p>';
             btnInapoi.style.display = 'none';
             btnInainte.style.display = 'none';
             return;

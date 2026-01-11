@@ -3,6 +3,7 @@
 <html>
     <head>
         <link rel="stylesheet" href="~/css/Profil.css">
+    <link rel="stylesheet" href="~/css/comentarii.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -258,10 +259,10 @@
                         <i class="far fa-heart"></i>
                         <i class="far fa-comment"></i>
                     </div>
-                    <div class="numar-aprecieri">0 aprecieri</div>
+                    <div class="numar-aprecieri">0 likes</div>
                     <div class="zona-input-comentariu">
-                        <input type="text" placeholder="Adaugă un comentariu...">
-                        <button>Postează</button>
+                        <input id="input-comentariu-text" type="text" placeholder="Add a comment..." maxlength="255">
+                        <button onclick="postCom()">Post</button>
                     </div>
                 </div>
             </div>
@@ -273,4 +274,5 @@
 <script src="~/js/tagSearch.js" asp-append-version="true"></script>
 <script src="~/js/map.js" asp-append-version="true"></script>
 <script src="~/js/popUpPostare.js" asp-append-version="true"></script>
+<script src="~/js/addCom.js" asp-append-version="true"></script>
 </html>

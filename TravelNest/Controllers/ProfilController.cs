@@ -9,6 +9,7 @@ using TravelNest.Data.Migrations;
 using TravelNest.Models;
 using TravelNest.Services;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using TravelNest.ViewModels;
 
 namespace TravelNest.Controllers
 {
@@ -342,10 +343,13 @@ public async Task<IActionResult> CautareTag(string val)
         public async Task<IActionResult> InfoPostari(int postId)
         {
             var postare = await _context.Postares
-                .Include(p => p.Profil)      
-                    .ThenInclude(pr => pr.User)  
-                .Include(p => p.FisiereMedia)
-                .FirstOrDefaultAsync(p => p.Id == postId);
+                    .Include(p => p.Profil)
+                        .ThenInclude(pr => pr.User)
+                    .Include(p => p.FisiereMedia)
+                    .Include(p => p.Comentarii)
+                        .ThenInclude(c => c.Profil)
+                            .ThenInclude(u => u.User)
+                    .FirstOrDefaultAsync(p => p.Id == postId);
             if (postare == null)
             {
                 return NotFound();
@@ -363,10 +367,48 @@ public async Task<IActionResult> CautareTag(string val)
                 media = postare.FisiereMedia.Select(f => new {
                     url = f.Url,
                     tip = f.fisier.ToString() 
+                }).ToList(),
+                totalComentarii = postare.Comentarii.Count,
+                comentarii = postare.Comentarii
+                .OrderBy(c => c.DataCr) //sortare
+                .Select(c => new {
+                    username = c.Profil.User.UserName,
+                    poza = c.Profil.ImagineProfil ?? "/images/profilDefault.png",
+                    continut = c.Continut,
+                    data = c.DataCr.ToString("dd MMM"),
+                    nrRaspunsuri = 0,
+                    nrLikeuri = 0
                 }).ToList()
+
             };
 
             return Json(rezultatPostare);
+        }
+        [HttpPost]
+        public async Task<IActionResult> AdaugaComentariu([FromBody] ComentariuInput input)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+            var p = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (p == null) return NotFound("Profil negăsit");
+            var comm = new Comentariu
+            {
+                PostareId = input.PostareId,
+                ProfilId = p.Id,
+                Continut = input.Continut,
+                DataCr = DateTime.UtcNow
+            };
+
+            _context.Comentarii.Add(comm);
+            await _context.SaveChangesAsync();
+            return Json(new
+            {
+                success = true,
+                username = user.UserName,
+                poza = p.ImagineProfil ?? "/images/profilDefault.png",
+                continut = comm.Continut,
+                data = "ACUM"
+            });
         }
     }
 }
