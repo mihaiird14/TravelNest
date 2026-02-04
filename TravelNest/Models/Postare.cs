@@ -18,6 +18,7 @@ namespace TravelNest.Models
         public List<string> UseriMentionati { get; set; } = new List<string>();
         public List<FisierMedia> FisiereMedia { get; set; } = new List<FisierMedia>();
         public List<Comentariu> Comentarii { get; set; } = new List<Comentariu>();
+        public List<LikesPostare> Likes { get; set; } = new List<LikesPostare>();
         public DateTime DataCr { get; set; } = DateTime.UtcNow;
     }
 }

@@ -1,5 +1,11 @@
 ﻿<!DOCTYPE html>
 @model Profil
+@using Microsoft.AspNetCore.Identity
+@using TravelNest.Models 
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var userId = UserManager.GetUserId(User);
+}
 <html>
     <head>
         <link rel="stylesheet" href="~/css/Profil.css">
@@ -87,6 +93,7 @@
 
                     @foreach (var postare in Model.Posts.OrderByDescending(p => p.DataCr))
                     {
+                        var aDatLike = postare.Likes.Any(l => l.UserId == userId);
                         var primaImagine = postare.FisiereMedia
                         .Where(f => f.fisier == Tip.Image)
                         .FirstOrDefault();
@@ -94,7 +101,7 @@
                         .Where(f => f.fisier == Tip.Video)
                         .FirstOrDefault();
 
-                        <div class="card-postare" onclick="deschidePostare(@postare.Id)" style="cursor: pointer;">
+                        <div class="card-postare" onclick="deschidePostare('@postare.Id')" style="cursor: pointer;">
                             @if (primaImagine != null)
                             {
                                 <img src="@primaImagine.Url" class="media-postare" />
@@ -255,11 +262,17 @@
                 </div>
 
                 <div class="detalii-footer">
-                    <div class="iconite-actiune">
-                        <i class="far fa-heart"></i>
-                        <i class="far fa-comment"></i>
+
+                    <div class="iconite-actiune" style="display: flex; align-items: center; gap: 20px; font-size: 1.5rem; margin-bottom: 10px;">
+
+                        <div id="btn-like-modal" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <i class="fa-regular fa-heart" id="iconInima" style="line-height: 1;"></i>
+                            <span id="text-like-count-modal" style="font-size: 1rem; font-weight: bold; line-height: 1;">0</span>
+                        </div>
+
+                        <i class="far fa-comment" id="iconComentariu" style="cursor: pointer;"></i>
+
                     </div>
-                    <div class="numar-aprecieri">0 likes</div>
                     <div class="zona-input-comentariu">
                         <input id="input-comentariu-text" type="text" placeholder="Add a comment..." maxlength="255">
                         <button onclick="postCom()">Post</button>
@@ -274,5 +287,4 @@
 <script src="~/js/tagSearch.js" asp-append-version="true"></script>
 <script src="~/js/map.js" asp-append-version="true"></script>
 <script src="~/js/popUpPostare.js" asp-append-version="true"></script>
-<script src="~/js/addCom.js" asp-append-version="true"></script>
 </html>

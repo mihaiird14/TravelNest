@@ -22,5 +22,6 @@ namespace TravelNest.Models
         public DateTime DateOfBirth { get; set; }
 
         public Profil Profil { get; set; }
+        public List<LikesPostare> Likes { get; set; } = new List<LikesPostare>();
     }
 }

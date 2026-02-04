@@ -981,8 +981,12 @@ textarea {
     border-radius: 50px;
     width: fit-content;
 }
-
-.iconite-actiune i:hover {
+#iconInima:hover {
+    color: red;
+    transform: translateY(-2px);
+    transition: 0.2s;
+}
+#iconComentariu:hover {
     color: aquamarine;
     transform: translateY(-2px);
     transition: 0.2s;
