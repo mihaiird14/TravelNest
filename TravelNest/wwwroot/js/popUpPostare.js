@@ -82,180 +82,246 @@ function afisCom(data) {
         bodyDetalii.scrollTop = bodyDetalii.scrollHeight;
     }
 }
-    function genComs(com) {
-        const textRaspunsuri = com.nrRaspunsuri > 0
-            ? `Vezi ${com.nrRaspunsuri} răspunsuri`
-            : 'Răspunde';
+function genComs(com) {
+    const comId = com.id;
+    const etichetaEditat = com.esteEditat 
+        ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
+        : '';
+    const butonEditare = (com.AutorComentariu === true || com.AutorComentariu === undefined) 
+        ? `<div class="ElementeDinMeniu btn-editare-custom" onclick="EditCommentOn(${comId})" style="color: #1e293b;">
+               <i class="fas fa-pencil-alt"></i> Edit
+           </div>` 
+        : '';
 
-        return `
-            <div class="rand-descriere">
-                <i class="fas fa-ellipsis-h optiuni-comentariu" title="Opțiuni"></i>
-
-                <div class="comentariu-top">
-                    <img src="${com.poza}" class="poza-rotunda mica">
-                    <div class="continut-text">
-                        <span class="nume-bold">${com.username}</span>
-                        <span class="text-normal">${com.continut}</span>
+    let htmlRaspunsuri = "";
+    if (com.raspunsuri && com.raspunsuri.length > 0) {
+        com.raspunsuri.forEach(rep => {
+            htmlRaspunsuri += `
+                <div class="rand-descriere" style="margin-bottom: 10px; padding: 10px; background: transparent; border: none; box-shadow: none;">
+                    <div class="comentariu-top">
+                        <img src="${rep.userImage}" class="poza-rotunda mica" style="width: 25px; height: 25px;">
+                        <div class="continut-text" style="display:flex; flex-direction:column;">
+                            <span class="nume-bold" style="font-size: 13px;">${rep.username}</span>
+                            <span class="text-normal" style="font-size: 13px;">${rep.mesaj}</span>
+                        </div>
                     </div>
+                    <div class="zona-actiuni-com" style="margin-left: 38px; margin-top: 0;">
+                        <span class="data-text" style="font-size: 10px;">${rep.data}</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    const butonVeziRaspunsuri = com.nrRaspunsuri > 0
+        ? `<div class="btn-vezi-raspunsuri" onclick="ListaRaspunsuri(${comId})" style="margin-left: 50px; margin-top: 5px; cursor: pointer; font-size: 12px; color: #8e8e8e; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+             <span style="height: 1px; width: 20px; background-color: #8e8e8e; display: inline-block;"></span> 
+             See ${com.nrRaspunsuri} replys
+           </div>`
+        : '';
+
+    return `
+    <div class="rand-descriere" id="comm-${comId}" style="position: relative;"> 
+        
+        <i class="fas fa-ellipsis-h optiuni-comentariu" title="Options" onclick="AfisOptiuniComs(${comId})"></i>
+        <div id="IdMeniuCom-${comId}" class="MeniuOptiuniComs">
+            ${butonEditare}
+            <div class="ElementeDinMeniu" onclick="stergeComentariu(${comId})">
+                <i class="fas fa-trash-alt"></i> Delete
+            </div>
+        </div>
+
+        <div class="comentariu-top">
+            <img src="${com.poza}" class="poza-rotunda mica">
+            
+            <div class="continut-text" style="width: 100%; display: flex; flex-direction: column;">
+                
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span class="nume-bold">${com.username}</span>
+                    <span id="labelEditat-${comId}">${etichetaEditat}</span>
+                </div>
+                
+                <div id="zonaTextCom-${comId}" style="display: block;">
+                    <span class="text-normal text-wrap-custom" id="textCom-${comId}">${com.continut}</span>
                 </div>
 
-                <div class="zona-actiuni-com">
-                    <span class="data-text">${com.data}</span>
-
-                    <div class="btn-like-com">
-                        <i class="far fa-heart"></i> <span>Like</span>
-                    </div>
-
-                    <div class="btn-raspunsuri">
-                        <span>${textRaspunsuri}</span>
-                        ${com.nrRaspunsuri > 0 ? '<i class="fas fa-chevron-down"></i>' : ''}
+                <div id="zonaEditareCom-${comId}" style="display:none; margin-top: 5px;">
+                    <textarea id="inputEditare-${comId}" class="input-editare-custom" rows="2" style="width:100%; border:1px solid #ccc; border-radius:5px; padding:5px;">${com.continut}</textarea>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <button onclick="saveEdit(${comId})" class="saveEditBtn" style="background:#0095f6; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Save</button>
+                        <button onclick="anuleazaEditareComentariu(${comId})" class="CancelEditBtn" style="background:transparent; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">Cancel</button>
                     </div>
                 </div>
             </div>
-        `;
-    }
-        function populeazaFereastra(date) {
-            document.getElementById('header-poza-profil').src = date.userImage;
-            document.getElementById('header-username').textContent = date.username;
-            document.getElementById('header-locatie').textContent = date.locatie || '';
-            document.getElementById('body-poza-profil').src = date.userImage;
-            document.getElementById('body-username').textContent = date.username;
-            document.getElementById('descriere-text').textContent = date.descriere;
-            document.getElementById('data-postarii').textContent = date.data;
-            listaMediaCurenta = date.media;
-            indexSlideCurent = 0;
-            const countSpan = document.getElementById('text-like-count-modal');
-            const iconLike = document.getElementById('iconInima');
-            if (countSpan) 
-                countSpan.innerText = date.nrLikeuri;
-            if (iconLike) {
-                if (date.esteApreciata) {
-                    iconLike.className = 'fa-solid fa-heart text-danger'; // Roșie
-                } else {
-                    iconLike.className = 'fa-regular fa-heart'; // Goală
-                }
-            }
-            afiseazaSlide(0);
-            const listaCom = document.getElementById('lista-comentarii');
-            listaCom.innerHTML = '';
-            if (date.comentarii && date.comentarii.length > 0) {
-            date.comentarii.forEach(com => {
-                const div = document.createElement('div');
-                div.className = 'rand-descriere';
-                div.innerHTML = `
-                    <img src="${com.poza}" class="poza-rotunda mica">
-                    <div class="continut-text">
-                        <span class="nume-bold">${com.username}</span>
-                        <span class="text-normal">${com.continut}</span>
-                        <span class="data-text" style="text-align:left; margin-top:5px;">${com.data}</span>
-                    </div>
-                `;
-                listaCom.appendChild(div);
-            });
-            }
-            const iconCom = document.querySelector('.detalii-footer .fa-comment');
-            if(iconCom) {
-                iconCom.setAttribute('title', `${date.totalComentarii} comentarii`);
-            }
+        </div>
 
-            listaCom.innerHTML = '';
+        <div class="zona-actiuni-com">
+            <span class="data-text">${com.data}</span>
+            <div class="btn-like-com"><i class="far fa-heart"></i> <span>Like</span></div>
+            <div class="btn-raspunsuri" onclick="adaugaReply(${comId})" style="margin-left: 15px; cursor: pointer;">
+                <span>Reply</span>
+            </div>
+        </div>
 
-            if (date.comentarii && date.comentarii.length > 0) {
-                date.comentarii.forEach(com => {
-                    listaCom.innerHTML += genComs(com);
-                });
-            }
-        }
-           function afiseazaSlide(index) {
-            const container = document.getElementById('continut-media');
-            const btnInapoi = document.getElementById('btn-inapoi');
-            const btnInainte = document.getElementById('btn-inainte');
-            if (!listaMediaCurenta || listaMediaCurenta.length === 0) {
-                container.innerHTML = '<p style="color:white">Fără media</p>';
-                btnInapoi.style.display = 'none';
-                btnInainte.style.display = 'none';
-                return;
-            }
-            if (listaMediaCurenta.length === 1) {
-                btnInapoi.style.display = 'none';
-                btnInainte.style.display = 'none';
-            } else {
-                btnInapoi.style.display = 'flex';
-                btnInainte.style.display = 'flex';
-            }
-            if (index < 0) index = 0;
-            if (index >= listaMediaCurenta.length) index = listaMediaCurenta.length - 1;
+        <div id="idReply-${comId}" class="RaspunsuriComentarii" style="display:none; margin-left: 50px; margin-top: 10px;">
+            <form onsubmit="trimiteReply(event, this, ${comId})" style="display:flex; width:100%; gap:5px;">
+                <input type="text" name="text" class="RaspunsInput" placeholder="Reply to ${com.username}" autocomplete="off" style="border: none; border-bottom: 1px solid #ccc; background: transparent; width: 100%; outline: none; font-size: 13px;">
+                <button type="submit" id="BtnRaspunsuri" style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer;">Post</button>
+            </form>
+        </div>
 
-            indexSlideCurent = index;
-            container.innerHTML = '';
-            const element = listaMediaCurenta[index];
-            let tagMedia;
+        ${butonVeziRaspunsuri}
 
-            if (element.tip === 'Video') {
-                tagMedia = document.createElement('video');
-                tagMedia.src = element.url;
-                tagMedia.controls = true;
-                tagMedia.autoplay = true;
-                tagMedia.muted = true;
-            } else {
-                tagMedia = document.createElement('img');
-                tagMedia.src = element.url;
-            }
-
-            tagMedia.className = 'element-media-vizual';
-            container.appendChild(tagMedia);
-            btnInapoi.classList.remove('disabled');
-            btnInainte.classList.remove('disabled');
-            if (index === 0) {
-                btnInapoi.classList.add('disabled');
-            }
-            if (index === listaMediaCurenta.length - 1) {
-                btnInainte.classList.add('disabled');
-            }
-        }
-        function schimbaSlide(directie) {
-            afiseazaSlide(indexSlideCurent + directie);
-        }
-        function inchideFereastra() {
-            document.getElementById('fereastra-postare').style.display = 'none';
-            document.getElementById('continut-media').innerHTML = '';
-        }
-        document.getElementById('fereastra-postare').addEventListener('click', function(e) {
-            if (e.target === this) {
-                inchideFereastra();
-            }
-        });
-    function apreciazaPostare(idPostare) {
-        const icon = document.getElementById('iconInima');
-        const countSpan = document.getElementById('text-like-count-modal');
-        const esteRosieAcum = icon.classList.contains('text-danger');
-        let numarCurent = parseInt(countSpan.innerText) || 0;
-        if (esteRosieAcum) {
-            icon.className = 'fa-regular fa-heart';
-            countSpan.innerText = Math.max(0, numarCurent - 1);
+        <div id="container-raspunsuri-${comId}" class="sectiuneReplys" style="display:none; margin-left: 50px;">
+            ${htmlRaspunsuri}
+        </div>
+    </div>`;
+}
+function populeazaFereastra(date) {
+    document.getElementById('header-poza-profil').src = date.userImage;
+    document.getElementById('header-username').textContent = date.username;
+    document.getElementById('header-locatie').textContent = date.locatie || '';
+    document.getElementById('body-poza-profil').src = date.userImage;
+    document.getElementById('body-username').textContent = date.username;
+    document.getElementById('descriere-text').textContent = date.descriere;
+    document.getElementById('data-postarii').textContent = date.data;
+    listaMediaCurenta = date.media;
+    indexSlideCurent = 0;
+    const countSpan = document.getElementById('text-like-count-modal');
+    const iconLike = document.getElementById('iconInima');
+    //nr like uri si nr comentarii + raspunsuri
+    if (countSpan) 
+        countSpan.innerText = date.nrLikeuri;
+    const commSpan = document.getElementById('text-comm-count-modal');
+    if (commSpan) 
+        commSpan.innerText = date.totalComentarii;
+    if (iconLike) {
+        if (date.esteApreciata) {
+            iconLike.className = 'fa-solid fa-heart text-danger'; // Roșie
         } else {
-            icon.className = 'fa-solid fa-heart text-danger';
-            countSpan.innerText = numarCurent + 1;
+            iconLike.className = 'fa-regular fa-heart'; // Goală
         }
-        fetch('/Profil/LikePostare', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `postId=${idPostare}`
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success && data.nrLikeuri !== undefined) {
-                 countSpan.innerText = data.nrLikeuri;
-            }
-        })
-        .catch(err => {
-            console.error("Eroare rețea:", err);
-            if (esteRosieAcum) {
-                icon.className = 'fa-solid fa-heart text-danger';
-                countSpan.innerText = numarCurent;
-            } else {
-                icon.className = 'fa-regular fa-heart';
-                countSpan.innerText = numarCurent;
-            }
+    }
+    afiseazaSlide(0);
+    const listaCom = document.getElementById('lista-comentarii');
+    listaCom.innerHTML = '';
+    if (date.comentarii && date.comentarii.length > 0) {
+    date.comentarii.forEach(com => {
+        const div = document.createElement('div');
+        div.className = 'rand-descriere';
+        div.innerHTML = `
+            <img src="${com.poza}" class="poza-rotunda mica">
+            <div class="continut-text">
+                <span class="nume-bold">${com.username}</span>
+                <span class="text-normal">${com.continut}</span>
+                <span class="data-text" style="text-align:left; margin-top:5px;">${com.data}</span>
+            </div>
+        `;
+        listaCom.appendChild(div);
+    });
+    }
+    const iconCom = document.querySelector('.detalii-footer .fa-comment');
+    if(iconCom) {
+        iconCom.setAttribute('title', `${date.totalComentarii} comentarii`);
+    }
+
+    listaCom.innerHTML = '';
+
+    if (date.comentarii && date.comentarii.length > 0) {
+        date.comentarii.forEach(com => {
+            listaCom.innerHTML += genComs(com);
         });
     }
+}
+function afiseazaSlide(index) {
+    const container = document.getElementById('continut-media');
+    const btnInapoi = document.getElementById('btn-inapoi');
+    const btnInainte = document.getElementById('btn-inainte');
+    if (!listaMediaCurenta || listaMediaCurenta.length === 0) {
+        container.innerHTML = '<p style="color:white">Fără media</p>';
+        btnInapoi.style.display = 'none';
+        btnInainte.style.display = 'none';
+        return;
+    }
+    if (listaMediaCurenta.length === 1) {
+        btnInapoi.style.display = 'none';
+        btnInainte.style.display = 'none';
+    } else {
+        btnInapoi.style.display = 'flex';
+        btnInainte.style.display = 'flex';
+    }
+    if (index < 0) index = 0;
+    if (index >= listaMediaCurenta.length) index = listaMediaCurenta.length - 1;
+
+    indexSlideCurent = index;
+    container.innerHTML = '';
+    const element = listaMediaCurenta[index];
+    let tagMedia;
+
+    if (element.tip === 'Video') {
+        tagMedia = document.createElement('video');
+        tagMedia.src = element.url;
+        tagMedia.controls = true;
+        tagMedia.autoplay = true;
+        tagMedia.muted = true;
+    } else {
+        tagMedia = document.createElement('img');
+        tagMedia.src = element.url;
+    }
+
+    tagMedia.className = 'element-media-vizual';
+    container.appendChild(tagMedia);
+    btnInapoi.classList.remove('disabled');
+    btnInainte.classList.remove('disabled');
+    if (index === 0) {
+        btnInapoi.classList.add('disabled');
+    }
+    if (index === listaMediaCurenta.length - 1) {
+        btnInainte.classList.add('disabled');
+    }
+}
+function schimbaSlide(directie) {
+    afiseazaSlide(indexSlideCurent + directie);
+}
+function inchideFereastra() {
+    document.getElementById('fereastra-postare').style.display = 'none';
+    document.getElementById('continut-media').innerHTML = '';
+}
+document.getElementById('fereastra-postare').addEventListener('click', function(e) {
+    if (e.target === this) {
+        inchideFereastra();
+    }
+});
+function apreciazaPostare(idPostare) {
+    const icon = document.getElementById('iconInima');
+    const countSpan = document.getElementById('text-like-count-modal');
+    const esteRosieAcum = icon.classList.contains('text-danger');
+    let numarCurent = parseInt(countSpan.innerText) || 0;
+    if (esteRosieAcum) {
+        icon.className = 'fa-regular fa-heart';
+        countSpan.innerText = Math.max(0, numarCurent - 1);
+    } else {
+        icon.className = 'fa-solid fa-heart text-danger';
+        countSpan.innerText = numarCurent + 1;
+    }
+    fetch('/Profil/LikePostare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `postId=${idPostare}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success && data.nrLikeuri !== undefined) {
+                countSpan.innerText = data.nrLikeuri;
+        }
+    })
+    .catch(err => {
+        console.error("Eroare rețea:", err);
+        if (esteRosieAcum) {
+            icon.className = 'fa-solid fa-heart text-danger';
+            countSpan.innerText = numarCurent;
+        } else {
+            icon.className = 'fa-regular fa-heart';
+            countSpan.innerText = numarCurent;
+        }
+    });
+}

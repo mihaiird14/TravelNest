@@ -24,5 +24,6 @@ namespace TravelNest.Models
         public string? Bio { set; get; }
         public List<Postare> Posts { get; set; } = new List<Postare>();
         public List<FaceEmbeddings> FaceEmbeddings { get; set; }
+        public List<ReplyCom> ReplyComs { get; set; }
     }
 }

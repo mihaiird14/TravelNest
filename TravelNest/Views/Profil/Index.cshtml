@@ -8,12 +8,13 @@
 }
 <html>
     <head>
+         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="~/css/Profil.css">
-    <link rel="stylesheet" href="~/css/comentarii.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-</head>
+        <link rel="stylesheet" href="~/css/comentarii.css">
+        <link rel="stylesheet" href="~/css/replyComs.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    </head>
     <body>
         <i id="menuBtn" class="fa-solid fa-bars"></i>
         <div class="sideMenu">
@@ -269,8 +270,10 @@
                             <i class="fa-regular fa-heart" id="iconInima" style="line-height: 1;"></i>
                             <span id="text-like-count-modal" style="font-size: 1rem; font-weight: bold; line-height: 1;">0</span>
                         </div>
-
-                        <i class="far fa-comment" id="iconComentariu" style="cursor: pointer;"></i>
+                        <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <i class="far fa-comment" id="iconComentariu"></i>
+                            <span id="text-comm-count-modal" style="font-size: 1rem; font-weight: bold; line-height: 1;">0</span>
+                        </div>
 
                     </div>
                     <div class="zona-input-comentariu">
@@ -280,11 +283,24 @@
                 </div>
             </div>
         </div>
+        <div id="popupStergeCom" class="popUp" style="display: none;">
+            <div class="popUpbox">
+                <h3 id="popUpTitlu">Delete this comment?</h3>
+                <p id="popUpMesaj">Are you sure you want to delete this comment? The action cannot be undone.</p>
+
+                <div class="butoanePopUp">
+                    <button onclick="inchidePopUp()" id="btnAnularePopUp">Cancel</button>
+                    <button onclick="StergeCom()" id="btnStergeComPopUp">Delete</button>
+                </div>
+            </div>
+        </div>
     </div>
+
     </body>
 
 <script src="~/js/profil.js" asp-append-version="true"></script>
 <script src="~/js/tagSearch.js" asp-append-version="true"></script>
 <script src="~/js/map.js" asp-append-version="true"></script>
 <script src="~/js/popUpPostare.js" asp-append-version="true"></script>
+<script src="~/js/replysComs.js" asp-append-version="true"></script>
 </html>

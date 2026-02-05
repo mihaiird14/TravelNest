@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelNest.Data;
 
@@ -11,9 +12,11 @@ using TravelNest.Data;
 namespace TravelNest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260205102155_addComsReplys")]
+    partial class addComsReplys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -271,9 +274,6 @@ namespace TravelNest.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("ComentariuEditat")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Continut")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -456,17 +456,9 @@ namespace TravelNest.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("RaspunsEditat")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ComentariuId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ReplyComs");
                 });
@@ -642,15 +634,7 @@ namespace TravelNest.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TravelNest.Models.Profil", "User")
-                        .WithMany("ReplyComs")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Comentariu");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TravelNest.Models.ApplicationUser", b =>
@@ -685,8 +669,6 @@ namespace TravelNest.Data.Migrations
                     b.Navigation("FaceEmbeddings");
 
                     b.Navigation("Posts");
-
-                    b.Navigation("ReplyComs");
                 });
 #pragma warning restore 612, 618
         }

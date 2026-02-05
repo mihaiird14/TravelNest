@@ -25,13 +25,14 @@
 }
 
 .optiuni-comentariu {
-    position: absolute; 
+    position: absolute;
     top: 15px;
     right: 15px;
     color: #94a3b8;
     cursor: pointer;
     font-size: 14px;
     padding: 5px;
+    z-index: 10;
 }
 
 .optiuni-comentariu:hover {
@@ -72,4 +73,127 @@
     font-size: 11px;
     color: #94a3b8;
     margin-right: auto; 
+}
+/*cod ptr meniu optiuni comentarii*/
+.MeniuOptiuniComs {
+    position: absolute !important;
+    top: 35px;
+    right: 10px;
+    background-color: white;
+    z-index: 100;
+    min-width: 120px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    display: none;
+}
+
+.MeniuOptiuniComs.activ {
+    display: block !important;
+    animation: animatieReplys 0.2s ease;
+}
+
+.ElementeDinMeniu {
+    padding: 10px 15px;
+    font-size: 13px;
+    color: #ef4444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    font-weight: 600;
+}
+
+.ElementeDinMeniu:hover {
+    background-color: #fee2e2;
+}
+/*cod ptr popUp stergere com*/
+.popUp {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; 
+    backdrop-filter: blur(2px);
+}
+
+.popUpbox {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: center;
+    animation: zoom 0.2s ease;
+}
+
+#popUpTitlu {
+    margin-top: 0;
+    color: #1e293b;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+#popUpMesaj {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.butoanePopUp {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+#btnAnularePopUp {
+    background: white;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+#btnAnularePopUp:hover {
+    background: #f1f5f9;
+}
+
+#btnStergeComPopUp {
+    background: #ef4444;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+    transition: all 0.2s;
+}
+
+#btnStergeComPopUp:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+@keyframes zoom {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }

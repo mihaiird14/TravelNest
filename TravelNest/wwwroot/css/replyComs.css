@@ -1,0 +1,105 @@
+﻿.sectiuneReplys {
+    margin-left: 50px;
+    margin-top: 5px;
+    border-left: 2px solid #e2e8f0;
+    padding-left: 10px;
+}
+.RaspunsuriComentarii {
+    margin-left: 50px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    display: none;
+    animation: animatieReplys 0.3s ease;
+}
+.RaspunsuriComentarii.active {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.RaspunsInput {
+    flex: 1;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 13px;
+    outline: none;
+}
+.RaspunsInput:focus {
+    border-color: aquamarine;
+    background-color: white;
+}
+#BtnRaspunsuri {
+    background-color: transparent;
+    font-weight: 700;
+    border: none;
+    color: #008080;
+    font-size: 13px;
+    cursor: pointer;
+}
+#BtnRaspunsuri:hover {
+    text-decoration: underline;
+}
+
+@keyframes animatieReplys {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/*ptr editbtn de la com*/
+.text-wrap-custom {
+    white-space: pre-wrap; 
+    word-break: break-word;
+    overflow-wrap: break-word; 
+    display: block; 
+    max-width: 100%;
+}
+.eticheta-editat {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-left: 5px;
+    font-style: italic;
+}
+.input-editare-custom {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+    outline: none;
+}
+
+.input-editare-custom:focus {
+    border-color: #0095f6;
+}
+
+.saveEditBtn {
+    background-color: #0095f6;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.CancelEditBtn {
+    background-color: transparent;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.btn-editare-custom:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}

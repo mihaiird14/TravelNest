@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SugestieTag> SugestieTags { get; set; }
     public DbSet<Comentariu> Comentarii { get; set; }
     public DbSet<LikesPostare> LikesPostari { get; set; }
+    public DbSet<ReplyCom> ReplyComs { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -70,6 +71,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(l => l.User)
             .WithMany() 
             .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ReplyCom>()
+            .HasOne(r => r.Comentariu)
+            .WithMany(c => c.Raspunsuri)
+            .HasForeignKey(r => r.ComentariuId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ReplyCom>()
+            .HasOne(r => r.User)
+            .WithMany(u => u.ReplyComs)
+            .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -8,8 +8,9 @@ using TravelNest.Data;
 using TravelNest.Data.Migrations;
 using TravelNest.Models;
 using TravelNest.Services;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using TravelNest.ViewModels;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TravelNest.Controllers
 {
@@ -351,6 +352,9 @@ public async Task<IActionResult> CautareTag(string val)
                     .Include(p => p.Comentarii)
                         .ThenInclude(c => c.Profil)
                             .ThenInclude(u => u.User)
+                    .Include(p => p.Comentarii)
+                        .ThenInclude(c => c.Raspunsuri)
+                            .ThenInclude(r => r.User).ThenInclude(u => u.User)
                     .FirstOrDefaultAsync(p => p.Id == postId);
             if (postare == null)
             {
@@ -372,17 +376,26 @@ public async Task<IActionResult> CautareTag(string val)
                     url = f.Url,
                     tip = f.fisier.ToString() 
                 }).ToList(),
-                totalComentarii = postare.Comentarii.Count,
+                totalComentarii = postare.Comentarii.Count() + postare.Comentarii.SelectMany(c => c.Raspunsuri).Count(),
                 comentarii = postare.Comentarii
-                .OrderBy(c => c.DataCr) //sortare
-                .Select(c => new {
-                    username = c.Profil.User.UserName,
-                    poza = c.Profil.ImagineProfil ?? "/images/profilDefault.png",
-                    continut = c.Continut,
-                    data = c.DataCr.ToString("dd MMM"),
-                    nrRaspunsuri = 0,
-                    nrLikeuri = 0
-                }).ToList()
+                    .OrderBy(c => c.DataCr)
+                    .Select(c => new {
+                        id = c.Id, 
+                        username = c.Profil.User.UserName,
+                        poza = c.Profil.ImagineProfil ?? "/images/profilDefault.png",
+                        continut = c.Continut,
+                        data = c.DataCr.ToString("dd MMM"),
+                        esteEditat = c.ComentariuEditat, 
+                        AutorComentariu = utilizatorConectat != null && c.Profil.UserId == utilizatorConectat.Id,
+                        nrRaspunsuri = c.Raspunsuri.Count(),
+                        raspunsuri = c.Raspunsuri.OrderBy(r => r.DataPost).Select(r => new {
+                            id = r.Id,
+                            username = r.User.User.UserName,
+                            userImage = r.User.ImagineProfil ?? "/images/profilDefault.png",
+                            mesaj = r.Mesaj,
+                            data = r.DataPost.ToString("dd MMM")
+                        }).ToList()
+                    }).ToList()
 
             };
 
@@ -409,6 +422,7 @@ public async Task<IActionResult> CautareTag(string val)
             return Json(new
             {
                 success = true,
+                id = comm.Id,
                 username = user.UserName,
                 poza = p.ImagineProfil ?? "/images/profilDefault.png",
                 continut = comm.Continut,
@@ -440,6 +454,117 @@ public async Task<IActionResult> CautareTag(string val)
             await _context.SaveChangesAsync();
             int numarActualizat = await _context.LikesPostari.CountAsync(l => l.PostareId == postId);
             return Json(new { success = true,liked = esteLikedAcum, nrLikeuri = numarActualizat });
+        }
+       [HttpPost]
+        public async Task<IActionResult> AddComReply(int comentariuId, string mesaj)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(mesaj))
+                {
+                    return Json(new { success = false, message = "The message cannot be empty!" });
+                }
+                if (comentariuId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid comment ID!" });
+                }
+                var utilizator = await _userManager.GetUserAsync(User);
+                if (utilizator == null)
+                    return Unauthorized();
+                var profil = await _context.Profils.FirstOrDefaultAsync(pr => pr.UserId == utilizator.Id);
+                if (profil == null)
+                {
+                    return Json(new { success = false, message = "Profile not found!" });
+                }
+                var raspunsComentariu = new ReplyCom
+                {
+                    ComentariuId = comentariuId,
+                    Mesaj = mesaj,
+                    DataPost = DateTime.UtcNow,
+                    UserId = profil.Id
+                };
+                _context.ReplyComs.Add(raspunsComentariu);
+                await _context.SaveChangesAsync();
+                return Json(new
+                {
+                    success = true,
+                    username = utilizator.UserName,
+                    userImage = profil.ImagineProfil ?? "/images/profilDefault.png",
+                    mesaj = raspunsComentariu.Mesaj,
+                    data = "ACUM"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> StergeComentariu(int id)
+        {
+            var utilizator = await _userManager.GetUserAsync(User);
+            if (utilizator == null) 
+                return Unauthorized();
+
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            if (profil == null) 
+                return NotFound();
+            var comm = await _context.Comentarii
+                .Include(c => c.Raspunsuri)
+                .Include(c => c.Postare)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (comm == null)
+                return Json(new { success = false, message = "Comment not found!" });
+            bool autorCom = comm.ProfilId == profil.Id;
+            //bool esteProprietarPostare = comm.Postare.CreatorId == profil.Id;
+
+            if (!autorCom)
+            {
+                return Json(new { success = false, message = "You do not have permission to delete this comment!" });
+            }
+            try
+            {
+                if (comm.Raspunsuri != null && comm.Raspunsuri.Any())
+                {
+                    _context.ReplyComs.RemoveRange(comm.Raspunsuri);
+                }
+                _context.Comentarii.Remove(comm);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditComment(int id, string continutUpdated)
+        {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            if (utilizatorConectat == null) 
+                return Unauthorized();
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+            if (profil == null) 
+                return NotFound();
+            var comentariu = await _context.Comentarii.FirstOrDefaultAsync(c => c.Id == id);
+            if (comentariu == null)
+                return Json(new { success = false, message = "Comment not found!" });
+            if (comentariu.ProfilId != profil.Id)
+            {
+                return Json(new { success = false, message = "You do not have permission to edit this comment!" });
+            }
+            try
+            {
+                comentariu.Continut = continutUpdated;
+                comentariu.ComentariuEditat = true;
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, newContent = comentariu.Continut });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
         }
     }
 }
