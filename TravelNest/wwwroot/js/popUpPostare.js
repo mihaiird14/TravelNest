@@ -84,6 +84,7 @@ function afisCom(data) {
 }
 function genComs(com) {
     const comId = com.id;
+    //apare edited daca este editat
     const etichetaEditat = com.esteEditat 
         ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
         : '';
@@ -92,32 +93,74 @@ function genComs(com) {
                <i class="fas fa-pencil-alt"></i> Edit
            </div>` 
         : '';
-
+    //apreciere buton like uri
+    const clasaInima = com.esteApreciat ? 'fas fa-heart text-danger' : 'fa-regular fa-heart';
+    const comentariiNrLikes = (com.nrLikeuriComentariu > 0) ? com.nrLikeuriComentariu : '0';
     let htmlRaspunsuri = "";
     if (com.raspunsuri && com.raspunsuri.length > 0) {
         com.raspunsuri.forEach(rep => {
+            const etichetaEditatRep = rep.esteEditat 
+                    ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
+                    : '';
+        
+            // Calculăm starea inimii pentru reply
+            const clasaInimaRep = rep.euAmDatLikeReply ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart';
+            const textNrLikeuriRep = (rep.nrLikeuriReply > 0) ? rep.nrLikeuriReply : '0';
+        
+            const meniuReply = rep.autorReply ? `
+                    <i class="fas fa-ellipsis-h optiuni-comentariu" style="font-size: 10px; cursor:pointer; position:absolute; right:10px; top:10px;" onclick="vizualizareMeniureplys(${rep.id})"></i>
+                    <div id="IdMeniuReply-${rep.id}" class="MeniuOptiuniComs" style="font-size: 11px;">
+                        <div class="ElementeDinMeniu" onclick="EditareReply(${rep.id})" style="color: #1e293b;">
+                            <i class="fas fa-pencil-alt"></i> Edit
+                        </div>
+                        <div class="ElementeDinMeniu" onclick="stergeReply(${rep.id})">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </div>
+                    </div>` : '';
+
             htmlRaspunsuri += `
-                <div class="rand-descriere" style="margin-bottom: 10px; padding: 10px; background: transparent; border: none; box-shadow: none;">
+                <div class="rand-descriere" id="reply-container-${rep.id}" style="position: relative; margin-bottom: 10px; padding: 10px; background: transparent; border: none; box-shadow: none;">
+                    ${meniuReply}
                     <div class="comentariu-top">
                         <img src="${rep.userImage}" class="poza-rotunda mica" style="width: 25px; height: 25px;">
-                        <div class="continut-text" style="display:flex; flex-direction:column;">
-                            <span class="nume-bold" style="font-size: 13px;">${rep.username}</span>
-                            <span class="text-normal" style="font-size: 13px;">${rep.mesaj}</span>
+                        <div class="continut-text" style="display:flex; flex-direction:column; width:100%;">
+                            <div style="display: flex; align-items: baseline; gap: 5px;">
+                                <span class="nume-bold" style="font-size: 13px;">${rep.username}</span>
+                                <span id="labelEditatReply-${rep.id}">${etichetaEditatRep}</span>
+                            </div>
+                        
+                            <div id="zonaTextReply-${rep.id}">
+                                <span class="text-normal text-reply-wrap" id="textReply-${rep.id}" style="font-size: 13px;">${rep.mesaj}</span>
+                            </div>
+
+                            <div id="zonaEditareReply-${rep.id}" style="display:none; margin-top: 5px;">
+                                <textarea id="inputEditareReply-${rep.id}" class="input-editare-custom" rows="2" style="width:100%; border:1px solid #ccc; border-radius:5px; padding:5px; font-size:12px;">${rep.mesaj}</textarea>
+                                <div style="display:flex; gap:5px; margin-top:5px;">
+                                    <button onclick="saveEditReply(${rep.id})" style="background:#0095f6; color:white; border:none; padding:3px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Save</button>
+                                    <button onclick="anuleazaEditareReply(${rep.id})" style="background:transparent; border:1px solid #ccc; padding:3px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Cancel</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="zona-actiuni-com" style="margin-left: 38px; margin-top: 0;">
+                    <div class="zona-actiuni-com" style="margin-left: 38px; margin-top: 5px; display: flex; align-items: center; gap: 15px;">
                         <span class="data-text" style="font-size: 10px;">${rep.data}</span>
+                    
+                        <div class="btn-like-reply" onclick="apreciazaReply(${rep.id})" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <i class="${clasaInimaRep}" id="icon-like-reply-${rep.id}" style="font-size: 11px;"></i> 
+                            <span id="count-like-reply-${rep.id}" style="font-size: 11px; font-weight: 600;">${textNrLikeuriRep}</span>
+                        </div>
                     </div>
                 </div>`;
         });
     }
-
-    const butonVeziRaspunsuri = com.nrRaspunsuri > 0
-        ? `<div class="btn-vezi-raspunsuri" onclick="ListaRaspunsuri(${comId})" style="margin-left: 50px; margin-top: 5px; cursor: pointer; font-size: 12px; color: #8e8e8e; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+    //afis nr + raspunsuri
+    const butonVeziRaspunsuri = `
+        <div id="btn-raspunsuri-container-${comId}" class="btn-vezi-raspunsuri" onclick="ListaRaspunsuri(${comId})" 
+             style="margin-left: 50px; margin-top: 5px; cursor: pointer; font-size: 12px; color: #8e8e8e; font-weight: 600; 
+                    display: ${com.nrRaspunsuri > 0 ? 'flex' : 'none'}; align-items: center; gap: 5px;">
              <span style="height: 1px; width: 20px; background-color: #8e8e8e; display: inline-block;"></span> 
-             See ${com.nrRaspunsuri} replys
-           </div>`
-        : '';
+             See <span id="numar-raspunsuri-${comId}">${com.nrRaspunsuri}</span> replys
+        </div>`;
 
     return `
     <div class="rand-descriere" id="comm-${comId}" style="position: relative;"> 
@@ -134,21 +177,20 @@ function genComs(com) {
             <img src="${com.poza}" class="poza-rotunda mica">
             
             <div class="continut-text" style="width: 100%; display: flex; flex-direction: column;">
-                
                 <div style="display: flex; align-items: baseline; gap: 8px;">
                     <span class="nume-bold">${com.username}</span>
                     <span id="labelEditat-${comId}">${etichetaEditat}</span>
                 </div>
                 
                 <div id="zonaTextCom-${comId}" style="display: block;">
-                    <span class="text-normal text-wrap-custom" id="textCom-${comId}">${com.continut}</span>
+                    <span class="text-normal text-reply-wrap" id="textCom-${comId}">${com.continut}</span>
                 </div>
 
                 <div id="zonaEditareCom-${comId}" style="display:none; margin-top: 5px;">
                     <textarea id="inputEditare-${comId}" class="input-editare-custom" rows="2" style="width:100%; border:1px solid #ccc; border-radius:5px; padding:5px;">${com.continut}</textarea>
                     <div style="display:flex; gap:5px; margin-top:5px;">
-                        <button onclick="saveEdit(${comId})" class="saveEditBtn" style="background:#0095f6; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Save</button>
-                        <button onclick="anuleazaEditareComentariu(${comId})" class="CancelEditBtn" style="background:transparent; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">Cancel</button>
+                        <button onclick="saveEdit(${comId})" class="btn-salvare-mic" style="background:#0095f6; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Save</button>
+                        <button onclick="anuleazaEditareComentariu(${comId})" class="btn-anulare-mic" style="background:transparent; border:1px solid #ccc; padding:5px 10px; border-radius:4px; cursor:pointer;">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -156,7 +198,10 @@ function genComs(com) {
 
         <div class="zona-actiuni-com">
             <span class="data-text">${com.data}</span>
-            <div class="btn-like-com"><i class="far fa-heart"></i> <span>Like</span></div>
+           <div class="btn-like-com" onclick="apreciazaComentariu(${comId})" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <i class="${clasaInima}" id="icon-like-com-${comId}"></i> 
+                <span id="count-like-com-${comId}" style="font-size: 12px; font-weight: 600;">${comentariiNrLikes}</span>
+           </div>
             <div class="btn-raspunsuri" onclick="adaugaReply(${comId})" style="margin-left: 15px; cursor: pointer;">
                 <span>Reply</span>
             </div>
@@ -164,7 +209,7 @@ function genComs(com) {
 
         <div id="idReply-${comId}" class="RaspunsuriComentarii" style="display:none; margin-left: 50px; margin-top: 10px;">
             <form onsubmit="trimiteReply(event, this, ${comId})" style="display:flex; width:100%; gap:5px;">
-                <input type="text" name="text" class="RaspunsInput" placeholder="Reply to ${com.username}" autocomplete="off" style="border: none; border-bottom: 1px solid #ccc; background: transparent; width: 100%; outline: none; font-size: 13px;">
+                <input type="text" name="text" class="RaspunsInput" placeholder="Reply to ${com.username}" autocomplete="off" maxlength="100" style="border: none; border-bottom: 1px solid #ccc; background: transparent; width: 100%; outline: none; font-size: 13px;">
                 <button type="submit" id="BtnRaspunsuri" style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer;">Post</button>
             </form>
         </div>

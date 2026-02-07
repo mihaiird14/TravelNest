@@ -23,5 +23,6 @@ namespace TravelNest.Models
         public Profil Profil { get; set; }
         public List<ReplyCom> Raspunsuri { get; set; } = new List<ReplyCom>();
         public bool ComentariuEditat { get; set; } = false;
+        public List<LikeComentariu> LikeComentariu { get; set; } = new List<LikeComentariu>();
     }
 }

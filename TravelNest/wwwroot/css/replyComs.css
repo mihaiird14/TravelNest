@@ -103,3 +103,12 @@
     background-color: #f1f5f9 !important;
     color: #1e293b !important;
 }
+.text-reply-wrap {
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    overflow-wrap: break-word; 
+    word-break: break-word; 
+    max-width: 100%; 
+    display: block; 
+    line-height: 1.4; 
+}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelNest.Data;
 
@@ -11,9 +12,11 @@ using TravelNest.Data;
 namespace TravelNest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260207112304_likesComs")]
+    partial class likesComs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -372,29 +375,6 @@ namespace TravelNest.Data.Migrations
                     b.ToTable("LikeComentarii");
                 });
 
-            modelBuilder.Entity("TravelNest.Models.LikeReplyComentarii", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProfilId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReplyId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfilId");
-
-                    b.HasIndex("ReplyId");
-
-                    b.ToTable("LikeReplyComentarii");
-                });
-
             modelBuilder.Entity("TravelNest.Models.LikesPostare", b =>
                 {
                     b.Property<int>("Id")
@@ -654,25 +634,6 @@ namespace TravelNest.Data.Migrations
                     b.Navigation("Profil");
                 });
 
-            modelBuilder.Entity("TravelNest.Models.LikeReplyComentarii", b =>
-                {
-                    b.HasOne("TravelNest.Models.Profil", "Profil")
-                        .WithMany("LikeReplyComentarii")
-                        .HasForeignKey("ProfilId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("TravelNest.Models.ReplyCom", "ReplyCom")
-                        .WithMany("LikeReplyComentarii")
-                        .HasForeignKey("ReplyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Profil");
-
-                    b.Navigation("ReplyCom");
-                });
-
             modelBuilder.Entity("TravelNest.Models.LikesPostare", b =>
                 {
                     b.HasOne("TravelNest.Models.ApplicationUser", null)
@@ -772,16 +733,9 @@ namespace TravelNest.Data.Migrations
 
                     b.Navigation("LikeComentarii");
 
-                    b.Navigation("LikeReplyComentarii");
-
                     b.Navigation("Posts");
 
                     b.Navigation("ReplyComs");
-                });
-
-            modelBuilder.Entity("TravelNest.Models.ReplyCom", b =>
-                {
-                    b.Navigation("LikeReplyComentarii");
                 });
 #pragma warning restore 612, 618
         }

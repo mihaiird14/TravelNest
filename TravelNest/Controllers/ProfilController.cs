@@ -18,7 +18,7 @@ namespace TravelNest.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CalculFaceRec _faceService; 
+        private readonly CalculFaceRec _faceService;
         public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService)
         {
             _userManager = userManager;
@@ -47,27 +47,27 @@ namespace TravelNest.Controllers
             }
             return View(profil);
         }
- [HttpGet]
-public async Task<IActionResult> CautareTag(string val)
-{
-    if (string.IsNullOrEmpty(val))
-    {
-        return Json(new List<object>());
-    }
+        [HttpGet]
+        public async Task<IActionResult> CautareTag(string val)
+        {
+            if (string.IsNullOrEmpty(val))
+            {
+                return Json(new List<object>());
+            }
 
-    var users = await _context.Profils 
-        .Where(u => u.User.UserName.Contains(val)) 
-        .Take(5) 
-        .Select(u => new 
-        { 
-    
-            userName = u.User.UserName, 
-            poza = u.ImagineProfil ?? "/images/profilDefault.png" 
-        })
-        .ToListAsync();
+            var users = await _context.Profils
+                .Where(u => u.User.UserName.Contains(val))
+                .Take(5)
+                .Select(u => new
+                {
 
-    return Json(users);
-}
+                    userName = u.User.UserName,
+                    poza = u.ImagineProfil ?? "/images/profilDefault.png"
+                })
+                .ToListAsync();
+
+            return Json(users);
+        }
         public async Task<IActionResult> AddPostare(int profilId, List<IFormFile> FisiereMedia, string locatie, string descriere, string tagUseri)
         {
             var profil = await _context.Profils.FindAsync(profilId);
@@ -174,7 +174,7 @@ public async Task<IActionResult> CautareTag(string val)
                                 var faceEmb = new FaceEmbeddings
                                 {
                                     FisierMediaId = media.Id,
-                                    PersonId = null, 
+                                    PersonId = null,
                                     Embedding = JsonSerializer.Serialize(embVector)
                                 };
                                 bool gasit = false;
@@ -192,7 +192,7 @@ public async Task<IActionResult> CautareTag(string val)
                                     {
                                         faceEmb.PersonId = profilId;
                                         gasit = true;
-                                  
+
                                     }
                                 }
                                 if (!gasit && nrFete == 1)
@@ -299,7 +299,7 @@ public async Task<IActionResult> CautareTag(string val)
                             foreach (var known in knownFaces)
                             {
                                 var knownVector = JsonSerializer.Deserialize<List<double>>(known.Embedding);
-                           
+
                                 var dist = _faceService.CalculDistanta(newFaceVector, knownVector);
 
                                 if (dist < 0.6 && dist < bestDist)
@@ -311,7 +311,7 @@ public async Task<IActionResult> CautareTag(string val)
 
                             if (bestMatchId != null)
                             {
-                               
+
                                 if (!foundUsers.Any(u => (int)((dynamic)u).ProfilId == bestMatchId))
                                 {
                                     var match = knownFaces.First(k => k.PersonId == bestMatchId);
@@ -350,12 +350,18 @@ public async Task<IActionResult> CautareTag(string val)
                     .Include(p => p.FisiereMedia)
                     .Include(p => p.Likes)
                     .Include(p => p.Comentarii)
+                         .ThenInclude(c => c.LikeComentariu)
+                    .Include(p => p.Comentarii)
                         .ThenInclude(c => c.Profil)
                             .ThenInclude(u => u.User)
                     .Include(p => p.Comentarii)
                         .ThenInclude(c => c.Raspunsuri)
                             .ThenInclude(r => r.User).ThenInclude(u => u.User)
+                    .Include(p => p.Comentarii)
+                        .ThenInclude(c => c.Raspunsuri)
+                            .ThenInclude(r => r.LikeReplyComentarii)
                     .FirstOrDefaultAsync(p => p.Id == postId);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
             if (postare == null)
             {
                 return NotFound();
@@ -372,28 +378,37 @@ public async Task<IActionResult> CautareTag(string val)
                             : "/images/profilDefault.png",
                 nrLikeuri = postare.Likes.Count(),
                 esteApreciata = utilizatorConectat != null && postare.Likes.Any(l => l.UserId == utilizatorConectat.Id),
-                media = postare.FisiereMedia.Select(f => new {
+                media = postare.FisiereMedia.Select(f => new
+                {
                     url = f.Url,
-                    tip = f.fisier.ToString() 
+                    tip = f.fisier.ToString()
                 }).ToList(),
                 totalComentarii = postare.Comentarii.Count() + postare.Comentarii.SelectMany(c => c.Raspunsuri).Count(),
                 comentarii = postare.Comentarii
                     .OrderBy(c => c.DataCr)
-                    .Select(c => new {
-                        id = c.Id, 
+                    .Select(c => new
+                    {
+                        id = c.Id,
                         username = c.Profil.User.UserName,
                         poza = c.Profil.ImagineProfil ?? "/images/profilDefault.png",
                         continut = c.Continut,
                         data = c.DataCr.ToString("dd MMM"),
-                        esteEditat = c.ComentariuEditat, 
+                        esteEditat = c.ComentariuEditat,
                         AutorComentariu = utilizatorConectat != null && c.Profil.UserId == utilizatorConectat.Id,
                         nrRaspunsuri = c.Raspunsuri.Count(),
-                        raspunsuri = c.Raspunsuri.OrderBy(r => r.DataPost).Select(r => new {
+                        nrLikeuriComentariu = c.LikeComentariu.Count(),
+                        esteApreciat = c.LikeComentariu.Any(l => l.ProfilId == profil.Id),
+                        raspunsuri = c.Raspunsuri.OrderBy(r => r.DataPost).Select(r => new
+                        {
                             id = r.Id,
                             username = r.User.User.UserName,
                             userImage = r.User.ImagineProfil ?? "/images/profilDefault.png",
                             mesaj = r.Mesaj,
-                            data = r.DataPost.ToString("dd MMM")
+                            data = r.DataPost.ToString("dd MMM"),
+                            nrLikeuriReply = r.LikeReplyComentarii.Count(),
+                            euAmDatLikeReply = r.LikeReplyComentarii.Any(l => l.ProfilId == profil.Id),
+                            esteEditat = r.RaspunsEditat,
+                            autorReply = utilizatorConectat != null && r.UserId == profil.Id
                         }).ToList()
                     }).ToList()
 
@@ -405,7 +420,7 @@ public async Task<IActionResult> CautareTag(string val)
         public async Task<IActionResult> AdaugaComentariu([FromBody] ComentariuInput input)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) 
+            if (user == null)
                 return Unauthorized();
             var p = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
             if (p == null) return NotFound("Profil negăsit");
@@ -433,7 +448,7 @@ public async Task<IActionResult> CautareTag(string val)
         public async Task<IActionResult> LikePostare(int postId)
         {
             var utilizator = await _userManager.GetUserAsync(User);
-            if (utilizator == null) 
+            if (utilizator == null)
                 return Unauthorized();
 
             var likeExistent = await _context.LikesPostari
@@ -443,19 +458,19 @@ public async Task<IActionResult> CautareTag(string val)
             if (likeExistent != null)
             {
                 _context.LikesPostari.Remove(likeExistent);
-                esteLikedAcum = false; 
+                esteLikedAcum = false;
             }
             else
             {
                 var likeNou = new LikesPostare { PostareId = postId, UserId = utilizator.Id };
                 _context.LikesPostari.Add(likeNou);
-                esteLikedAcum = true; 
+                esteLikedAcum = true;
             }
             await _context.SaveChangesAsync();
             int numarActualizat = await _context.LikesPostari.CountAsync(l => l.PostareId == postId);
-            return Json(new { success = true,liked = esteLikedAcum, nrLikeuri = numarActualizat });
+            return Json(new { success = true, liked = esteLikedAcum, nrLikeuri = numarActualizat });
         }
-       [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> AddComReply(int comentariuId, string mesaj)
         {
             try
@@ -503,11 +518,11 @@ public async Task<IActionResult> CautareTag(string val)
         public async Task<IActionResult> StergeComentariu(int id)
         {
             var utilizator = await _userManager.GetUserAsync(User);
-            if (utilizator == null) 
+            if (utilizator == null)
                 return Unauthorized();
 
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
-            if (profil == null) 
+            if (profil == null)
                 return NotFound();
             var comm = await _context.Comentarii
                 .Include(c => c.Raspunsuri)
@@ -542,10 +557,10 @@ public async Task<IActionResult> CautareTag(string val)
         public async Task<IActionResult> EditComment(int id, string continutUpdated)
         {
             var utilizatorConectat = await _userManager.GetUserAsync(User);
-            if (utilizatorConectat == null) 
+            if (utilizatorConectat == null)
                 return Unauthorized();
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
-            if (profil == null) 
+            if (profil == null)
                 return NotFound();
             var comentariu = await _context.Comentarii.FirstOrDefaultAsync(c => c.Id == id);
             if (comentariu == null)
@@ -565,6 +580,97 @@ public async Task<IActionResult> CautareTag(string val)
             {
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
+        }
+        //functie pentru like-uri comentarii
+        [HttpPost]
+        public async Task<IActionResult> AdaugaLikeComentariu(int comId)
+        {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+            if (utilizatorConectat == null)
+                return Unauthorized();
+            if (profil == null)
+                return NotFound();
+            var likeExistent = await _context.LikeComentarii
+                .FirstOrDefaultAsync(l => l.ComentariuId == comId && l.ProfilId == profil.Id);
+            bool esteLikedAcum;
+            if (likeExistent != null)
+            {
+                _context.LikeComentarii.Remove(likeExistent);
+                esteLikedAcum = false;
+            }
+            else
+            {
+                var likeCom = new LikeComentariu
+                {
+                    ComentariuId = comId,
+                    ProfilId = profil.Id
+                };
+                _context.LikeComentarii.Add(likeCom);
+                esteLikedAcum = true;
+            }
+            await _context.SaveChangesAsync();
+            int nrLikesComs = await _context.LikeComentarii.CountAsync(l => l.ComentariuId == comId);
+            return Json(new { success = true, liked = esteLikedAcum, nrLikeuri = nrLikesComs });
+        }
+        //functie like reply comentarii
+        [HttpPost]
+        public async Task<IActionResult> AdaugaLikeReplyComentariu(int replyId)
+        {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+            if (utilizatorConectat == null)
+                return Unauthorized();
+            if (profil == null)
+                return NotFound();
+            var likeExistent = await _context.LikeReplyComentarii
+                .FirstOrDefaultAsync(l => l.ReplyId == replyId && l.ProfilId == profil.Id);
+            bool esteLikedAcum;
+            if (likeExistent != null)
+            {
+                _context.LikeReplyComentarii.Remove(likeExistent);
+                esteLikedAcum = false;
+            }
+            else
+            {
+                var likeReplyCom = new LikeReplyComentarii
+                {
+                    ReplyId = replyId,
+                    ProfilId = profil.Id
+                };
+                _context.LikeReplyComentarii.Add(likeReplyCom);
+                esteLikedAcum = true;
+            }
+            await _context.SaveChangesAsync();
+            int nrLikesReplyComs = await _context.LikeReplyComentarii.CountAsync(l => l.ReplyId == replyId);
+            return Json(new { success = true, liked = esteLikedAcum, nrLikeuri = nrLikesReplyComs });
+        }
+        //functie editare reply
+        [HttpPost]
+        public async Task<IActionResult>EditReply(int ReplyId,string continut)
+        {
+            var utilizator = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            var reply = await _context.ReplyComs.FindAsync(ReplyId);
+            if (reply == null || profil == null || reply.UserId != profil.Id) 
+                    return Unauthorized();
+            reply.Mesaj = continut;
+            reply.RaspunsEditat = true;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, mesajNou = reply.Mesaj });
+        }
+        //functie sterge reply 
+        [HttpPost]
+        public async Task<IActionResult> StergeReply(int ReplyId)
+        {
+            var utilizator = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            var reply = await _context.ReplyComs.FindAsync(ReplyId);
+            if (reply == null || profil == null || reply.UserId != profil.Id) 
+                return Unauthorized();
+            _context.ReplyComs.Remove(reply);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
         }
     }
 }

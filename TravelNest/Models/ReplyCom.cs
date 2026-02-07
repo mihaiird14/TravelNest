@@ -15,5 +15,6 @@ namespace TravelNest.Models
         public Comentariu Comentariu { get; set; }
         public DateTime DataPost { get; set; } = DateTime.UtcNow;
         public bool RaspunsEditat { get; set; } = false;
+        public List<LikeReplyComentarii> LikeReplyComentarii { get; set; } = new List<LikeReplyComentarii>();
     }
 }

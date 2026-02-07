@@ -18,6 +18,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Comentariu> Comentarii { get; set; }
     public DbSet<LikesPostare> LikesPostari { get; set; }
     public DbSet<ReplyCom> ReplyComs { get; set; }
+    public DbSet<LikeComentariu> LikeComentarii { get; set; }
+    public DbSet<LikeReplyComentarii> LikeReplyComentarii { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -81,6 +83,26 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(r => r.User)
             .WithMany(u => u.ReplyComs)
             .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<LikeComentariu>()
+            .HasOne(l => l.Comentariu)
+            .WithMany(c => c.LikeComentariu)
+            .HasForeignKey(l => l.ComentariuId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<LikeComentariu>()
+            .HasOne(l => l.Profil)
+            .WithMany(p => p.LikeComentarii)
+            .HasForeignKey(l => l.ProfilId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<LikeReplyComentarii>()
+            .HasOne(l=> l.ReplyCom)
+            .WithMany(r => r.LikeReplyComentarii)
+            .HasForeignKey(l => l.ReplyId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<LikeReplyComentarii>()
+            .HasOne(l => l.Profil)
+            .WithMany(p => p.LikeReplyComentarii)
+            .HasForeignKey(l => l.ProfilId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
