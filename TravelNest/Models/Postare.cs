@@ -20,5 +20,6 @@ namespace TravelNest.Models
         public List<Comentariu> Comentarii { get; set; } = new List<Comentariu>();
         public List<LikesPostare> Likes { get; set; } = new List<LikesPostare>();
         public DateTime DataCr { get; set; } = DateTime.UtcNow;
+        public bool Arhivata { get; set; } = false;
     }
 }

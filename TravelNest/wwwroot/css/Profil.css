@@ -413,11 +413,12 @@ hr {
     box-shadow: 0 6px 15px rgba(0,0,0,0.3);
 }
 .carousel-wrapper img,.carousel-wrapper video {
-    max-width: 90%; 
-    max-height: 90%; 
+    width: 200% !important; 
+    max-height: 250%; 
     object-fit: contain; 
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-left: 20px;
 }
 
 #butoaneCarusel {
@@ -470,7 +471,31 @@ hr {
     border-color: #ff4d4d;
     color: white;
 }
+#butoaneCarusel .nav-btn {
+    display: flex !important; 
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 
+#butoaneCarusel .nav-btn.prev,
+#butoaneCarusel .nav-btn.next {
+    position: static !important; 
+    background-color: white;
+    color: #5596f5;
+    border: 1px solid #cbd5e1;
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+    margin: 0 !important;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#butoaneCarusel .nav-btn:hover {
+    background-color: #5596f5;
+    color: white;
+    transform: scale(1.1);
+}
 .right-column {
     background: #fff;
     padding: 6.5rem;
@@ -870,6 +895,7 @@ textarea {
 
 .detalii-header {
     padding: 15px 20px;
+    padding-right: 50px !important;
     border-bottom: none;
     display: flex;
     align-items: center;
@@ -1053,6 +1079,161 @@ textarea {
     pointer-events: none; 
     box-shadow: none !important;
     transform: none !important;
+}
+/*cod pentru meniu optiuni postari*/
+#boxOptiuniPostari {
+    position: relative;
+    z-index: 1050;
+}
+#MeniuOptiuniPostare {
+    display: none;
+    position: absolute;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    border: 1px solid #dbdbdb;
+    right: 0;
+    top: 30px;
+    background-color: #ffffff;
+    min-width: 140px;
+    z-index: 1051;
+    overflow: hidden;
+}
+
+#MeniuOptiuniPostare.activ {
+    display: block !important;
+}
+#boxOptiuniPostari .ElementeDinMeniu {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: black !important;
+    transition: background-color 0.1s;
+}
+
+#boxOptiuniPostari .ElementeDinMeniu:hover {
+    background-color: #f1f5f9 !important;
+}
+#boxOptiuniPostari .ElementeDinMeniu i.fa-trash-alt {
+    color: #ed4956 !important;
+}
+#boxOptiuniPostari #OptiuniStergePost{
+    color: red !important;
+}
+#boxOptiuniPostari #OptiuniStergePost:hover {
+    background-color: #fee2e2 !important;
+}
+.EditContainer {
+    background-color: white;
+    width: 90%;
+    max-width: 900px; 
+    border-radius: 15px;
+    position: relative;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+}
+/*stil lista useri tag din formular editare*/
+#edit-rezultateTag {
+    order: 4 !important;
+    display: none; 
+    flex-direction: row;
+    flex-wrap: wrap; 
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#edit-rezultateTag p {
+    width: 100%; 
+    flex-basis: 100%; 
+    margin: 0 0 5px 0;
+    color: #666;
+    font-size: 12px;
+    font-weight: bold;
+    padding-left: 5px;
+}
+#edit-rezultateTag .user-chip {
+    flex: 0 0 auto;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 8px 12px !important;
+    background-color: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 50px;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+#edit-rezultateTag .user-chip:hover {
+    transform: translateY(-1px); 
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+#edit-rezultateTag .user-chip img {
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    margin-right: 10px !important; 
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+#edit-rezultateTag .user-chip span {
+    font-weight: 600;
+    font-size: 14px;
+}
+.tag-section {
+    display: flex !important;
+    flex-direction: column !important;
+}
+.tag-section label {
+    order: 1 !important;
+    margin-bottom: 8px;
+}
+.tag-section .tag-input-wrapper {
+    order: 2 !important;
+    margin-bottom: 12px;
+}
+#edit-selectedTagsContainer {
+    order: 3 !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+#edit-rezultateTag {
+    order: 4 !important;
+    display: none; 
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: static !important; 
+}
+#edit-rezultateTag p {
+    flex: 0 0 100%; 
+    margin: 0 0 8px 5px;
+    color: #666;
+    font-size: 12px;
+    font-weight: bold;
 }
 @media (max-width: 768px) {
     .card-postare {

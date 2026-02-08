@@ -366,12 +366,25 @@ namespace TravelNest.Controllers
             {
                 return NotFound();
             }
+            var userIds = postare.UseriMentionati ?? new List<string>();
+
+            var listaTaguri = await _context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .Select(u => new {
+                    username = u.UserName,
+                    userImage = (u.Profil != null && !string.IsNullOrEmpty(u.Profil.ImagineProfil))
+                                ? u.Profil.ImagineProfil
+                                : "/images/profilDefault.png"
+                })
+                .ToListAsync();
             var rezultatPostare = new
             {
                 id = postare.Id,
                 descriere = postare.Descriere,
                 locatie = postare.Locatie,
+                taguri = listaTaguri,
                 data = postare.DataCr.ToString("dd MMM yyyy"),
+                esteAutorPostare = (profil != null && postare.Profil.Id == profil.Id),
                 username = postare.Profil.User.UserName,
                 userImage = !string.IsNullOrEmpty(postare.Profil.ImagineProfil)
                             ? postare.Profil.ImagineProfil
@@ -671,6 +684,46 @@ namespace TravelNest.Controllers
             _context.ReplyComs.Remove(reply);
             await _context.SaveChangesAsync();
             return Json(new { success = true });
+        }
+        //functie sterge postare
+        [HttpPost]
+        public async Task<IActionResult>StergePostare(int postareId)
+        {
+            var utilizator = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            var postare = await _context.Postares
+                .Include(p => p.Comentarii)
+                .Include(p => p.FisiereMedia)
+                .FirstOrDefaultAsync(p => p.Id == postareId);
+            if (profil == null || postare == null || postare.CreatorId != profil.Id)
+            {
+                return Json(new { success = false, message = "You dont have permission!" });
+            }
+            if (postare.Comentarii != null && postare.Comentarii.Any())
+            {
+                _context.Comentarii.RemoveRange(postare.Comentarii);
+            }
+            if (postare.FisiereMedia != null && postare.FisiereMedia.Any())
+            {
+                _context.FisierMedias.RemoveRange(postare.FisiereMedia);
+            }
+            _context.Postares.Remove(postare);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
+        //functie de arhivare postare
+        public async Task<IActionResult>ArhivarePostare(int postareId)
+        {
+            var utilizator = await _userManager.GetUserAsync(User); 
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            var postare = await _context.Postares.FirstOrDefaultAsync(p => p.Id == postareId);
+            if (profil == null || postare == null || postare.CreatorId != profil.Id)
+            {
+                return Json(new { success = false, message = "You dont have permission!" });
+            }
+            postare.Arhivata = true;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true});
         }
     }
 }

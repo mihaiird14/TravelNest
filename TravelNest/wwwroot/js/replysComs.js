@@ -56,6 +56,7 @@ async function trimiteReply(event, formElement, idComentariu) {
         if (result.success) {
             input.value = '';
             generareReply(idComentariu, result);
+            updateNrComentarii(1);
             const container = document.getElementById(`container-raspunsuri-${idComentariu}`);
             if(container) {
                 container.style.display = 'block';
@@ -136,7 +137,8 @@ function stergeComentariu(id) {
     idComentariuSelectat = id;
    
     const meniuOptiuni = document.getElementById(`IdMeniuCom-${id}`);
-    if(meniuOptiuni) meniuOptiuni.classList.remove('activ');
+    if(meniuOptiuni) 
+        meniuOptiuni.classList.remove('activ');
     document.getElementById('popupStergeCom').style.display = 'flex';
 }
 
@@ -161,11 +163,14 @@ async function StergeCom() {
         if (rezultat.success) {
             const elementComentariu = document.getElementById(`comm-${id}`);
             if (elementComentariu) {
+                const nr = elementComentariu.querySelectorAll('.rand-descriere').length;
+                updateNrComentarii(-(1+nr));
                 elementComentariu.style.opacity = "0";
                 setTimeout(() => {
                     elementComentariu.remove();
                 }, 300);
             }
+            
         } else {
             alert(rezultat.message || "Error!");
         }
@@ -386,7 +391,7 @@ async function ConfirmaStergereReply() {
                 elementReply.style.opacity = '0';
                 setTimeout(() => elementReply.remove(), 300);
             }
-
+            updateNrComentarii(-1);
             if (idComentariuParinte) {
                 const spanNumar = document.getElementById(`numar-raspunsuri-${idComentariuParinte}`);
                 const btnContainer = document.getElementById(`btn-raspunsuri-container-${idComentariuParinte}`);
@@ -411,5 +416,13 @@ async function ConfirmaStergereReply() {
         console.error("Eroare la ștergere reply:", e);
     } finally {
         inchidePopUpReply();
+    }
+}
+//functie pentru a actualiza nr comentarii+replys
+function updateNrComentarii(x) {
+    const nr = document.getElementById('text-comm-count-modal');
+    if (nr) {
+        let curent = parseInt(nr.innerText) || 0;
+        nr.innerText = curent + x;
     }
 }
