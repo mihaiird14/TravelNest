@@ -256,9 +256,38 @@ function populeazaFereastra(date) {
         commSpan.innerText = date.totalComentarii;
     if (iconLike) {
         if (date.esteApreciata) {
-            iconLike.className = 'fa-solid fa-heart text-danger'; // Roșie
+            iconLike.className = 'fa-solid fa-heart text-danger'; 
         } else {
-            iconLike.className = 'fa-regular fa-heart'; // Goală
+            iconLike.className = 'fa-regular fa-heart'; 
+        }
+    }
+    //afisare lista de taguri la postare
+    const iconita = document.getElementById('userTagsIcon');
+    const containerLista = document.getElementById('listaTags');
+    if (containerLista) {
+        containerLista.style.display = 'none';
+        containerLista.innerHTML = ''; 
+    }
+    if (iconita) {
+        iconita.style.display = 'none';
+        iconita.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        iconita.style.color = 'white';
+    }
+    if (date.taguri && date.taguri.length > 0) {
+        if (iconita)
+            iconita.style.display = 'flex';
+        if (containerLista) {
+            date.taguri.forEach(tag => {
+                const rand = document.createElement('a');
+                rand.className = 'tag-row';
+                rand.href = `/Profil/Index?user=${tag.username}`; 
+                const pozaUrl = tag.userImage || '/images/profilDefault.png';
+                rand.innerHTML = `
+                    <img src="${pozaUrl}" alt="user">
+                    <span>@${tag.username}</span>
+                `;
+                containerLista.appendChild(rand);
+            });
         }
     }
     afiseazaSlide(0);
@@ -475,10 +504,16 @@ function EditarePostare() {
     document.getElementById('edit-inputTag').value = '';
     document.getElementById('edit-rezultateTag').style.display = 'none';
     if (window.datePostareCurenta && window.datePostareCurenta.taguri) {
-        editTagsList = [...window.datePostareCurenta.taguri]; 
+            editTagsList = window.datePostareCurenta.taguri.map(t => ({
+            username: t.username || t.userName, 
+            userImage: t.userImage || t.poza
+        }));
     }
     vizualizareTags();
     afiseazaSlideEdit(0);
+    if (listaMediaCurenta && listaMediaCurenta.length > 0) {
+        scanareAutomataEdit(listaMediaCurenta);
+    }
     const modalEdit = document.getElementById('formularEditarePostare');
     if (modalEdit) {
         modalEdit.style.display = 'flex';
@@ -761,13 +796,16 @@ function adaugaTagEdit(user) {
         userImage: user.userImage
     });
     vizualizareTags(); 
+    sincronizeazaToateListeleEdit(user.username, true);
 }
 function vizualizareTags() {
     const container = document.getElementById('edit-selectedTagsContainer');
     const hiddenInput = document.getElementById('edit-finalTagList');
     
-    if (!container || !hiddenInput) return;
+    if (!container || !hiddenInput) 
+        return;
     container.innerHTML = '';
+
     hiddenInput.value = JSON.stringify(editTagsList.map(u => u.username));
     editTagsList.forEach(user => {
         const chip = document.createElement('div');
@@ -794,4 +832,5 @@ function stergeTagEdit(username) {
     editTagsList = editTagsList.filter(u => u.username !== username);
     vizualizareTags();
     eliminaVizualizareTag(username,false);
+    sincronizeazaToateListeleEdit(username, false);
 }

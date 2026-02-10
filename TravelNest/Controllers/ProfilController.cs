@@ -725,5 +725,57 @@ namespace TravelNest.Controllers
             await _context.SaveChangesAsync();
             return Json(new { success = true});
         }
+        //functie pentru editare postare
+        [HttpPost]
+        public async Task<IActionResult> EditeazaPostare(int postareId, string locatie, string descriere, string tagUseri)
+        {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            if (utilizatorConectat == null) 
+                return Unauthorized();
+            var postare = await _context.Postares.FirstOrDefaultAsync(p => p.Id == postareId);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+            if (postare == null || profil == null || postare.CreatorId != profil.Id)
+            {
+                return Json(new { success = false, message = "You dont have permission to edit!" });
+            }
+            postare.Locatie = locatie;
+            postare.Descriere = descriere;
+            if (!string.IsNullOrEmpty(tagUseri))
+            {
+                try
+                {
+                    var listaNume = JsonSerializer.Deserialize<List<string>>(tagUseri);
+                    var idsDeSalvat = await _context.Users
+                        .Where(u => listaNume.Contains(u.UserName))
+                        .Select(u => u.Id)
+                        .ToListAsync();
+
+                    postare.UseriMentionati = idsDeSalvat;
+                }
+                catch (Exception)
+                {
+                    var listaNumeManual = tagUseri.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    var idsManual = await _context.Users
+                        .Where(u => listaNumeManual.Contains(u.UserName))
+                        .Select(u => u.Id)
+                        .ToListAsync();
+                    postare.UseriMentionati = idsManual;
+                }
+            }
+            else
+            {
+                postare.UseriMentionati = new List<string>();
+            }
+            try
+            {
+                _context.Postares.Update(postare);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", new { openPostId = postareId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
     }
 }

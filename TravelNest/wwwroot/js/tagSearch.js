@@ -127,26 +127,29 @@
         });
     }
 
-    function syncVisuals(name, isActive) {
-        var allChips = document.querySelectorAll('.user-chip');
-        allChips.forEach(chip => {
-            var span = chip.querySelector('span');
-            if(span && span.innerText === name) {
-                if(isActive) chip.classList.add('active');
-                else chip.classList.remove('active');
-            }
-        });
-    }
+function syncVisuals(name, isActive) {
+    var allChips = document.querySelectorAll('.user-chip');
+    allChips.forEach(chip => {
+        var span = chip.querySelector('span');
+        if(span && span.innerText === name) {
+            if(isActive) 
+                chip.classList.add('active');
+            else 
+                chip.classList.remove('active');
+        }
+    });
+}
 
-    function manageTags(name, add) {
-        if (add) activeTags.add(name);
-        else activeTags.delete(name);
-        
+function manageTags(name, add) {
+        if (add) 
+            activeTags.add(name);
+        else 
+            activeTags.delete(name);
         hiddenInput.value = Array.from(activeTags).join(',');
         renderSelectedTags();
     }
 
-    function renderSelectedTags() {
+function renderSelectedTags() {
         selectedTagsContainer.innerHTML = '';
         activeTags.forEach(function(tagName) {
             var tagEl = document.createElement('div');
@@ -171,3 +174,126 @@
         });
     }
 });
+async function scanareAutomataEdit(mediaFiles) {
+    const loadingMsg = document.getElementById('edit-loadingFaces');
+    const suggestionsArea = document.getElementById('edit-sugestiiAutomate');
+    
+    if (!loadingMsg || !suggestionsArea) 
+        return;
+    
+    loadingMsg.style.display = 'block';
+    suggestionsArea.innerHTML = '';
+
+    const imagini = mediaFiles.filter(m => m.tip === 'Image');
+    
+    const promises = imagini.map(async (media) => {
+        try {
+            const resp = await fetch(media.url);
+            const blob = await resp.blob();
+            
+            const formData = new FormData();
+            formData.append('file', blob, "image.jpg");
+
+            const r = await fetch('/Profil/CheckFacesInPhoto', { method: 'POST', body: formData });
+            return await r.json();
+        } catch (err) {
+            return { success: false, suggestions: [] };
+        }
+    });
+
+    const results = await Promise.all(promises);
+    loadingMsg.style.display = 'none';
+
+    let uniqueList = [];
+    let uniqueMap = {};
+
+    results.forEach(data => {
+        if (data.success && data.suggestions) {
+            data.suggestions.forEach(u => {
+                const name = u.userName || u.UserName;
+                if (name && !uniqueMap[name]) {
+                    uniqueMap[name] = true;
+                    uniqueList.push({ userName: name, poza: u.poza || u.Poza });
+                }
+            });
+        }
+    });
+
+    if (uniqueList.length > 0) {
+        afiseazaSugestiiAutomateEdit(uniqueList);
+    }
+}
+
+function afiseazaSugestiiAutomateEdit(users) {
+    const container = document.getElementById('edit-sugestiiAutomate');
+    container.innerHTML = '<p style="width:100%; color:#666; font-size:12px; margin-bottom:5px; font-weight:bold; margin-left: 5px;">Suggested Users:</p>';
+
+    users.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'user-chip';
+      
+        if (editTagsList.some(u => u.username === user.userName)) {
+            div.classList.add('active');
+        }
+
+        div.innerHTML = `
+            <img src="${user.poza || '/images/profilDefault.png'}">
+            <span>@${user.userName}</span>
+        `;
+
+        div.onclick = (e) => {
+            if(e) e.stopPropagation();
+            if (div.classList.contains('active')) {
+                div.classList.remove('active');
+                stergeTagEdit(user.userName);
+            } else {
+                div.classList.add('active');
+                adaugaTagEdit({ username: user.userName, userImage: user.poza });
+            }
+        };
+        container.appendChild(div);
+    });
+}
+function sincronizeazaToateListeleEdit(username, esteSelectat) {
+    const containere = [
+        document.getElementById('edit-rezultateTag'),    
+        document.getElementById('edit-sugestiiAutomate') 
+    ];
+
+    containere.forEach(container => {
+        if (!container) 
+            return;
+       
+        const chips = container.querySelectorAll('.user-chip');
+        
+        chips.forEach(chip => {
+            const span = chip.querySelector('span');
+            if (span && (span.innerText === username || span.innerText === '@' + username)) {
+                if (esteSelectat) {
+                    chip.classList.add('active'); 
+                } else {
+                    chip.classList.remove('active'); 
+                }
+            }
+        });
+    });
+}
+function viewTags() {
+    const lista = document.getElementById('listaTags');
+    const icon = document.getElementById('userTagsIcon'); 
+    if (!lista) 
+        return;
+    if (lista.style.display === 'none' || lista.style.display === '') {
+        lista.style.display = 'flex'; 
+        if(icon) 
+            icon.style.backgroundColor = 'white';
+        if(icon) 
+            icon.style.color = 'black';
+    } else {
+        lista.style.display = 'none'; 
+        if(icon)
+            icon.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        if(icon) 
+            icon.style.color = 'white';
+    }
+}

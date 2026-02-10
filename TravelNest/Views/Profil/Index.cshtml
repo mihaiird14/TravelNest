@@ -198,7 +198,7 @@
 
                 <form id="formEdit" method="post" asp-controller="Profil" asp-action="EditeazaPostare" class="modern-upload-form" style="width: 100%; height: 100%; box-shadow: none;">
                     <input type="hidden" id="idEditPost" name="postareId" value="0" />
-
+                    <input type="hidden" id="edit-finalTagList" name="tagUseri" value="" />
                     <div class="upload-container">
                         <div class="left-column" id="addPhotos" style="height: 100%;">
 
@@ -247,6 +247,10 @@
                                 <div id="edit-rezultateTag" class="tag-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; z-index: 1000; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
 
                                 <div id="edit-selectedTagsContainer" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                                <div id="edit-loadingFaces" style="display:none; color: #666; font-size: 0.9em; margin-top:10px;">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Analyzing photo...
+                                </div>
+                                <div id="edit-sugestiiAutomate" style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
                             </div>
 
                             <button id="PostFormPoze" type="submit" style="margin-top: auto;">
@@ -297,9 +301,15 @@
             <span class="buton-inchidere" onclick="inchideFereastra()">&times;</span>
 
             <div class="zona-media">
-
-                <div class="media-wrapper">
+                <div class="media-wrapper" style="position: relative;">
                     <div id="continut-media"></div>
+
+                    <div id="userTagsIcon" class="userTagsIcon" onclick="viewTags()" style="display: none;">
+                        <i class="fa-solid fa-user-tag"></i>
+                    </div>
+
+                    <div id="listaTags" class="tags-popover" style="display: none;">
+                    </div>
                 </div>
 
                 <div class="media-controls">
