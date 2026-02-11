@@ -27,5 +27,7 @@ namespace TravelNest.Models
         public List<ReplyCom> ReplyComs { get; set; } = new List<ReplyCom>();
         public List<LikeComentariu> LikeComentarii { get; set; } = new List<LikeComentariu>();
         public List<LikeReplyComentarii> LikeReplyComentarii { get; set; } = new List<LikeReplyComentarii>();
+        public bool isPrivate { get; set; } = false;
+        public bool autoTag { get; set; } = true;
     }
 }

@@ -1,149 +1,273 @@
-#setariPage {
-    height: 90vh;
-    width: 100%;
-    display: flex;
+﻿html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; 
+    background-color: #ffffff;
+    font-family: 'Poppins', sans-serif;
 }
+#setariPage {
+    height: 100vh;
+    width: calc(100% - 250px);
+    margin-left: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+    margin-top: -20px;
+}
+
 #titluSet {
-    position: absolute;
-    font-family: 'Poppins', 'Montserrat', sans-serif;
-    font-size: 2.75rem; 
-    font-weight: 700; 
-    color: #0A333D; 
-    margin-left: 5vw;
-    margin-top: 5vh;
+    position: static; 
+    font-size: 3rem;
+    color: #107373;
+    margin: 0 0 10px 0;
 }
 #setBtn {
-    position: absolute;
-    margin-top: 13vh;
-    margin-left: 5vw;
+    position: static;
     display: flex;
-    flex-direction: row;
-    gap: 0;
+    gap: 40px;
+    margin-bottom: 20px;
 }
+
 #setBtn button {
-    width: 4vw;
-    height: 4vh;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #107373;
     background: none;
     border: none;
+    padding-bottom: 5px;
+    cursor: pointer;
 }
-#paginaProfilSet{
-    margin-top: 16vh;
+#paginaProfilSet {
+    width: 100%;
+    max-width: 480px; 
+    margin-top: 0;
     display: flex;
     flex-direction: column;
 }
-#inputUsername {
-    display: flex;
-    flex-direction: column;
+#paginaProfilSet > h5:first-of-type {
+    display: none;
 }
-#paginaProfilSet h5, #paginaProfilSet #inputUsername label {
-    font-family: 'Poppins', 'Montserrat', sans-serif;
-    font-weight: 700;
-    color: #0A333D;
-    margin-left: 5vw;
-    margin-top: 5vh;
+#schimbaImagine {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 15px;
 }
 
 #paginaProfilSet img {
-    width: 170px;
-    height: 160px;
-    margin-left: 5vw;
-    border: 2px solid aquamarine;
+    width: 140px;
+    height: 140px;
+    border: 5px solid #000; 
     border-radius: 50%;
-    margin-top: 2vh;
+    margin: 0;
+    object-fit: cover;
 }
-#paginaProfilSet input {
-    margin-left: 5vw;
-    border-radius: 25px;
-    text-align: center;
-    margin-top: 2vh;
-    border: 2px solid green;
-    width: 16vw;
-}
-#paginaProfilSet input:focus {
-    border: 2px solid aquamarine;
-}
-#paginaProfilSet textarea{
-    resize: none;
-    margin-left: 5vw;
-    margin-top: 2vh;
-    width: 16vw;
-    overflow-y: auto;
-    border: 2px solid green;
-}
-#paginaProfilSet button {
-    background-color: #fff !important;
-    color: black !important;
-    border-radius: 30vh;
-    width: 10vw;
-    min-width: 150px;
-    border: 1px solid #0A333D !important;
-    margin-left: 5vw;
-    margin-top: 2vh;
-}
-#paginaProfilSet button:hover {
-    border: 1px black solid !important;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
-    background-color: #90EE90 !important;
-    transition: linear 0.2s;
-}
-#schimbaImagine{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-}
-#schimbaImagine label {
-    background-color: #fff !important;
-    color: black !important;
-    border-radius: 30vh;
-    width: 10vw;
-    min-width: 150px;
-    border: 1px #0A333D solid !important;
-    margin-left: 5vw;
-    height: 3vh;
-    text-align: center;
-}
-#schimbaImagine input{
-    display: none;
-}
-#schimbaImagine label:hover {
-    border: 1px black solid !important;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
-    background-color: #90EE90 !important;
-    transition: linear 0.2s;
-}
+
 #pozeSet {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 12px;
 }
-#inputUsername span{
-    margin-left: 5vw;
-    margin-top: 2vh;
-}
-@media screen and (max-width: 1300px){
-    #setariPage{
-        width: 90%;
-        margin-left: 10vw;
-    }
-    #setBtn {
-        gap: 20px;
 
-    }
-    #setBtn button{
-        width: 100%;
-    }
-    #inputUsername{
-        margin-top: -5vh;
-    }
-    #paginaProfilSet #bioh5{
-        margin-top: -2vh;
-    }
-    #schimbaImagine label {
-        display: flex;
-        height: 35px;
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-    }
+#pozeSet label {
+    border: 2px solid #107373 !important;
+    background: transparent !important;
+    color: #107373 !important;
+    border-radius: 20px;
+    padding: 6px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    min-width: 160px;
+}
+
+#ImagineProfil {
+    display: none !important;
+}
+
+#inputUsername label, #bioh5 {
+    display: block !important; 
+    color: #107373;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    margin-left: 0 !important;
+}
+
+#paginaProfilSet input {
+    width: 100%;
+    height: 40px;
+    border: 2px solid #A2E4C1;
+    border-radius: 15px;
+    margin: 0 0 15px 0;
+    padding-left: 15px;
+    text-align: left;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+#paginaProfilSet textarea {
+    width: 100%;
+    height: 90px; 
+    border: 2px solid #A2E4C1;
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin: 0;
+    font-size: 1rem;
+    box-sizing: border-box;
+    resize: none;
+}
+
+#paginaProfilSet button[type="submit"] {
+    background-color: #107373 !important;
+    color: white !important;
+    border-radius: 30px;
+    width: 100%;
+    height: 50px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border: none !important;
+    margin: 20px 0 0 0;
+    cursor: pointer;
+}
+
+#paginaProfilSet button[type="submit"]:hover {
+    background-color: #0d5e5e !important;
+}
+#removeProfileImg:hover {
+    background-color: red !important;
+    color: white !important;
+    transition: all 0.2s ease;
+}
+#SelecteazaPoza:hover {
+    background-color: #A2E4C1 !important;
+    transition: all 0.2s ease;
+}
+/*sectiune privacy*/
+#sectiuneSetariPrivacy{
+    display: flex;
+    flex-direction: row;
+    gap: 160px;
+    margin-bottom: 250px;
+}
+#sectiuneSetariPrivacy h3 {
+    white-space: nowrap;
+    color: #107373;
+}
+#SetNouaParola{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#SetNouaParola input {
+    border: 2px solid #A2E4C1;
+    border-radius: 20px;
+    padding: 5px;
+}
+#setariProfilePrivacy {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 95px;
+    width: 100%;
+
+}
+
+.randButonActivare {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 480px;
+}
+
+.textBtn {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    margin-left: 10px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.switch.filled .slider {
+    background-color: #ccc;
+}
+
+.switch.filled .slider:before {
+    background-color: white;
+}
+
+.switch.filled input:checked + .slider {
+    background-color: lime;
+}
+
+.switch.filled input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.switch.outline .slider {
+    background-color: transparent;
+    border: 2px solid #107373;
+}
+
+.switch.outline .slider:before {
+    background-color: lime;
+    height: 14px;
+    width: 14px;
+    left: 4px;
+    bottom: 3px;
+}
+
+.switch.outline input:checked + .slider:before {
+    transform: translateX(22px);
+}
+#SetNouaParola button {
+    border-radius: 20px;
+    padding: 5px;
+    margin-top: 10px;
+    background-color: #107373;
+    color: white;
+}
+#SetNouaParola button:hover {
+    background-color: #A2E4C1;
+    color: #107373;
 }

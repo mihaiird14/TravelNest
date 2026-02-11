@@ -9,42 +9,34 @@
 <body>
     <i id="menuBtn" class="fa-solid fa-bars"></i>
     <div class="sideMenu">
-        <i id="xBtn" class="fa-solid fa-x"></i>
         <img id="logoMenu" src="~/images/logoMenu.png" />
         <div id="butonMeniu">
             <a asp-controller="Profil" asp-action="Index">
-            <i class="fa-solid fa-circle-user"></i>
-            <p>Profil</p></a>
+                <p>Profil</p>
+            </a>
         </div>
         <div id="butonMeniu">
-            <i class="fas fa-home"></i>
             <p>For You</p>
         </div>
         <div id="butonMeniu">
-            <i class="fa-solid fa-users-between-lines"></i>
             <p>New Travel Group</p>
         </div>
         <div id="butonMeniu">
-            <i class="fa-solid fa-plane"></i>
             <p>Search Destination</p>
         </div>
         <div id="butonMeniu">
-            <i class="fa-solid fa-hotel"></i>
             <p>Find Accommodation</p>
         </div>
         <div id="butonMeniu">
-            <i class="fas fa-map"></i>
             <p>Travel Map</p>
         </div>
         <div class="butoaneJos">
-            <a asp-controller="Settings" asp-action="Index">
                 <div id="butonMeniu">
-                    <i class="fa-solid fa-gear"></i>
-                    <p id="paginaCurenta">Settings</p>
+                     <a asp-controller="Settings" asp-action="Index">
+                        <p id="paginaCurenta">Settings</p>
+                     </a>
                 </div>
-            </a>
             <div id="butonMeniu" class="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i>
                 <p>Logout</p>
             </div>
         </div>
@@ -57,8 +49,6 @@
             <button id="Arhive">Arhive</button>
         </div>
         <div id="paginaProfilSet">
-            <h5>Edit Profile</h5>
-
             <form method="post" enctype="multipart/form-data" asp-controller="Settings" asp-action="EditProfil">
                 <input type="hidden" asp-for="UserId" />
                 <input type="hidden" asp-for="Id" />
@@ -70,7 +60,7 @@
                     <img id="previzualizare" src="@Model.ImagineProfil" />
                     <input name="ImagineProfil" type="file" id="ImagineProfil" accept="image/png, image/jpg, image/jpeg" />
                     <div id="pozeSet">
-                        <label for="ImagineProfil">Select A Photo</label>
+                        <label for="ImagineProfil" id="SelecteazaPoza">Select A Photo</label>
                         <input type="hidden" id="ResetImage" name="ResetImage" value="false" />
                         <label id="removeProfileImg">Delete Profile Photo</label>
                     </div>
@@ -93,26 +83,34 @@
                 <partial name="_ValidationScriptsPartial" />
             }
         </div>
-    <script>
-        window.onload=function(){
-            document.getElementById("ProfilSet").style.borderBottom="2px solid green";
-        }
-        document.getElementById("ProfilSet").addEventListener("click",function(){
-                document.getElementById("ProfilSet").style.borderBottom="2px solid green";
-                document.getElementById("ConfSet").style.borderBottom="none";
-                document.getElementById("Arhive").style.borderBottom="none";
-        })
-        document.getElementById("ConfSet").addEventListener("click",function(){
-                document.getElementById("ConfSet").style.borderBottom="2px solid green";
-                document.getElementById("ProfilSet").style.borderBottom="none";
-                document.getElementById("Arhive").style.borderBottom="none";
-        })
-        document.getElementById("Arhive").addEventListener("click",function(){
-                document.getElementById("Arhive").style.borderBottom="2px solid green";
-                document.getElementById("ProfilSet").style.borderBottom="none";
-                document.getElementById("ConfSet").style.borderBottom="none";
-        })
-    </script>
+        <div id="sectiuneSetariPrivacy">
+            <div id="SetNouaParola">
+                <h3>Change Password</h3>
+                <input id="parolaCurenta" type="password"  placeholder="Current Password"/>
+                <input id="parolaNoua" type="password" placeholder="New Password" />
+                <input id="confirmareParola" type="password" placeholder="Confirm New Password" />
+                <button type="submit">Update Password</button>
+            </div>
+
+            <div id="setariProfilePrivacy">
+                <input type="hidden" id="hiddenProfilId" value="@Model.Id" />
+                <div class="randButonActivare">
+                    <span class="textBtn">Make Profile Private</span>
+                    <label class="switch filled">
+                        <input type="checkbox" name="isPrivate" @(Model.isPrivate ? "checked" : "")>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="randButonActivare">
+                    <span class="textBtn">Disable Auto-Tag Suggestions</span>
+                    <label class="switch filled">
+                        <input type="checkbox" name="noTags" @(Model.autoTag ? "checked" : "")>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 
 </body>

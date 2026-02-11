@@ -124,5 +124,35 @@ namespace TravelNest.Controllers
             var userDb = await _context.Users.Include(u => u.Profil).FirstOrDefaultAsync(u => u.Id == p.UserId);
             return View("Index", userDb?.Profil ?? p);
         }
+        [HttpPost]
+        public async Task<IActionResult> makePrivateProfile(int profilId, bool status)
+        {
+            try
+            {
+                var profil = await _context.Profils.FindAsync(profilId);
+                if (profil == null) return Json(new { success = false, message = "Profilul nu a fost găsit." });
+
+                profil.isPrivate = status;
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                // Aceasta va ajuta la diagnosticarea erorilor 500
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> AllowAutoTag(int profilId, bool status)
+        {
+            var profil = await _context.Profils.FindAsync(profilId);
+            if (profil == null)
+            {
+                return NotFound();
+            }
+            profil.autoTag = status;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
     }
 }
