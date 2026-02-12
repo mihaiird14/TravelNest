@@ -27,6 +27,9 @@
             <div id="butonMeniu">
                 <p>For You</p>
             </div>
+            <div id="butonMeniu" class="AddPost2">
+                <p>New Post</p>
+            </div>
             <div id="butonMeniu">
                 <p>New Travel Group</p>
             </div>
@@ -47,7 +50,9 @@
                     </a>
                 </div>
                 <div id="butonMeniu" class="logoutBtn">
-                    <p>Logout</p>
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
                 </div>
             </div>
         </div>
@@ -68,10 +73,6 @@
                 <button id="PostsProfil">Posts</button>
                 <button id="TravelGrProfil">Travel Groups</button>
                 <button id="MentionedProfil">Tagged</button>
-                @if (Model.Posts.Count() != 0)
-                {
-                    <button id="addPost2">New Post</button>
-                }
 
             </div>
             <hr />
@@ -80,7 +81,6 @@
                     {
                         <img src="~/images/nophoto.png" />
                         <br />
-                        <button id="addPost">New Post</button>
                     }
             else
             {

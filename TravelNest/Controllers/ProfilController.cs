@@ -56,7 +56,7 @@ namespace TravelNest.Controllers
             }
 
             var users = await _context.Profils
-                .Where(u => u.User.UserName.Contains(val))
+                .Where(u => u.User.UserName.Contains(val) && u.manualTag==true)
                 .Take(5)
                 .Select(u => new
                 {
@@ -185,7 +185,8 @@ namespace TravelNest.Controllers
                                     {
                                         var knownVector = JsonSerializer.Deserialize<List<double>>(known.Embedding);
                                         var dist = _faceService.CalculDistanta(embVector, knownVector);
-                                        if (dist < distMinimaUser) distMinimaUser = dist;
+                                        if (dist < distMinimaUser) 
+                                            distMinimaUser = dist;
                                     }
 
                                     if (distMinimaUser < 0.6)
@@ -287,7 +288,7 @@ namespace TravelNest.Controllers
                     {
                         //cauta db
                         var knownFaces = await _context.FaceEmbeddings
-                            .Where(f => f.PersonId != null)
+                            .Where(f => f.PersonId != null && f.Person.autoTag==false)
                             .Include(f => f.Person).ThenInclude(p => p.User)
                             .ToListAsync();
 
@@ -436,7 +437,8 @@ namespace TravelNest.Controllers
             if (user == null)
                 return Unauthorized();
             var p = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
-            if (p == null) return NotFound("Profil negăsit");
+            if (p == null) 
+                return NotFound("Profil negăsit");
             var comm = new Comentariu
             {
                 PostareId = input.PostareId,

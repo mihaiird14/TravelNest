@@ -28,6 +28,13 @@ document.getElementById("Arhive").addEventListener("click",function(){
         document.getElementById("paginaProfilSet").style.display="none"
         document.getElementById("sectiuneSetariPrivacy").style.display="none"
 })
+const addPostBtn2 = document.getElementsByClassName("AddPost2")[0];
+if (addPostBtn2) {
+    addPostBtn2.addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.href = '/Profil?openPost=true';
+    });
+}
 imgProfil.addEventListener('change', function () {
      const file = this.files[0];
     if (file) {
@@ -50,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const profilId = profilIdInput.value;
     const isPrivateCheckbox = document.querySelector('input[name="isPrivate"]');
     const noTagsCheckbox = document.querySelector('input[name="noTags"]');
-
+    const manualTagCheckbox = document.querySelector('input[name="manualTag"]');
     if (isPrivateCheckbox) {
         isPrivateCheckbox.addEventListener('change', () => {
             updateSetting('/Settings/makePrivateProfile', profilId, isPrivateCheckbox.checked);
@@ -60,6 +67,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (noTagsCheckbox) {
         noTagsCheckbox.addEventListener('change', () => {
             updateSetting('/Settings/AllowAutoTag', profilId, noTagsCheckbox.checked);
+        });
+    }
+    if (manualTagCheckbox) {
+        manualTagCheckbox.addEventListener('change', () => {
+            updateSetting('/Settings/AllowManualTagSearch', profilId, manualTagCheckbox.checked);
         });
     }
 });
@@ -76,18 +88,56 @@ function updateSetting(url, id, status) {
     })
     .then(response => {
         if (!response.ok) {
-            // Această linie îți va spune în consolă dacă e 400, 404 sau 500
-            console.error(`Serverul a răspuns cu eroarea: ${response.status}`);
+            console.error(`Error: ${response.status}`);
             throw new Error('Server error');
         }
         return response.json();
     })
     .then(data => {
         if (data.success) {
-            console.log("Salvat cu succes!");
+            console.log("Saved!");
         } else {
-            console.error("Eroare logică server:", data.message);
+            console.error("Error:", data.message);
         }
     })
     .catch(err => console.error("Fetch error:", err));
 }
+//functie schimbare parola
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('formSchimbaParola');
+    if (!form) 
+        return;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const pNoua = document.getElementById('parolaNoua').value;
+        const pConfirm = document.getElementById('confirmareParola').value;
+        const elEroare = document.getElementById('mesajEroareParola');
+        const elSucces = document.getElementById('mesajSuccesParola');
+        elEroare.style.display = "none";
+        elSucces.style.display = "none";
+        if (pNoua !== pConfirm) {
+            elEroare.innerText = "The passwords do not match.";
+            elEroare.style.display = "block";
+            return;
+        }
+        fetch('/Settings/SchimbaParola', {
+            method: 'POST',
+            body: new FormData(this) 
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                elSucces.style.display = "block";
+                form.reset(); 
+            } else {
+                elEroare.innerHTML = data.message; 
+                elEroare.style.display = "block";
+            }
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+            elEroare.innerText = "A server error occurred.";
+            elEroare.style.display = "block";
+        });
+    });
+});

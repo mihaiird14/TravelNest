@@ -37,7 +37,6 @@ namespace TravelNest.Controllers
                 _context.Profils.Add(profil);
                 await _context.SaveChangesAsync();
             }
-            Console.WriteLine("dssdsdsd");
             return View(profil);
         }
         [HttpPost]
@@ -95,13 +94,13 @@ namespace TravelNest.Controllers
                     {
                         if (p.User.UserName.Length < 5)
                         {
-                            ModelState.AddModelError("User.UserName", "Username-ul trebuie să aibă minim 5 caractere.");
+                            ModelState.AddModelError("User.UserName", "The username must have at least 5 characters!");
                             return View("Index", user.Profil);
                         }
                         var userExistent = await _userManager.FindByNameAsync(p.User.UserName);
                         if (userExistent != null)
                         {
-                            ModelState.AddModelError("User.UserName", "Acest username este deja folosit.");
+                            ModelState.AddModelError("User.UserName", "This username is already used by another user!");
                             return View("Index", user.Profil);
                         }
 
@@ -138,7 +137,6 @@ namespace TravelNest.Controllers
             }
             catch (Exception ex)
             {
-                // Aceasta va ajuta la diagnosticarea erorilor 500
                 return Json(new { success = false, message = ex.Message });
             }
         }
@@ -153,6 +151,39 @@ namespace TravelNest.Controllers
             profil.autoTag = status;
             await _context.SaveChangesAsync();
             return Json(new { success = true });
+        }
+        [HttpPost]
+        public async Task<IActionResult> AllowManualTagSearch(int profilId, bool status)
+        {
+            var profil = await _context.Profils.FindAsync(profilId);
+            if (profil == null)
+            {
+                return NotFound();
+            }
+            profil.manualTag = status;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
+        [HttpPost]
+        public async Task<IActionResult> SchimbaParola(string parolaCurenta, string parolaNoua)
+        {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            if (utilizatorConectat == null)
+                return Json(new { success = false, message = "The users can not be found!" });
+
+            if (parolaCurenta == parolaNoua)
+            {
+                return Json(new { success = false, message = "The new password must be diffrent from the current password!" });
+            }
+            var r = await _userManager.ChangePasswordAsync(utilizatorConectat, parolaCurenta, parolaNoua);
+
+            if (r.Succeeded)
+            {
+                return Json(new { success = true });
+            }
+            var erori = string.Join("<br/>", r.Errors.Select(e => e.Description));
+
+            return Json(new { success = false, message = erori });
         }
     }
 }

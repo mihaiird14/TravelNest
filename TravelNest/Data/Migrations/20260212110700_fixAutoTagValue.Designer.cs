@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelNest.Data;
 
@@ -11,9 +12,11 @@ using TravelNest.Data;
 namespace TravelNest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260212110700_fixAutoTagValue")]
+    partial class fixAutoTagValue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -483,9 +486,6 @@ namespace TravelNest.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("isPrivate")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("manualTag")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");

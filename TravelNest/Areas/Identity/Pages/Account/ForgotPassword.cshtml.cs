@@ -58,7 +58,8 @@ namespace TravelNest.Areas.Identity.Pages.Account
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                    ModelState.AddModelError("Input.Email", "This email does not exist in our database!");
+                    return Page();
                 }
 
                 // For more information on how to enable account confirmation and password reset please

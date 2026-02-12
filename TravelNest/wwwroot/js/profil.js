@@ -5,8 +5,7 @@
     const xBtn = document.getElementById("xBtn");
     const menuBtn = document.getElementById("menuBtn");
     const sideMenus = document.querySelectorAll(".sideMenu");
-    const addPostBtn = document.getElementById("addPost");
-    const addPostBtn2 = document.getElementById("addPost2");
+    const addPostBtn2 = document.getElementsByClassName("AddPost2")[0];
     const newPostForm = document.getElementById("newPostForm");
     const xBtnForm = document.getElementById("xBtnFormPost");
     const carouselWrapper = document.getElementById('carouselWrapper');
@@ -17,7 +16,27 @@
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
     const xBtnCarusel = document.getElementById("xBtnFormPostCarusel");
-
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('openPost') === 'true') {
+        const vechiulActiv = document.getElementById("paginaCurenta");
+        if (vechiulActiv) {
+            vechiulActiv.removeAttribute("id");
+        }
+        const btnAddPost = document.querySelector(".AddPost2");
+        if (btnAddPost) {
+            const pInside = btnAddPost.querySelector("p");
+            if (pInside) {
+                pInside.id = "paginaCurenta";
+            }
+        }
+        const newPostForm = document.getElementById("newPostForm"); 
+        if (newPostForm) {
+            newPostForm.style.display = "flex";
+            if (window.resetTagSystem) {
+                window.resetTagSystem();
+            }
+        }
+    }
     if (xBtn) {
         xBtn.addEventListener("click", function () {
             sideMenus.forEach(x => x.style.display = "none");
@@ -32,18 +51,20 @@
         });
     }
 
-    if (addPostBtn) {
-        addPostBtn.addEventListener("click", function (event) {
-            event.stopPropagation();
-            newPostForm.style.display = "flex";
-            if (window.resetTagSystem) window.resetTagSystem();
-        });
-    }
     if (addPostBtn2) {
         addPostBtn2.addEventListener("click", function (event) {
+            const vechiulActiv = document.getElementById("paginaCurenta");
+            if (vechiulActiv) {
+                vechiulActiv.removeAttribute("id");
+            }
+            const pId = this.querySelector("p");
+            if (pId) {
+                pId.id = "paginaCurenta";
+            }
             event.stopPropagation();
             newPostForm.style.display = "flex";
-            if (window.resetTagSystem) window.resetTagSystem();
+            if (window.resetTagSystem) 
+                window.resetTagSystem();
         });
     }
 

@@ -2,20 +2,142 @@
 @model LogoutModel
 @{
     ViewData["Title"] = "Log out";
+    Layout = null;
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
-    @{
-        if (User.Identity?.IsAuthenticated ?? false)
-        {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
-            </form>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      
+        .logout-body {
+            background-color: #E6F4FE;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif, 'Segoe UI';
+            margin-left: -100px;
         }
-        else
-        {
-            <p>You have successfully logged out of the application.</p>
+
+        .logout-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            width: 200%;
+            max-width: 400px;
+            text-align: center;
         }
-    }
-</header>
+        .icon-circle {
+            background-color: #E7F6ED;
+            color: #10B981;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 20px;
+        }
+
+        .brand-title {
+            color: #111827;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .main-text {
+            color: #4B5563;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .sub-text {
+            color: #9CA3AF;
+            font-size: 13px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .button-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-stay {
+            flex: 1; 
+            text-decoration: none;
+            background: white;
+            color: #374151;
+            border: 1px solid #E5E7EB;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        #logoutForm {
+            flex: 1; 
+        }
+
+        .btn-confirm-logout {
+            width: 100%;
+            background-color: #10B981; 
+            color: white;
+            border: none;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-confirm-logout:hover {
+            background-color: #059669;
+        }
+
+        .btn-stay:hover {
+            background-color: #F9FAFB;
+            border-color: #D1D5DB;
+        }
+        .divider {
+            height: 1px;
+            background-color: #F3F4F6;
+            margin-bottom: 15px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="logout-body">
+    <div class="logout-container">
+        <div class="logout-card">
+            <div class="icon-circle">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </div>
+
+            <h1 class="brand-title">Travel Nest</h1>
+            <p class="main-text">Are you sure you want to log out?</p>
+            <div class="button-row">
+                <a href="javascript:history.back()" class="btn-stay">Stay Logged In</a>
+
+                <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout"
+                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                    <button type="submit" class="btn-confirm-logout">Logout</button>
+                </form>
+            </div>
+
+            <div class="divider"></div>
+        </div>
+    </div>
+</body>
+</html>

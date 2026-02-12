@@ -18,6 +18,9 @@
         <div id="butonMeniu">
             <p>For You</p>
         </div>
+        <div id="butonMeniu" class="AddPost2">
+            <p>New Post</p>
+        </div>
         <div id="butonMeniu">
             <p>New Travel Group</p>
         </div>
@@ -36,9 +39,11 @@
                         <p id="paginaCurenta">Settings</p>
                      </a>
                 </div>
-            <div id="butonMeniu" class="logoutBtn">
-                <p>Logout</p>
-            </div>
+                <div id="butonMeniu" class="logoutBtn">
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
+                </div>
         </div>
     </div>
     <div id="setariPage">
@@ -80,16 +85,28 @@
                 <button type="submit">Save Changes</button>
             </form>
             @section Scripts {
-                <partial name="_ValidationScriptsPartial" />
+                <script src="~/js/settings.js"></script>
             }
         </div>
         <div id="sectiuneSetariPrivacy">
             <div id="SetNouaParola">
                 <h3>Change Password</h3>
-                <input id="parolaCurenta" type="password"  placeholder="Current Password"/>
-                <input id="parolaNoua" type="password" placeholder="New Password" />
-                <input id="confirmareParola" type="password" placeholder="Confirm New Password" />
-                <button type="submit">Update Password</button>
+                <form id="formSchimbaParola">
+                    <div class="inputParola">
+                        <input id="parolaCurenta" name="parolaCurenta" type="password" placeholder="Current Password" required />
+                    </div>
+                    <div class="inputParola">
+                        <input id="parolaNoua" name="parolaNoua" type="password" placeholder="New Password" required />
+                    </div>
+                    <div class="inputParola">
+                        <input id="confirmareParola" type="password" placeholder="Confirm New Password" required />
+                    </div>
+                    <div id="mesajEroareParola" class="text-danger"></div>
+                    <div id="mesajSuccesParola">
+                        <i class="fa-solid fa-check-circle"></i> Password updated successfully!
+                    </div>
+                    <button type="submit" id="btnUpdateParola">Update Password</button>
+                </form>
             </div>
 
             <div id="setariProfilePrivacy">
@@ -109,10 +126,16 @@
                         <span class="slider"></span>
                     </label>
                 </div>
+                <div class="randButonActivare">
+                    <span class="textBtn">Include Profile in Tagging Searches</span>
+                    <label class="switch filled">
+                        <input type="checkbox" name="manualTag" @(Model.manualTag ? "checked" : "")>
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
 
 </body>
-<script src="~/js/settings.js"></script>
 </html>
