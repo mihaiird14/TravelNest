@@ -1,0 +1,144 @@
+﻿<html>
+    <head>
+        <link rel="stylesheet" href="~/css/Profil.css">
+        <link rel="stylesheet" href="~/css/travelGr.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    </head>
+    <body>
+        <i id="menuBtn" class="fa-solid fa-bars"></i>
+        <div class="sideMenu">
+            <img id="logoMenu" src="~/images/logoMenu.png" />
+            <div id="butonMeniu">
+                <a asp-controller="Profil" asp-action="Index">
+                    <p>Profil</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>For You</p>
+            </div>
+            <div id="butonMeniu" class="AddPost2">
+                <p>New Post</p>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelGroup" asp-action="Index">
+                    <p id="paginaCurenta">New Travel Group</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>Search Destination</p>
+            </div>
+            <div id="butonMeniu">
+                <p>Find Accommodation</p>
+            </div>
+            <div id="butonMeniu">
+                <p>Travel Map</p>
+            </div>
+            <div class="butoaneJos">
+
+                <div id="butonMeniu">
+                    <a asp-controller="Settings" asp-action="Index">
+                        <p>Settings</p>
+                    </a>
+                </div>
+                <div id="butonMeniu" class="logoutBtn">
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="mainPage">
+            <h1 id="titlu">Create Travel Group</h1>
+            <p id="descriere">Plan your next adventure with friends and family.</p>
+            <form asp-controller="TravelGroup" asp-action="AdaugaGrup" method="post" id="formCreateGroup">
+                <div id="continut">
+                <div id="hiddenInputsContainer"></div>
+                    <div id="locatieBox">
+                        <h5 id="locatieTitlu"><i class="fa-solid fa-location-dot"></i> Where are we going?</h5>
+                        <div id="locatieButoane">
+                            <button type="button" id="locatieManual"><i class="fa-solid fa-location-dot"></i> Enter Manually</button>
+                            <button type="button" id="locatieAI"><i class="fa-solid fa-wand-magic-sparkles"></i> Ask the AI</button>
+                        </div>
+                    </div>
+
+                    <div id="friendsBox">
+                        <h5><i class="fa-solid fa-user-plus"></i> Invite Friends</h5>
+                        <div class="search-flex-row">
+                            <div class="input-group-container">
+                                <input type="text" placeholder="Search by username..." id="friendSearch" autocomplete="off">
+                                <div id="friendResults" class="search-results-dropdown" style="display: none;"></div>
+                            </div>
+                            <button type="button" id="butonFriendsTG">Add</button>
+                        </div>
+                        <div id="prieteniAdaugati" class="chips-list"></div>
+                    </div>
+
+                    <div id="detaliiBox">
+                        <div id="imageBox">
+                            <h5><i class="fa-solid fa-image"></i> Group Image</h5>
+                            <div id="imagineGrid">
+                                <div id="previzualizareImagineTG">
+                                    <i class="fa-solid fa-file-image"></i>
+                                    <span>Preview</span>
+                                </div>
+                                <div id="butoaneImaginiTG">
+                                    <button type="button" class="btn-outline"><i class="fa-solid fa-upload"></i> Upload</button>
+                                    <button id="btnAI" type="button" class="btn-outline"><i class="fa-solid fa-wand-magic-sparkles"></i>Instant Cover</button>
+                                    <input type="file" id="uploadImagineInput" style="display: none;" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="perioadaBox">
+                            <h5><i class="fa-solid fa-calendar-days"></i> Trip Dates</h5>
+                            <div class="date-row">
+                                <div class="date-input-group">
+                                    <label>START DATE</label>
+                                    <input type="date" name="DataPlecare" id="startDate">
+                                </div>
+                                <div class="date-input-group">
+                                    <label>END DATE</label>
+                                    <input type="date" name="DataIntoarcere" id="endDate">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="inputThumbnail" name="Thumbnail">
+                    <button type="submit" id="createGroupTG">
+                        Create Group <i class="fa-solid fa-rocket"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div id="popUpDestinatieManuala" style="display: none;">
+            <div id="continutPopUp">
+                <div id="headerPopUpDestinatieManuala">
+                    <h3><i class="fa-solid fa-map-location-dot"></i> Add Destinations</h3>
+                    <button type="button" id="inchidePopUp" class="close-btn">&times;</button>
+                </div>
+
+                <div id="popUpBody">
+                    <div id="destinatieSearchManual">
+                        <input type="text" id="mapSearchInput" placeholder="Search for a city...">
+                        <button type="button" id="btnCautaOras"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <div id="searchSugestii"></div>
+                    </div>
+
+                    <div class="OraseSelectate">
+                        <p>Selected Cities:</p>
+                        <div id="listaOraseSelectate"></div>
+                    </div>
+
+                    <div id="mapContainer"></div>
+                </div>
+
+                <div class="popUpConfirm">
+                    <button type="button" id="btnConfirmaDestinatii">Confirm Destinations</button>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="~/js/travelGr.js" asp-append-version="true"></script>
+</html>

@@ -30,5 +30,7 @@ namespace TravelNest.Models
         public bool isPrivate { get; set; } = false;
         public bool autoTag { get; set; } = false;
         public bool manualTag { get; set; } = false;
+        public List<TravelGroup> GrupuriAdministrate { get; set; } = new List<TravelGroup>();
+        public List<MembruGrup> MembruGrupuri { get; set; } = new List<MembruGrup>();
     }
 }

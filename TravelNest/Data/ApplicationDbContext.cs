@@ -20,9 +20,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ReplyCom> ReplyComs { get; set; }
     public DbSet<LikeComentariu> LikeComentarii { get; set; }
     public DbSet<LikeReplyComentarii> LikeReplyComentarii { get; set; }
+    public DbSet<TravelGroup> TravelGroups { get; set; }
+    public DbSet<LocatieGrup> LocatieGrups { get; set; }
+    public DbSet<MembruGrup> MembruGrups { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        //cheie primara compusa ptr membru grup
+        modelBuilder.Entity<MembruGrup>()
+        .HasKey(mg => new { mg.ProfilId, mg.TravelGroupId });
+
         modelBuilder.Entity<Comentariu>()
         .HasOne(c => c.Profil)
         .WithMany()
@@ -104,5 +111,25 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(p => p.LikeReplyComentarii)
             .HasForeignKey(l => l.ProfilId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<TravelGroup>()
+            .HasOne(l=>l.Admin)
+            .WithMany(p=>p.GrupuriAdministrate)
+            .HasForeignKey(p=>p.AdminId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<LocatieGrup>()
+            .HasOne(x=>x.TravelGroup)
+            .WithMany(x=>x.Locatii)
+            .HasForeignKey(x=>x.GroupId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MembruGrup>()
+               .HasOne(mg => mg.Profil)
+               .WithMany(p => p.MembruGrupuri)
+               .HasForeignKey(mg => mg.ProfilId)
+               .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<MembruGrup>()
+            .HasOne(mg => mg.TravelGroup)
+            .WithMany(tg => tg.ListaParticipanti) 
+            .HasForeignKey(mg => mg.TravelGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
