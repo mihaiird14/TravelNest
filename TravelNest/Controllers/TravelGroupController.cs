@@ -66,7 +66,21 @@ namespace TravelNest.Controllers
             }
             _context.TravelGroups.Add(grup);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Vizualizare", new { id = grup.Id });
+        }
+        public async Task<IActionResult> Vizualizare(int id)
+        {
+            var grup = await _context.TravelGroups
+                .Include(x => x.Locatii) 
+                .Include(x => x.ListaParticipanti)
+                    .ThenInclude(x => x.Profil)
+                        .ThenInclude(pr => pr.User)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (grup == null)
+            {
+                return NotFound(); 
+            }
+            return View("Vizualizare", grup);
         }
     }
 }

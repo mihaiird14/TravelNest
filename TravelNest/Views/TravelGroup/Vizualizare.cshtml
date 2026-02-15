@@ -1,0 +1,360 @@
+﻿@model TravelNest.Models.TravelGroup
+@{
+    var dataAcum = DateTime.Now;
+    int zileRaman = 0;
+    if (Model.DataPlecare.HasValue)
+    {
+        var plecareDt = Model.DataPlecare.Value.ToDateTime(TimeOnly.MinValue);
+        zileRaman = (plecareDt - dataAcum).Days;
+        if (zileRaman < 0) zileRaman = 0;
+    }
+}
+<html>
+
+    <head>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="~/css/Profil.css">
+        <link rel="stylesheet" href="~/css/vizualizareTG.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    </head>
+    <body>
+        <i id="menuBtn" class="fa-solid fa-bars"></i>
+        <div class="sideMenu">
+            <img id="logoMenu" src="~/images/logoMenu.png" />
+            <div id="butonMeniu">
+                <a asp-controller="Profil" asp-action="Index">
+                    <p>Profil</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>For You</p>
+            </div>
+            <div id="butonMeniu" class="AddPost2">
+                <p>New Post</p>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelGroup" asp-action="Index">
+                    <p>New Travel Group</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>Search Destination</p>
+            </div>
+            <div id="butonMeniu">
+                <p>Find Accommodation</p>
+            </div>
+            <div id="butonMeniu">
+                <p>Travel Map</p>
+            </div>
+            <div class="butoaneJos">
+
+                <div id="butonMeniu">
+                    <a asp-controller="Settings" asp-action="Index">
+                        <p>Settings</p>
+                    </a>
+                </div>
+                <div id="butonMeniu" class="logoutBtn">
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="detaliiTG">
+        <header id="detaliiHero">
+            <div id="bannerVizualizare">
+                <img src="@(string.IsNullOrEmpty(Model.Thumbnail) ? "/images/default-trip.jpg" : Model.Thumbnail.Split(',')[0])" alt="Trip Banner" id="imgThumbnail">
+                <div class="hero-overlay">
+                    <div class="hero-content">
+                        <span class="status-badge active-trip">ACTIVE TRIP</span>
+                        <span class="trip-dates-hero">
+                            <i class="fa-solid fa-calendar"></i>
+                            @Model.DataPlecare?.ToString("MMM dd") - @Model.DataIntoarcere?.ToString("MMM dd, yyyy")
+                        </span>
+                        <h1 id="titliTG">@Model.Nume</h1>
+                        <p id="descriereTG">@Model.Descriere</p>
+                        <div id="detaliiButoane">
+                            <button id="EditGrup"><i class="fa-solid fa-pen-to-square"></i> Edit Group</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+            <div id="carduriStat">
+                <div class="cardMic">
+                    <div class="cercIcon portocaliu"><i class="fa-solid fa-clock"></i></div>
+                    <div class="textStat">
+                        <p>Timp Rămas</p>
+                        <span>@zileRaman Zile</span>
+                    </div>
+                </div>
+                <div class="cardMic">
+                    <div class="cercIcon verde"><i class="fa-solid fa-user-group"></i></div>
+                    <div class="textStat">
+                        <p>Participanți</p>
+                        <span>@(Model.ListaParticipanti?.Count ?? 0) Prieteni</span>
+                    </div>
+                </div>
+                <div class="cardMic">
+                    <div class="cercIcon albastru"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="textStat">
+                        <p>Buget Target</p>
+                        <span>$2,500 <small>/pers</small></span>
+                    </div>
+                </div>
+                <div class="cardMic">
+                    <div class="cercIcon mov"><i class="fa-solid fa-map-location-dot"></i></div>
+                    <div class="textStat">
+                        <p>Locații</p>
+                        <span>@(Model.Locatii?.Count ?? 0) Locuri</span>
+                    </div>
+                </div>
+            </div>
+            <div id="mainLayout">
+                <div id="leftCol">
+                    <section id="membersBox">
+                        <h5 id="boxTitle">Trip Participants</h5>
+                        <div id="membersList">
+                            @foreach (var membru in Model.ListaParticipanti)
+                            {
+                                <div id="memberRow_@membru.ProfilId">
+                                    <img src="@(string.IsNullOrEmpty(membru.Profil.ImagineProfil) ? "/images/default.png" : membru.Profil.ImagineProfil)"
+                                         id="memberAvatar_@membru.ProfilId">
+                                    <div id="memberInfo_@membru.ProfilId">
+                                        <p id="memberName_@membru.ProfilId">@membru.Profil.User.UserName</p>
+                                        <p id="memberRole_@membru.ProfilId">@(membru.ProfilId == Model.AdminId ? "Organizer" : "Member")</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <button id="inviteBtn">Invite Friends</button>
+                    </section>
+                    <section id="calendarGrup">
+                        <div id="calendarHeader">
+                            <h5 id="titluCalendar">Trip Dates</h5>
+                            <div id="controaleLuna">
+                                <button id="lunaPrecedenta"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button id="lunaUrmatoare"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div id="containerZile">
+                        </div>
+                    </section>
+                    <section id="flightBox">
+                        <h5 id="flightTitle">Flight Tickets</h5>
+                        <div id="airlineInfo">
+                            <div id="airlineLogo">
+                                <i class="fa-solid fa-plane-departure"></i>
+                            </div>
+                            <div id="flightCode">
+                                <p id="airlineName">Generic Airline</p>
+                                <p id="planeModel">A1 123</p>
+                            </div>
+                        </div>
+                        <div id="flightTimes">
+                            <div id="departCol">
+                                <span id="departLabel">Departure</span>
+                                <p id="departTime">10:00 AM (JFK)</p>
+                            </div>
+                            <div id="arriveCol">
+                                <span id="arriveLabel">Arrival</span>
+                                <p id="arriveTime">2:00 PM (JTR)</p>
+                            </div>
+                        </div>
+                        <button id="ticketBtn">View Ticket</button>
+                    </section>
+
+                    <section id="hotelBox">
+                        <h5 id="hotelTitle">Booking Accommodation</h5>
+                        <p id="hotelName">Grace Hotel Santorini</p>
+                        <div id="stayDates">
+                            <div id="checkIn">
+                                <span id="inLabel">Check-in</span>
+                                <p id="inDate">@Model.DataPlecare?.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                            <div id="checkOut">
+                                <span id="outLabel">Check-out</span>
+                                <p id="outDate">@Model.DataIntoarcere?.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                        </div>
+                        <button id="addressBtn">Address</button>
+                    </section>
+                </div>
+
+                <div id="rightCol">
+                    <section id="stopsBox">
+                        <h5 id="stopsTitle">Planned Stops</h5>
+                        <div id="stopsList">
+                            @foreach (var loc in Model.Locatii)
+                            {
+                                <div id="stopRow_@loc.Id">
+                                    <div id="stopIcon_@loc.Id">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <div id="stopInfo_@loc.Id">
+                                        <p id="stopName_@loc.Id">@loc.Locatie</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                    <section id="scheduleBox">
+                        <h5 id="scheduleTitle">Upcoming Schedule</h5>
+                        <div id="scheduleList">
+                            @foreach (var loc in Model.Locatii)
+                            {
+                                <div id="itemRow_@loc.Id">
+                                    <div id="dateMarker_@loc.Id">
+                                        <span id="monthText_@loc.Id">@Model.DataPlecare?.ToString("MMM")</span>
+                                        <span id="dayText_@loc.Id">@(Model.DataPlecare?.Day.ToString() ?? "00")</span>
+                                    </div>
+                                    <div id="eventDetails_@loc.Id">
+                                        <p id="eventTitle_@loc.Id">Arrival & Exploration: @loc.Locatie</p>
+                                        <p id="eventDesc_@loc.Id">Check-in at local stay • 02:00 PM</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+                    <section id="mapBox">
+                        <div id="mapHeader">
+                            <h5 id="mapTitle">Trip Map</h5>
+                            <a href="#" id="mapLink">Open Full Map</a>
+                        </div>
+                        <div id="mapDisplay">
+                            <div id="mapPlaceholder">
+                                <i class="fa-solid fa-map-pin" id="pinIcon"></i>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="budgetBox">
+                        <div id="budgetHeader">
+                            <h5 id="budgetTitle">Budget Progress</h5>
+                        </div>
+
+                        <div id="budgetStats">
+                            <div id="pooledInfo">
+                                <span id="pooledLabel">Total Pooled</span>
+                                <h4 id="pooledValue">$18,450</h4>
+                            </div>
+                            <div id="percentInfo">
+                                <span id="percentValue">74% of Goal</span>
+                            </div>
+                        </div>
+
+                        <div id="progressBar">
+                            <div id="progressFill"></div>
+                        </div>
+
+                        <div id="budgetFooter">
+                            <div id="paidInfo">
+                                <span id="paidLabel">PAID</span>
+                                <p id="paidValue">6 Members</p>
+                            </div>
+                            <div id="unpaidInfo">
+                                <span id="unpaidLabel">UNPAID</span>
+                                <p id="unpaidValue">2 Members</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="docsBox">
+                        <h5 id="docsTitle">Trip Documents</h5>
+
+                        <div id="docsList">
+                            <div id="docRow_1">
+                                <div id="docIcon_1">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div id="docInfo_1">
+                                    <p id="docName_1">Flight_Tickets.pdf</p>
+                                </div>
+                            </div>
+
+                            <div id="docRow_2">
+                                <div id="docIcon_2">
+                                    <i class="fa-solid fa-file-lines"></i>
+                                </div>
+                                <div id="docInfo_2">
+                                    <p id="docName_2">Hotel_Confirmation.pdf</p>
+                                </div>
+                            </div>
+
+                            <div id="docRow_3">
+                                <div id="docIcon_3">
+                                    <i class="fa-solid fa-passport"></i>
+                                </div>
+                                <div id="docInfo_3">
+                                    <p id="docName_3">Travel_Insurance.pdf</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="uploadBtn">Upload New</button>
+                    </section>
+                </div>
+            </div>
+        </div>
+         <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const strStart = '@Model.DataPlecare?.ToString("yyyy-MM-dd")';
+                    const strEnd = '@Model.DataIntoarcere?.ToString("yyyy-MM-dd")';
+                    let dStart = null, dEnd = null;
+                    if (strStart && strEnd && strStart !== '' && strEnd !== '') {
+                        const s = strStart.split('-');
+                        const e = strEnd.split('-');
+                        dStart = new Date(parseInt(s[0]), parseInt(s[1]) - 1, parseInt(s[2]));
+                        dEnd = new Date(parseInt(e[0]), parseInt(e[1]) - 1, parseInt(e[2]));
+
+                        dStart.setHours(0, 0, 0, 0);
+                        dEnd.setHours(0, 0, 0, 0);
+                    }
+                let dataVizualizata = dStart ? new Date(dStart) : new Date();
+        
+                const container = document.getElementById('containerZile');
+
+                function randeazaLuna() {
+                    const an = dataVizualizata.getFullYear();
+                    const luna = dataVizualizata.getMonth();
+                    const numeLuni = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
+
+                    let html = `<div id="lunaAfisata">${numeLuni[luna]} ${an}</div>`;
+                    html += `<div id="gridCalendar">
+                        <span class="numeZi">Du</span><span class="numeZi">Lu</span><span class="numeZi">Ma</span>
+                        <span class="numeZi">Mi</span><span class="numeZi">Jo</span><span class="numeZi">Vi</span><span class="numeZi">Sâ</span>`;
+
+                    const primaZi = new Date(an, luna, 1).getDay();
+                    const zileInLuna = new Date(an, luna + 1, 0).getDate();
+
+                    for (let i = 0; i < primaZi; i++) html += `<div></div>`;
+
+                    for (let zi = 1; zi <= zileInLuna; zi++) {
+                        const dataCurenta = new Date(an, luna, zi);
+                        let clasa = 'ziCelula';
+                        if (dStart && dEnd) {
+                            if (dataCurenta.getTime() >= dStart.getTime() && dataCurenta.getTime() <= dEnd.getTime()) {
+                                clasa += ' ziVerde';
+                            }
+                        }
+                        html += `<div class="${clasa}">${zi}</div>`;
+                    }
+                    container.innerHTML = html + `</div>`;
+                }
+                document.getElementById('lunaPrecedenta').addEventListener('click', () => {
+                    dataVizualizata.setMonth(dataVizualizata.getMonth() - 1);
+                    randeazaLuna();
+                });
+
+                document.getElementById('lunaUrmatoare').addEventListener('click', () => {
+                    dataVizualizata.setMonth(dataVizualizata.getMonth() + 1);
+                    randeazaLuna();
+                });
+
+                randeazaLuna();
+            });
+        </script>
+
+    </body>
+
+</html>

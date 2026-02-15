@@ -13,7 +13,8 @@ function initializareHarta() {
 
 function afisareLocatii() {
     const container = document.getElementById('locatieButoane');
-    if (!container) return;
+    if (!container) 
+        return;
 
     if (selectedCities.length === 0) {
         container.innerHTML = `
@@ -32,11 +33,11 @@ function afisareLocatii() {
     } else {
         container.innerHTML = '';
         selectedCities.forEach(city => {
-            const chip = document.createElement('div');
-            chip.className = 'chip';
-            chip.style.cssText = "background: #EE5607; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 600; margin-right: 5px; display: inline-flex;";
-            chip.innerText = city;
-            container.appendChild(chip);
+            const l = document.createElement('div');
+            l.className = 'chip';
+            l.style.cssText = "background: #EE5607; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 600; margin-right: 5px; display: inline-flex;";
+            l.innerText = city;
+            container.appendChild(l);
         });
 
         const changeBtn = document.createElement('button');
@@ -94,11 +95,11 @@ function afisareOraseSelectate() {
     if (!container) return;
     container.innerHTML = '';
     selectedCities.forEach(city => {
-        const chip = document.createElement('div');
-        chip.className = 'chip';
-        chip.style.cssText = "background: #FEEDE5; color: #EE5607; padding: 6px 12px; border-radius: 50px; font-weight: 600; display: flex; align-items: center; gap: 8px;";
-        chip.innerHTML = `${city} <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeCity('${city}')"></i>`;
-        container.appendChild(chip);
+        const oras = document.createElement('div');
+        oras.className = 'chip';
+        oras.style.cssText = "background: #FEEDE5; color: #EE5607; padding: 6px 12px; border-radius: 50px; font-weight: 600; display: flex; align-items: center; gap: 8px;";
+        oras.innerHTML = `${city} <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeCity('${city}')"></i>`;
+        container.appendChild(oras);
     });
 }
 
@@ -278,19 +279,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         function adaugaChipPrieten(id, name) {
             listaIdPrieteni.add(id);
-            const chip = document.createElement('div');
-            chip.className = 'chip';  
-            chip.style.cssText = "background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; margin: 5px; font-weight: 600; border: 1px solid #e2e8f0;";
-            chip.innerHTML = `
+            const prietenAdaugat = document.createElement('div');
+            prietenAdaugat.className = 'chip';  
+            prietenAdaugat.style.cssText = "background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; margin: 5px; font-weight: 600; border: 1px solid #e2e8f0;";
+            prietenAdaugat.innerHTML = `
                 <span>${name}</span>
                 <i class="fa-solid fa-circle-xmark" style="cursor:pointer; color: #64748b;" data-id="${id}"></i>
             `;
-            chip.querySelector('i').onclick = () => {
+            prietenAdaugat.querySelector('i').onclick = () => {
                 listaIdPrieteni.delete(id);
-                chip.remove();
+                prietenAdaugat.remove();
             };
 
-            friendsList.appendChild(chip);
+            friendsList.appendChild(prietenAdaugat);
         }
         document.addEventListener('click', (e) => {
             if (!friendInput.contains(e.target) && !resultsContainer.contains(e.target)) {

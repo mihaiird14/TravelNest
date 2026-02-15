@@ -43,10 +43,10 @@ async function postCom() {
             })
         });
 
-        const result = await response.json();
+        const rz = await response.json();
 
-        if (result.success) {
-            afisCom(result);
+        if (rz.success) {
+            afisCom(rz);
             updateNrComentarii(1);
             input.value = '';
         } else {

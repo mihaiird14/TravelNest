@@ -109,8 +109,9 @@
             div.appendChild(img);
             div.appendChild(span);
 
-            div.onclick = function(e) {
-                if(e) e.stopPropagation();
+            div.onclick = function(ev) {
+                if(ev) 
+                    ev.stopPropagation();
 
                 if (div.classList.contains('active')) {
                     div.classList.remove('active');
@@ -162,8 +163,9 @@ function renderSelectedTags() {
             xIcon.className = 'fa-solid fa-xmark';
             xIcon.style.cursor = 'pointer';
             
-            xIcon.onclick = function(e) {
-                if(e) e.stopPropagation();
+            xIcon.onclick = function(ev) {
+                if(ev) 
+                    ev.stopPropagation();
                 manageTags(tagName, false);
                 syncVisuals(tagName, false);
             };
