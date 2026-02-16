@@ -187,14 +187,13 @@
                     </section>
                     <section id="calendarGrup">
                         <div id="calendarHeader">
-                            <h5 id="titluCalendar">Trip Dates</h5>
+                            <h5 id="titluCalendar">Trip Dates <i class="fa-solid fa-circle-check" id="confirmareData" style="display: none; color: #f1c40f; cursor: pointer;"></i></h5>
                             <div id="controaleLuna">
                                 <button id="lunaPrecedenta"><i class="fa-solid fa-chevron-left"></i></button>
-                                <button id="lunaUrmatoare"><i class="fa-solid fa-chevron-right"></i></button>
+                                <span id="numeLunaAn"></span> <button id="lunaUrmatoare"><i class="fa-solid fa-chevron-right"></i></button>
                             </div>
                         </div>
-                        <div id="containerZile">
-                        </div>
+                        <div id="containerZile"></div>
                     </section>
                     <section id="flightBox">
                         <h5 id="flightTitle">Flight Tickets</h5>
@@ -350,64 +349,141 @@
                 </div>
             </div>
         </div>
-         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const strStart = '@Model.DataPlecare?.ToString("yyyy-MM-dd")';
-                    const strEnd = '@Model.DataIntoarcere?.ToString("yyyy-MM-dd")';
-                    let dStart = null, dEnd = null;
-                    if (strStart && strEnd && strStart !== '' && strEnd !== '') {
-                        const s = strStart.split('-');
-                        const e = strEnd.split('-');
-                        dStart = new Date(parseInt(s[0]), parseInt(s[1]) - 1, parseInt(s[2]));
-                        dEnd = new Date(parseInt(e[0]), parseInt(e[1]) - 1, parseInt(e[2]));
-
-                        dStart.setHours(0, 0, 0, 0);
-                        dEnd.setHours(0, 0, 0, 0);
-                    }
-                let dataVizualizata = dStart ? new Date(dStart) : new Date();
-        
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const btnConfirm = document.getElementById('confirmareData');
+            if (btnConfirm) {
+                btnConfirm.addEventListener('click', salveazaPerioadaNoua);
+            }
+            const strStartOficial = '@Model.DataPlecare?.ToString("yyyy-MM-dd")';
+            const strEndOficial = '@Model.DataIntoarcere?.ToString("yyyy-MM-dd")';
+            let dataVizualizata = strStartOficial ? new Date(strStartOficial) : new Date();
+            if (isNaN(dataVizualizata.getTime()))
+                dataVizualizata = new Date();
+            function afiseazaLuna() {
                 const container = document.getElementById('containerZile');
-
-                function afiseazaLuna() {
-                    const an = dataVizualizata.getFullYear();
-                    const luna = dataVizualizata.getMonth();
-                    const numeLuni = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                    let html = `<div id="lunaAfisata">${numeLuni[luna]} ${an}</div>`;
-                    html += `<div id="gridCalendar">
-                         <span class="numeZi">Su</span><span class="numeZi">Mo</span><span class="numeZi">Tu</span>
-                         <span class="numeZi">We</span><span class="numeZi">Th</span><span class="numeZi">Fr</span><span class="numeZi">Sa</span>`;
-                    const primaZi = new Date(an, luna, 1).getDay();
-                    const zileInLuna = new Date(an, luna + 1, 0).getDate();
-
-                    for (let i = 0; i < primaZi; i++){
-                        html += `<div></div>`;
-                    }
-                    for (let zi = 1; zi <= zileInLuna; zi++) {
-                        const dataCurenta = new Date(an, luna, zi);
-                        let clasa = 'ziCelula';
-                        if (dStart && dEnd) {
-                            if (dataCurenta.getTime() >= dStart.getTime() && dataCurenta.getTime() <= dEnd.getTime()) {
-                                clasa += ' ziVerde';
-                            }
-                        }
-                        html += `<div class="${clasa}">${zi}</div>`;
-                    }
-                    container.innerHTML = html + `</div>`;
+                const headerLuna = document.getElementById('numeLunaAn');
+                if (!container) 
+                    return;
+                const an = dataVizualizata.getFullYear();
+                const luna = dataVizualizata.getMonth();
+                const numeLuna = new Date(an, luna).toLocaleString('default', { month: 'long' });
+                if (headerLuna) 
+                    headerLuna.innerText = `${numeLuna} ${an}`;
+                container.innerHTML = "";
+                const zileSaptamana = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+                zileSaptamana.forEach(zi => {
+                    const divHeader = document.createElement('div');
+                    divHeader.classList.add('nume-zi-header');
+                    divHeader.innerText = zi;
+                    container.appendChild(divHeader);
+                });
+                const primaZi = new Date(an, luna, 1).getDay();
+                const offset = (primaZi === 0) ? 6 : primaZi - 1;
+                for (let s = 0; s < offset; s++) {
+                    container.appendChild(document.createElement('div'));
                 }
-                document.getElementById('lunaPrecedenta').addEventListener('click', () => {
-                    dataVizualizata.setMonth(dataVizualizata.getMonth() - 1);
-                    afiseazaLuna();
-                });
+                const nrZile = new Date(an, luna + 1, 0).getDate();
+                for (let i = 1; i <= nrZile; i++) {
+                    const ziElement = document.createElement('div');
+                    ziElement.classList.add('zi-calendar');
 
-                document.getElementById('lunaUrmatoare').addEventListener('click', () => {
-                    dataVizualizata.setMonth(dataVizualizata.getMonth() + 1);
-                    afiseazaLuna();
-                });
+                    const lunaF = (luna + 1).toString().padStart(2, '0');
+                    const ziF = i.toString().padStart(2, '0');
+                    const dataISO = `${an}-${lunaF}-${ziF}`;
 
+                    ziElement.setAttribute('data-date', dataISO);
+                    ziElement.innerText = i;
+                    if (strStartOficial && strEndOficial) {
+                if (dataISO >= strStartOficial && dataISO <= strEndOficial) {
+                    ziElement.classList.add('perioada-oficiala');
+                }
+            }
+                ziElement.onclick = function() { gestioneazaClickData(dataISO); };
+                container.appendChild(ziElement);
+            }
+            actualizeazaCuloriZile();
+        }
+            document.getElementById('lunaPrecedenta').addEventListener('click', (e) => {
+                e.preventDefault();
+                dataVizualizata.setMonth(dataVizualizata.getMonth() - 1);
                 afiseazaLuna();
             });
-        </script>
+
+            document.getElementById('lunaUrmatoare').addEventListener('click', (e) => {
+                e.preventDefault();
+                dataVizualizata.setMonth(dataVizualizata.getMonth() + 1);
+                afiseazaLuna();
+            });
+            afiseazaLuna();
+        });
+        let rangeSelectat = [];
+        function gestioneazaClickData(data) {
+            const bifaConfirmare = document.getElementById('confirmareData');
+
+            if (rangeSelectat.includes(data)) {
+                rangeSelectat = rangeSelectat.filter(d => d !== data);
+            } else {
+                if (rangeSelectat.length >= 2) {
+                    rangeSelectat = [data];
+                } else {
+                    rangeSelectat.push(data);
+                }
+            }
+            rangeSelectat.sort();
+            actualizeazaCuloriZile();
+            if (bifaConfirmare) {
+                bifaConfirmare.style.display = (rangeSelectat.length === 2) ? 'inline-block' : 'none';
+            }
+        }
+
+        function actualizeazaCuloriZile() {
+            const toateZilele = document.querySelectorAll('.zi-calendar');
+
+            toateZilele.forEach(zi => {
+                const d = zi.getAttribute('data-date');
+                zi.classList.remove('zi-selectata');
+
+                if (rangeSelectat.length === 1) {
+                    if (d === rangeSelectat[0])
+                        zi.classList.add('zi-selectata');
+                } else if (rangeSelectat.length === 2) {
+                    if (d >= rangeSelectat[0] && d <= rangeSelectat[1]) {
+                        zi.classList.add('zi-selectata');
+                    }
+                }
+            });
+        }
+        async function salveazaPerioadaNoua() {
+            if (rangeSelectat.length !== 2) {
+                return;
+            }
+            const banner = document.getElementById('bannerVizualizare');
+            if (!banner) {
+                return;
+            }
+            const idGrup = banner.getAttribute('data-idGrup');
+            const formData = new FormData();
+            formData.append("id", idGrup);
+            formData.append("dataPlecare", rangeSelectat[0]); 
+            formData.append("dataIntoarcere", rangeSelectat[1]); 
+            try {
+                const res = await fetch('/TravelGroup/ActualizarePerioada', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    location.reload();
+                }
+            } catch (err) {
+                console.error("Error:", err);
+            }
+        }
+    </script>
 
     </body>
-    <script src="~/js/vizualizareTG.js" asp-append-version="true"></script>
+    @section Scripts {
+    <script src="~/js/vizualizareTG.js"></script>
+}
 </html>

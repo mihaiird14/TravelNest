@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelNest.Data;
+using TravelNest.Data.Migrations;
 using TravelNest.Models;
 using TravelNest.Services;
 
 namespace TravelNest.Controllers
 {
+    [Authorize]
     public class TravelGroupController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -97,6 +100,8 @@ namespace TravelNest.Controllers
         }
         public async Task<IActionResult> Vizualizare(int id)
         {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
             var grup = await _context.TravelGroups
                 .Include(x => x.Locatii) 
                 .Include(x => x.ListaParticipanti)
@@ -106,6 +111,12 @@ namespace TravelNest.Controllers
             if (grup == null)
             {
                 return NotFound(); 
+            }
+            bool esteMembru = grup.ListaParticipanti.Any(p => p.ProfilId == profil.Id);
+            bool esteAdmin = grup.AdminId == profil.Id;
+            if (!esteMembru && !esteAdmin)
+            {
+                return RedirectToAction("Index", "Profil");
             }
             return View("Vizualizare", grup);
         }
@@ -117,6 +128,14 @@ namespace TravelNest.Controllers
                 var grup = await _context.TravelGroups.FindAsync(int.Parse(id));
                 if (grup == null) 
                     return NotFound();
+                var utilizatorConectat = await _userManager.GetUserAsync(User);
+                var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+                bool esteMembru = grup.ListaParticipanti.Any(p => p.ProfilId == profil.Id);
+                bool esteAdmin = grup.AdminId == profil.Id;
+                if (!esteMembru && !esteAdmin)
+                {
+                    return RedirectToAction("Index", "Profil");
+                }
                 grup.Nume = nume;
                 grup.Descriere = descriere;
                 if (imagineFisier != null && imagineFisier.Length > 0)
@@ -146,6 +165,25 @@ namespace TravelNest.Controllers
             {
                 return StatusCode(500, $"Eroare: {ex.Message}");
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> ActualizarePerioada(string id, DateOnly dataPlecare, DateOnly dataIntoarcere)
+        {
+            var grup = await _context.TravelGroups.FindAsync(int.Parse(id));
+            if (grup == null)
+                    return NotFound();
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+            bool esteMembru = grup.ListaParticipanti.Any(p => p.ProfilId == profil.Id);
+            bool esteAdmin = grup.AdminId == profil.Id;
+            if (!esteMembru && !esteAdmin)
+            {
+                return RedirectToAction("Index", "Profil");
+            }
+            grup.DataPlecare = dataPlecare;
+            grup.DataIntoarcere = dataIntoarcere;
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 

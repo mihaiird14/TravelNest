@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
@@ -7,6 +8,7 @@ using TravelNest.Models;
 
 namespace TravelNest.Controllers
 {
+    [Authorize]
     public class SettingsController : Controller
     {
         private readonly ApplicationDbContext _context;

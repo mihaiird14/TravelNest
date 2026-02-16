@@ -717,41 +717,6 @@
     text-transform: uppercase;
 }
 
-#gridCalendar {
-    display: grid !important;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-top: 15px;
-    justify-items: center; 
-}
-
-.ziCelula {
-    width: 34px; 
-    height: 34px;
-    display: flex !important; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 13px;
-    color: #64748b;
-    border-radius: 50%;
-    transition: 0.3s;
-    padding: 0 !important; 
-    margin: 0;
-}
-
-.ziVerde {
-    width: 34px; 
-    height: 34px;
-    display: flex !important; 
-    align-items: center; 
-    justify-content: center;
-    font-size: 13px;
-    border-radius: 50%; 
-    transition: 0.3s;
-    padding: 0 !important; 
-    margin: 0;
-    background: lime !important;
-}
 #mainLayout {
     gap: 35px;
 }
@@ -957,4 +922,48 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+.zi-calendar {
+    cursor: pointer;
+    padding: 10px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+#containerZile {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 5px; 
+    margin-top: 15px;
+    text-align: center;
+    font-size: 13px;
+    border-radius: 50%;
+    transition: 0.3s;
+    padding: 0 !important;
+    margin: 0;
+}
+.perioada-oficiala {
+    width: 34px;
+    height: 34px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border-radius: 50%;
+    transition: 0.3s;
+    padding: 0 !important;
+    margin: 0;
+    background: lime !important;
+}
+.zi-selectata {
+    width: 34px;
+    height: 34px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border-radius: 50%;
+    transition: 0.3s;
+    padding: 0 !important;
+    margin: 0;
+    background: yellow !important;
 }

@@ -95,6 +95,17 @@ async function salveazaEditareBanner() {
                 elTitlu.innerText = numeNou;
             if (elDescriere) 
                 elDescriere.innerText = descriereNoua;
+            if (inputHidden && inputHidden.value !== "") {
+                const primaImagine = inputHidden.value.split(',')[0];
+                if (banner) {
+                    banner.src = primaImagine;
+                    imagineOriginala = primaImagine; 
+                }
+            } 
+            else {
+                if (banner) 
+                    imagineOriginala = banner.src;
+            }
             afiseazaEdit(false);
         } else {
         }
@@ -145,3 +156,5 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+
+

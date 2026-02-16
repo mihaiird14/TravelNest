@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace TravelNest.Controllers
 {
+    [Authorize]
     public class ProfilController : Controller
     {
         private readonly ApplicationDbContext _context;
