@@ -52,7 +52,7 @@
         <div id="mainPage">
             <h1 id="titlu">Create Travel Group</h1>
             <p id="descriere">Plan your next adventure with friends and family.</p>
-            <form asp-controller="TravelGroup" asp-action="AdaugaGrup" method="post" id="formCreateGroup">
+            <form asp-controller="TravelGroup" asp-action="AdaugaGrup" method="post" id="formCreateGroup" enctype="multipart/form-data">
                 <div id="continut">
                 <div id="hiddenInputsContainer"></div>
                     <div id="locatieBox">
@@ -86,7 +86,7 @@
                                 <div id="butoaneImaginiTG">
                                     <button type="button" class="btn-outline"><i class="fa-solid fa-upload"></i> Upload</button>
                                     <button id="btnAI" type="button" class="btn-outline"><i class="fa-solid fa-wand-magic-sparkles"></i>Instant Cover</button>
-                                    <input type="file" id="uploadImagineInput" style="display: none;" accept="image/*">
+                                    <input type="file" id="uploadImagineInput" name="imagineFisier" style="display: none;" accept="image/*">
                                 </div>
                             </div>
                         </div>

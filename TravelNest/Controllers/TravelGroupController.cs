@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelNest.Data;
@@ -11,10 +12,12 @@ namespace TravelNest.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        private readonly IWebHostEnvironment _env;
+        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env)
         {
             _userManager = userManager;
             _context = context;
+            _env = env;
         }
         public IActionResult Index()
         {
@@ -42,21 +45,44 @@ namespace TravelNest.Controllers
             return Json(prieteni);
         }
         [HttpPost]
-        public async Task<IActionResult> AdaugaGrup(TravelGroup grup, string[] oraseSelectate, int[] idPrieteni)
+        public async Task<IActionResult> AdaugaGrup(TravelGroup grup, string[] oraseSelectate, int[] idPrieteni, IFormFile imagineFisier)
         {
             var adminId = _userManager.GetUserId(User);
             var profilAdmin = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == adminId);
             if (profilAdmin == null) 
                 return BadRequest();
             grup.AdminId = profilAdmin.Id;
-            grup.ListaParticipanti.Add(new MembruGrup { ProfilId = profilAdmin.Id, DataInscrierii = DateTime.Now });
+            if (imagineFisier != null && imagineFisier.Length > 0)
+            {
+                string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "trips");
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                string numeFisier = Guid.NewGuid().ToString() + Path.GetExtension(imagineFisier.FileName);
+                string caleSistem = Path.Combine(folderPath, numeFisier);
+
+                using (var stream = new FileStream(caleSistem, FileMode.Create))
+                {
+                    await imagineFisier.CopyToAsync(stream);
+                }
+                grup.Thumbnail = "/images/trips/" + numeFisier;
+            }
+            grup.ListaParticipanti.Add(new MembruGrup
+            {
+                ProfilId = profilAdmin.Id,
+                DataInscrierii = DateTime.Now,
+                Confirmare = "ORGANIZER"
+            });
+
             if (idPrieteni != null)
             {
                 foreach (var id in idPrieteni)
                 {
-                    grup.ListaParticipanti.Add(new MembruGrup { ProfilId = id });
+                    grup.ListaParticipanti.Add(new MembruGrup { ProfilId = id, Confirmare = "PENDING" });
                 }
             }
+
             if (oraseSelectate != null)
             {
                 foreach (var loc in oraseSelectate)
@@ -64,6 +90,7 @@ namespace TravelNest.Controllers
                     grup.Locatii.Add(new LocatieGrup { Locatie = loc });
                 }
             }
+
             _context.TravelGroups.Add(grup);
             await _context.SaveChangesAsync();
             return RedirectToAction("Vizualizare", new { id = grup.Id });
@@ -82,5 +109,44 @@ namespace TravelNest.Controllers
             }
             return View("Vizualizare", grup);
         }
+        [HttpPost]
+        public async Task<IActionResult> ActualizareBannerGrup(string id, string nume, string descriere, IFormFile imagineFisier, string thumbnailLink)
+        {
+            try
+            {
+                var grup = await _context.TravelGroups.FindAsync(int.Parse(id));
+                if (grup == null) 
+                    return NotFound();
+                grup.Nume = nume;
+                grup.Descriere = descriere;
+                if (imagineFisier != null && imagineFisier.Length > 0)
+                {
+                    string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "trips");
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+                    string numeFisier = Guid.NewGuid().ToString() + Path.GetExtension(imagineFisier.FileName);
+                    string caleSistem = Path.Combine(folderPath, numeFisier);
+
+                    using (var x = new FileStream(caleSistem, FileMode.Create))
+                    {
+                        await imagineFisier.CopyToAsync(x);
+                    }
+                    grup.Thumbnail = "/images/trips/" + numeFisier;
+                }
+                else if (!string.IsNullOrEmpty(thumbnailLink))
+                {
+                    grup.Thumbnail = thumbnailLink;
+                }
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Eroare: {ex.Message}");
+            }
+        }
     }
+
 }

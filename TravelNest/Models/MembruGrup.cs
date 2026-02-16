@@ -12,5 +12,6 @@ namespace TravelNest.Models
         public TravelGroup TravelGroup { get; set; }
 
         public DateTime DataInscrierii { get; set; } = DateTime.Now;
+        public string Confirmare { get; set; }
     }
 }

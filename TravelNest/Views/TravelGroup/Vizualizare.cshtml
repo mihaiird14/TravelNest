@@ -1,12 +1,17 @@
 ﻿@model TravelNest.Models.TravelGroup
+@using System.Text.Json
+<script>
+    window.selectedCities = @Html.Raw(JsonSerializer.Serialize(Model.Locatii.Select(l => l.Locatie)));
+</script>
 @{
-    var dataAcum = DateTime.Now;
-    int zileRaman = 0;
-    if (Model.DataPlecare.HasValue)
+    int nrZile = 0;
+    if (Model.DataPlecare.HasValue && Model.DataIntoarcere.HasValue)
     {
-        var plecareDt = Model.DataPlecare.Value.ToDateTime(TimeOnly.MinValue);
-        zileRaman = (plecareDt - dataAcum).Days;
-        if (zileRaman < 0) zileRaman = 0;
+        var st = Model.DataPlecare.Value.ToDateTime(TimeOnly.MinValue);
+        var ed = Model.DataIntoarcere.Value.ToDateTime(TimeOnly.MinValue);
+        nrZile = (ed - st).Days + 1;
+        if (nrZile < 0) 
+            nrZile = 0;
     }
 }
 <html>
@@ -63,19 +68,61 @@
         </div>
         <div id="detaliiTG">
         <header id="detaliiHero">
-            <div id="bannerVizualizare">
+            <div id="bannerVizualizare" data-idGrup="@Model.Id">
                 <img src="@(string.IsNullOrEmpty(Model.Thumbnail) ? "/images/default-trip.jpg" : Model.Thumbnail.Split(',')[0])" alt="Trip Banner" id="imgThumbnail">
+                <input type="hidden" id="inputThumbnail" value="@Model.Thumbnail">
+
                 <div class="hero-overlay">
                     <div class="hero-content">
-                        <span class="status-badge active-trip">ACTIVE TRIP</span>
-                        <span class="trip-dates-hero">
-                            <i class="fa-solid fa-calendar"></i>
-                            @Model.DataPlecare?.ToString("MMM dd") - @Model.DataIntoarcere?.ToString("MMM dd, yyyy")
-                        </span>
-                        <h1 id="titliTG">@Model.Nume</h1>
-                        <p id="descriereTG">@Model.Descriere</p>
+                        <div class="hero-meta">
+                            <span class="status-badge active-trip">ACTIVE TRIP</span>
+                            <span class="trip-dates-hero">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                @Model.DataPlecare?.ToString("MMM dd") — @Model.DataIntoarcere?.ToString("MMM dd, yyyy")
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Nume))
+                        {
+                            <h1 id="titliTG">@Model.Nume</h1>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Descriere))
+                        {
+                            <p id="descriereTG">@Model.Descriere</p>
+                        }
+
                         <div id="detaliiButoane">
-                            <button id="EditGrup"><i class="fa-solid fa-pen-to-square"></i> Edit Group</button>
+                            <button id="EditGrup" onclick="afiseazaEdit(true)">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Group Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modEditare" id="continutEditareBanner" style="display: none;">
+                    <div id="editareBox">
+                        <div id="campuriEdit">
+                            <input type="text" id="editNume" value="@Model.Nume" placeholder="Trip Name...">
+                            <textarea id="editDescriere" placeholder="Description...">@Model.Descriere</textarea>
+                        </div>
+
+                        <div id="butoaneEditare">
+                            <div id="butoaneThumbnail">
+                                <input type="file" id="incarcaImagine" style="display: none;" accept="image/*" onchange="previewImagine(this)">
+                                <button id="butonUpload" onclick="document.getElementById('incarcaImagine').click()">
+                                    <i class="fa-solid fa-upload"></i> Upload
+                                </button>
+                                @if (string.IsNullOrEmpty(Model.Thumbnail) || !Model.Thumbnail.Contains("https://upload.wikimedia.org"))
+                                {
+                                    <button id="btnAI" type="button" class="tool-btn ai-magic">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Instant Cover
+                                    </button>
+                                }
+                            </div>
+                            <div id="salveazaEditare">
+                                <button id="anulareEditare" onclick="afiseazaEdit(false)">Cancel</button>
+                                <button id="saveBtn" onclick="salveazaEditareBanner()">Save Changes</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -86,29 +133,36 @@
                 <div class="cardMic">
                     <div class="cercIcon portocaliu"><i class="fa-solid fa-clock"></i></div>
                     <div class="textStat">
-                        <p>Timp Rămas</p>
-                        <span>@zileRaman Zile</span>
+                        <p>Trip Duration</p>
+                        <span>@nrZile Days</span>
                     </div>
                 </div>
                 <div class="cardMic">
                     <div class="cercIcon verde"><i class="fa-solid fa-user-group"></i></div>
                     <div class="textStat">
-                        <p>Participanți</p>
-                        <span>@(Model.ListaParticipanti?.Count ?? 0) Prieteni</span>
-                    </div>
-                </div>
-                <div class="cardMic">
-                    <div class="cercIcon albastru"><i class="fa-solid fa-wallet"></i></div>
-                    <div class="textStat">
-                        <p>Buget Target</p>
-                        <span>$2,500 <small>/pers</small></span>
+                        <p>Participants</p>
+                        <span>@(Model.ListaParticipanti?.Count ?? 0) Friends</span>
                     </div>
                 </div>
                 <div class="cardMic">
                     <div class="cercIcon mov"><i class="fa-solid fa-map-location-dot"></i></div>
                     <div class="textStat">
-                        <p>Locații</p>
-                        <span>@(Model.Locatii?.Count ?? 0) Locuri</span>
+                        <p>Locations</p>
+                        <span>@(Model.Locatii?.Count ?? 0) Cities</span>
+                    </div>
+                </div>
+                <div class="cardMic">
+                    <div class="cercIcon albastru"><i class="fas fa-comment-alt"></i></div>
+                    <div class="textStat">
+                        <p></p>
+                        <span>Chat</span>
+                    </div>
+                </div>
+                <div class="cardMic">
+                    <div class="cercIcon verde"><i class="fa-solid fa-map"></i></i></div>
+                    <div class="textStat">
+                        <p></p>
+                        <span>Itinerary</span>
                     </div>
                 </div>
             </div>
@@ -124,7 +178,7 @@
                                          id="memberAvatar_@membru.ProfilId">
                                     <div id="memberInfo_@membru.ProfilId">
                                         <p id="memberName_@membru.ProfilId">@membru.Profil.User.UserName</p>
-                                        <p id="memberRole_@membru.ProfilId">@(membru.ProfilId == Model.AdminId ? "Organizer" : "Member")</p>
+                                        <p id="memberRole_@membru.ProfilId">@membru.Confirmare</p>
                                     </div>
                                 </div>
                             }
@@ -314,21 +368,20 @@
         
                 const container = document.getElementById('containerZile');
 
-                function randeazaLuna() {
+                function afiseazaLuna() {
                     const an = dataVizualizata.getFullYear();
                     const luna = dataVizualizata.getMonth();
-                    const numeLuni = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
-
+                    const numeLuni = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                     let html = `<div id="lunaAfisata">${numeLuni[luna]} ${an}</div>`;
                     html += `<div id="gridCalendar">
-                        <span class="numeZi">Du</span><span class="numeZi">Lu</span><span class="numeZi">Ma</span>
-                        <span class="numeZi">Mi</span><span class="numeZi">Jo</span><span class="numeZi">Vi</span><span class="numeZi">Sâ</span>`;
-
+                         <span class="numeZi">Su</span><span class="numeZi">Mo</span><span class="numeZi">Tu</span>
+                         <span class="numeZi">We</span><span class="numeZi">Th</span><span class="numeZi">Fr</span><span class="numeZi">Sa</span>`;
                     const primaZi = new Date(an, luna, 1).getDay();
                     const zileInLuna = new Date(an, luna + 1, 0).getDate();
 
-                    for (let i = 0; i < primaZi; i++) html += `<div></div>`;
-
+                    for (let i = 0; i < primaZi; i++){
+                        html += `<div></div>`;
+                    }
                     for (let zi = 1; zi <= zileInLuna; zi++) {
                         const dataCurenta = new Date(an, luna, zi);
                         let clasa = 'ziCelula';
@@ -343,18 +396,18 @@
                 }
                 document.getElementById('lunaPrecedenta').addEventListener('click', () => {
                     dataVizualizata.setMonth(dataVizualizata.getMonth() - 1);
-                    randeazaLuna();
+                    afiseazaLuna();
                 });
 
                 document.getElementById('lunaUrmatoare').addEventListener('click', () => {
                     dataVizualizata.setMonth(dataVizualizata.getMonth() + 1);
-                    randeazaLuna();
+                    afiseazaLuna();
                 });
 
-                randeazaLuna();
+                afiseazaLuna();
             });
         </script>
 
     </body>
-
+    <script src="~/js/vizualizareTG.js" asp-append-version="true"></script>
 </html>
