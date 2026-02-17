@@ -258,9 +258,46 @@
             </div>
             </div>
         <div id="paginaTravelGr">
-            <img src="~/images/notrGr.png" />
-            <br />
-            <button id="addPost">New Travel Group</button>
+            @if (!Model.MembruGrupuri.Any())
+            {
+                <img src="~/images/notrGr.png" />
+                <br />
+            }
+            else
+            {
+                <div id="listaTGProfil">
+                    @foreach (var x in Model.MembruGrupuri)
+                    {
+                        var grup = x.TravelGroup;
+                        var imagini = grup.Thumbnail?.Split(',') ?? new string[0];
+                        bool wikipedia = grup.Thumbnail?.Contains("https://upload.wikimedia.org") ?? false;
+
+                        <div id="vizualizareGrupProfil">
+                            <div id="vizualizareThumbnailProfil">
+                                    <img src="@imagini[0]" id="ThumbnailUpload" />
+                            </div>
+                            <div id="vizualizareTitluTG">
+                                @if (!string.IsNullOrEmpty(grup.Nume))
+                                {
+                                    <h4 id="vizualizareNumeTG">@grup.Nume</h4>
+                                }
+                                else if (grup.Locatii != null && grup.Locatii.Any())
+                                {
+
+                                    var primaLocatie = grup.Locatii.First();
+                                    <h4 id="vizualizareNumeTG">@primaLocatie.Locatie</h4>
+                                }
+                            </div>
+
+                            <div id="vizualizareTGButon">
+                                <a href="/TravelGroup/Vizualizare/@grup.Id" id="btnAcceseazaTG">
+                                    View <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
         <script>
             window.onload=function(){

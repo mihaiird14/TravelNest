@@ -28,13 +28,6 @@ document.getElementById("Arhive").addEventListener("click",function(){
         document.getElementById("paginaProfilSet").style.display="none"
         document.getElementById("sectiuneSetariPrivacy").style.display="none"
 })
-const addPostBtn2 = document.getElementsByClassName("AddPost2")[0];
-if (addPostBtn2) {
-    addPostBtn2.addEventListener("click", function (event) {
-        event.preventDefault();
-        window.location.href = '/Profil?openPost=true';
-    });
-}
 imgProfil.addEventListener('change', function () {
      const file = this.files[0];
     if (file) {
