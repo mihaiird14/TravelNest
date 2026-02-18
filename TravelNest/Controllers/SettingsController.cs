@@ -28,7 +28,13 @@ namespace TravelNest.Controllers
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
-            var profil = await _context.Profils.Include(p => p.User).FirstOrDefaultAsync(p => p.UserId == user.Id);
+            var profil = await _context.Profils
+             .Include(p => p.User)
+             .Include(p => p.Posts)
+                 .ThenInclude(post => post.FisiereMedia) // Necesar pentru imagini/video
+             .Include(p => p.Posts)
+                 .ThenInclude(post => post.Likes) // Necesar pentru verificarea aDatLike
+             .FirstOrDefaultAsync(p => p.UserId == user.Id);
             if (profil == null)
             {
                 profil = new Profil

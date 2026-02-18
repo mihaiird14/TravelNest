@@ -735,6 +735,20 @@ namespace TravelNest.Controllers
             await _context.SaveChangesAsync();
             return Json(new { success = true});
         }
+        [HttpPost]
+        public async Task<IActionResult> DezarhivarePostare(int postareId)
+        {
+            var utilizator = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            var postare = await _context.Postares.FirstOrDefaultAsync(p => p.Id == postareId);
+            if (profil == null || postare == null || postare.CreatorId != profil.Id)
+            {
+                return Json(new { success = false, message = "You dont have permission!" });
+            }
+            postare.Arhivata = false;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
         //functie pentru editare postare
         [HttpPost]
         public async Task<IActionResult> EditeazaPostare(int postareId, string locatie, string descriere, string tagUseri)

@@ -464,13 +464,37 @@ async function ConfirmaStergerePostare() {
 }
 //functie arhivare postare
 async function ArhiveazaPostare() {
-    if (!postare) return;
+    if (!postare) 
+        return;
 
     try {
         const formData = new FormData();
         formData.append('postareId', postare);
 
         const raspuns = await fetch('/Profil/ArhivarePostare', {
+            method: 'POST',
+            body: formData
+        });
+
+        const r = await raspuns.json();
+
+        if (r.success) {
+            inchideFereastra();       
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error("Error: ", err);
+    }
+}
+async function DezarhivarePostare() {
+    if (!postare) 
+        return;
+
+    try {
+        const formData = new FormData();
+        formData.append('postareId', postare);
+
+        const raspuns = await fetch('/Profil/DezarhivarePostare', {
             method: 'POST',
             body: formData
         });

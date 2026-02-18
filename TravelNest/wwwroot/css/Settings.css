@@ -1,7 +1,6 @@
 ﻿html, body {
     height: 100%;
     margin: 0;
-    overflow: hidden; 
     background-color: #ffffff;
     font-family: 'Poppins', sans-serif;
 }
@@ -19,16 +18,17 @@
 }
 
 #titluSet {
-    position: static; 
+    position: absolute;
     font-size: 3rem;
     color: #107373;
     margin: 0 0 10px 0;
+    top: 30px;
 }
 #setBtn {
-    position: static;
+    position: absolute;
     display: flex;
     gap: 40px;
-    margin-bottom: 20px;
+    top: 100px;
 }
 
 #setBtn button {
@@ -43,7 +43,7 @@
 #paginaProfilSet {
     width: 100%;
     max-width: 480px; 
-    margin-top: 0;
+    margin-top: 130px;
     display: flex;
     flex-direction: column;
 }
@@ -153,7 +153,7 @@
     display: flex;
     flex-direction: row;
     gap: 160px;
-    margin-bottom: 235px;
+    top: 200px;
 }
 #sectiuneSetariPrivacy h3 {
     white-space: nowrap;
@@ -173,7 +173,7 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: 95px;
+    top: 5px;
     width: 100%;
 
 }
@@ -290,4 +290,9 @@
     flex-direction: column;
     gap: 15px;
     width: 100%;
+}
+#sectiuneArhivaSetari{
+    position: absolute;
+    top: 150px;
+    width: 900px;
 }

@@ -5,28 +5,32 @@ const resetInput = document.getElementById('ResetImage');
 const defaultImg = '/images/profilDefault.png';
 window.onload=function(){
     document.getElementById("ProfilSet").style.borderBottom="3px solid #107373";
-    document.getElementById("sectiuneSetariPrivacy").style.display="none"
+    document.getElementById("sectiuneSetariPrivacy").style.display="none";
+    document.getElementById("sectiuneArhivaSetari").style.display="none";
 }
 document.getElementById("ProfilSet").addEventListener("click",function(){
         document.getElementById("ProfilSet").style.borderBottom="3px solid #107373";
         document.getElementById("ConfSet").style.borderBottom="none";
         document.getElementById("Arhive").style.borderBottom="none";
         document.getElementById("paginaProfilSet").style.display="flex"
-        document.getElementById("sectiuneSetariPrivacy").style.display="none"
+        document.getElementById("sectiuneSetariPrivacy").style.display="none";
+        document.getElementById("sectiuneArhivaSetari").style.display="none";
 })
 document.getElementById("ConfSet").addEventListener("click",function(){
         document.getElementById("ConfSet").style.borderBottom="3px solid #107373";
         document.getElementById("ProfilSet").style.borderBottom="none";
         document.getElementById("Arhive").style.borderBottom="none";
-        document.getElementById("paginaProfilSet").style.display="none"
-        document.getElementById("sectiuneSetariPrivacy").style.display="flex"
+        document.getElementById("paginaProfilSet").style.display="none";
+        document.getElementById("sectiuneSetariPrivacy").style.display="flex";
+        document.getElementById("sectiuneArhivaSetari").style.display="none";
 })
 document.getElementById("Arhive").addEventListener("click",function(){
         document.getElementById("Arhive").style.borderBottom="3px solid #107373";
         document.getElementById("ProfilSet").style.borderBottom="none";
         document.getElementById("ConfSet").style.borderBottom="none";
-        document.getElementById("paginaProfilSet").style.display="none"
-        document.getElementById("sectiuneSetariPrivacy").style.display="none"
+        document.getElementById("paginaProfilSet").style.display="none";
+        document.getElementById("sectiuneSetariPrivacy").style.display="none";
+        document.getElementById("sectiuneArhivaSetari").style.display="flex";
 })
 imgProfil.addEventListener('change', function () {
      const file = this.files[0];
