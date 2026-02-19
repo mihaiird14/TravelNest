@@ -185,6 +185,48 @@ namespace TravelNest.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+        [HttpPost]
+        public async Task<IActionResult> ModificareDestinatieTG(int id, List<string> oraseSelectate, string thumbnailLink)
+        {
+            var grup = await _context.TravelGroups
+                .Include(g => g.Locatii)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (grup == null)
+            {
+                return Json(new { success = false, message = "The Group can not be found!" });
+            }
+            if (grup.Locatii != null && grup.Locatii.Any())
+            {
+                _context.LocatieGrups.RemoveRange(grup.Locatii);
+            }
+
+            if (oraseSelectate != null && oraseSelectate.Any())
+            {
+                foreach (var oras in oraseSelectate)
+                {
+                    grup.Locatii.Add(new LocatieGrup 
+                    {   
+                        Locatie = oras, 
+                        GroupId = id 
+                    });
+                }
+                if (!string.IsNullOrEmpty(thumbnailLink))
+                {
+                    grup.Thumbnail = thumbnailLink;
+                }
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
     }
 
 }

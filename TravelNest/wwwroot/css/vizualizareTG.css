@@ -967,3 +967,25 @@
     margin: 0;
     background: yellow !important;
 }
+#titluSiEditLocatii {
+    display: flex;
+    flex-direction: row;
+    align-items: center !important;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+#stopsTitle {
+    margin: 0;
+    font-weight: 600;
+}
+#btnEditDestinatie {
+    color: #EE5607;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.2s, color 0.2s;
+}
+
+#btnEditDestinatie:hover {
+    color: #A2E4C1;
+    transform: scale(1.1);
+}

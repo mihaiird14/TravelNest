@@ -1,16 +1,9 @@
-﻿let selectedCities = [];
+﻿let selectedCities = window.selectedCities || [];
 let harta, marker;
 let listaIdPrieteni = new Set();
 document.addEventListener('DOMContentLoaded', () => {
     afisareLocatii();
 });
-
-function initializareHarta() {
-    if (harta) return;
-    harta = L.map('mapContainer').setView([45.9432, 24.9668], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(harta);
-}
-
 function afisareLocatii() {
     const container = document.getElementById('locatieButoane');
     if (!container) 
@@ -26,8 +19,10 @@ function afisareLocatii() {
             e.preventDefault();
             e.stopPropagation();
             document.getElementById('popUpDestinatieManuala').style.display = 'flex';
-            if (!harta) initializareHarta();
-            else setTimeout(() => { harta.invalidateSize(); }, 100);
+            if (!harta) 
+                initializareHarta();
+            else 
+                setTimeout(() => { harta.invalidateSize(); }, 100);
             afisareOraseSelectate();
         };
     } else {
@@ -54,17 +49,103 @@ function afisareLocatii() {
         container.appendChild(changeBtn);
     }
 }
+function permietConfirmareLocatii() {
+    const btnConfirm = document.getElementById('btnConfirmaDestinatii');
+    if (!btnConfirm) 
+        return;
+    if (selectedCities.length === 0) {
+        btnConfirm.disabled = true;
+        btnConfirm.style.opacity = "0.5";
+        btnConfirm.style.cursor = "not-allowed";
+    } else {
+        btnConfirm.disabled = false;
+        btnConfirm.style.opacity = "1";
+        btnConfirm.style.cursor = "pointer";
+    }
+}
+function initializareHarta() {
+    if (harta) 
+        return;
+    harta = L.map('mapContainer').setView([45.9432, 24.9668], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(harta);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    afisareLocatii();
+    const btnInchide = document.getElementById('inchidePopUp');
+    if (btnInchide) {
+        btnInchide.onclick = (e) => {
+            e.preventDefault();
+            const popUp = document.getElementById('popUpDestinatieManuala');
+            if (popUp) 
+                popUp.style.display = 'none';
+        };
+    }
+    const btnCauta = document.getElementById('btnCautaOras');
+    if (btnCauta) {
+        btnCauta.onclick = (e) => {
+            e.preventDefault();
+            cautaOras();
+        };
+    }
+    const btnEdit = document.getElementById('btnEditDestinatie');
+    if (btnEdit) {
+        btnEdit.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const popUp = document.getElementById('popUpDestinatieManuala');
+            if (popUp) {
+                popUp.style.display = 'flex';
+                if (!harta)
+                    initializareHarta();
+            
+                setTimeout(() => { 
+                    harta.invalidateSize(); 
+                    if (selectedCities.length > 0) {
+                        const ultimulOras = selectedCities[selectedCities.length - 1];
+                        centrareHartaPeOras(ultimulOras);
+                    }
+                }, 200);
 
-document.getElementById('inchidePopUp').onclick = (e) => {
-    e.preventDefault();
-    document.getElementById('popUpDestinatieManuala').style.display = 'none';
-};
+                afisareOraseSelectate();
+                permietConfirmareLocatii();
+            }
+        };
+    }
+    const btnConfirma = document.getElementById('btnConfirmaDestinatii');
+    if (btnConfirma) {
+        btnConfirma.onclick = (e) => {
+            e.preventDefault();
+            const popUp = document.getElementById('popUpDestinatieManuala');
+            if (popUp) 
+                popUp.style.display = 'none';
+            afisareLocatii();
+        };
+    }
+});
+async function centrareHartaPeOras(numeOras) {
+    if (!numeOras)
+        return;
+    
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(numeOras)}`);
+        const results = await response.json();
+        
+        if (results.length > 0) {
+            const city = results[0];
+            const lat = city.lat;
+            const lon = city.lon;
 
-document.getElementById('btnCautaOras').onclick = (e) => {
-    e.preventDefault();
-    cautaOras();
-};
-
+            if (harta) {
+                harta.setView([lat, lon], 12);
+                if (marker) 
+                    harta.removeLayer(marker);
+                marker = L.marker([lat, lon]).addTo(harta);
+            }
+        }
+    } catch (err) {
+        console.error("Error!")
+   }
+}
 async function cautaOras() {
     const cautare = document.getElementById('mapSearchInput').value;
     if (cautare.length < 3) return;
@@ -101,13 +182,8 @@ function afisareOraseSelectate() {
         oras.innerHTML = `${city} <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="removeCity('${city}')"></i>`;
         container.appendChild(oras);
     });
+    permietConfirmareLocatii();
 }
-
-document.getElementById('btnConfirmaDestinatii').onclick = (e) => {
-    e.preventDefault();
-    document.getElementById('popUpDestinatieManuala').style.display = 'none';
-    afisareLocatii();
-};
 const inputStart = document.getElementById('startDate');
 const inputEnd = document.getElementById('endDate');
 
@@ -313,12 +389,16 @@ if (btnCreate) {
             btnCreate.title = "Ready to go!";
         }
     });
-    document.getElementById('btnConfirmaDestinatii').addEventListener('click', () => {
-        if (selectedCities.length > 0) {
-            btnCreate.disabled = false;
-            btnCreate.classList.remove('btn-blocked');
+    document.getElementById('btnConfirmaDestinatii').onclick = async (e) => {
+        e.preventDefault();
+        const banner = document.getElementById('bannerVizualizare');
+        if (banner) {
+            const idGrup = banner.getAttribute('data-idGrup');
+            await salveazaLocatiiNoi(idGrup, selectedCities);
         }
-    });
+
+        document.getElementById('popUpDestinatieManuala').style.display = 'none';
+    };
 }
 document.getElementById('formCreateGroup').onsubmit = async function(e) {
     e.preventDefault(); 

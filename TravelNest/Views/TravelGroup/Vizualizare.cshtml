@@ -20,6 +20,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="~/css/Profil.css">
         <link rel="stylesheet" href="~/css/vizualizareTG.css">
+        <link rel="stylesheet" href="~/css/travelGr.css">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     </head>
@@ -238,7 +239,10 @@
 
                 <div id="rightCol">
                     <section id="stopsBox">
-                        <h5 id="stopsTitle">Planned Stops</h5>
+                        <div id="titluSiEditLocatii">
+                            <h5 id="stopsTitle">Planned Stops</h5>
+                            <i id="btnEditDestinatie" class="fa-solid fa-pen-to-square btn-edit-stops" aria-hidden="true"></i>
+                        </div>
                         <div id="stopsList">
                             @foreach (var loc in Model.Locatii)
                             {
@@ -251,6 +255,33 @@
                                     </div>
                                 </div>
                             }
+                        </div>
+                        <div id="popUpDestinatieManuala" style="display: none;">
+                            <div id="continutPopUp">
+                                <div id="headerPopUpDestinatieManuala">
+                                    <h3><i class="fa-solid fa-map-location-dot"></i> Add Destinations</h3>
+                                    <button type="button" id="inchidePopUp" class="close-btn">&times;</button>
+                                </div>
+
+                                <div id="popUpBody">
+                                    <div id="destinatieSearchManual">
+                                        <input type="text" id="mapSearchInput" placeholder="Search for a city...">
+                                        <button type="button" id="btnCautaOras"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                        <div id="searchSugestii"></div>
+                                    </div>
+
+                                    <div class="OraseSelectate">
+                                        <p>Selected Cities:</p>
+                                        <div id="listaOraseSelectate"></div>
+                                    </div>
+
+                                    <div id="mapContainer"></div>
+                                </div>
+
+                                <div class="popUpConfirm">
+                                    <button type="button" id="btnConfirmaDestinatii">Confirm Destinations</button>
+                                </div>
+                            </div>
                         </div>
                     </section>
                     <section id="scheduleBox">
@@ -271,17 +302,16 @@
                             }
                         </div>
                     </section>
-                    <section id="mapBox">
-                        <div id="mapHeader">
-                            <h5 id="mapTitle">Trip Map</h5>
-                            <a href="#" id="mapLink">Open Full Map</a>
-                        </div>
-                        <div id="mapDisplay">
-                            <div id="mapPlaceholder">
-                                <i class="fa-solid fa-map-pin" id="pinIcon"></i>
-                            </div>
-                        </div>
-                    </section>
+                <section id="mapBox">
+                    <div id="mapHeader">
+                        <h5 id="mapTitle">Trip Map</h5>
+                        <a href="#" id="mapLink">Open Full Map</a>
+                    </div>
+                    <div id="mapDisplay" style="height: 300px; position: relative;">
+                        @* Harta se va randa aici, înlocuind placeholder-ul *@
+                        <div id="tripMainMap" style="width: 100%; height: 100%; border-radius: 12px;"></div>
+                    </div>
+                </section>
                     <section id="budgetBox">
                         <div id="budgetHeader">
                             <h5 id="budgetTitle">Budget Progress</h5>
