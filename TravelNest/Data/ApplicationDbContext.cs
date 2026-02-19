@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<TravelGroup> TravelGroups { get; set; }
     public DbSet<LocatieGrup> LocatieGrups { get; set; }
     public DbSet<MembruGrup> MembruGrups { get; set; }
+    public DbSet<DocumenteTG> Documents { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -130,6 +131,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(mg => mg.TravelGroup)
             .WithMany(tg => tg.ListaParticipanti) 
             .HasForeignKey(mg => mg.TravelGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DocumenteTG>()
+            .HasOne(d => d.Grup) 
+            .WithMany(g => g.Documente)
+            .HasForeignKey(d => d.GroupId) 
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

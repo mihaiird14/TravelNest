@@ -393,10 +393,10 @@ async function salveazaLocatiiNoi(id, orase) {
 
 //harta si pin uri 
 document.addEventListener('DOMContentLoaded', () => {
-    initTripMap();
+    hartaVizualizareTG();
 });
 
-async function initTripMap() {
+async function hartaVizualizareTG() {
     const mapDiv = document.getElementById('tripMainMap');
     if (!mapDiv || !window.selectedCities || window.selectedCities.length === 0)
         return;
@@ -445,5 +445,53 @@ async function initTripMap() {
                 maxZoom: 5 
             });
         }
+    }
+}
+//functii ptr incarcare documente
+function IconitaFisier(numeFisier) {
+    const ext = numeFisier.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png'].includes(ext)) 
+        return 'fa-solid fa-file-image';
+    if (ext === 'pdf') 
+        return 'fa-solid fa-file-pdf';
+    if (['doc', 'docx'].includes(ext)) 
+        return 'fa-solid fa-file-word';
+    if (['xls', 'xlsx'].includes(ext)) 
+        return 'fa-solid fa-file-excel';
+    return 'fa-solid fa-file';
+}
+
+async function IncarcaDoc(input) {
+    const fisier = input.files[0];
+    if (!fisier) 
+        return;
+    const banner = document.getElementById('bannerVizualizare'); 
+    const idGrup = banner.getAttribute('data-idGrup'); 
+    const dateForm = new FormData();
+    dateForm.append("groupId", idGrup);
+    dateForm.append("fisier", fisier);
+    const raspuns = await fetch('/TravelGroup/IncarcaDocument', { method: 'POST', body: dateForm });
+    const rezultat = await raspuns.json();
+    if (rezultat.success) {
+        const lista = document.getElementById('ListaDoc');
+        const nouRand = `
+            <div id="RandDoc-${rezultat.id}" style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px;">
+                <div id="InfoDoc-${rezultat.id}" style="display: flex; align-items: center; gap: 12px;">
+                    <div id="IconDoc-${rezultat.id}"><i class="${IconitaFisier(rezultat.nume)}"></i></div>
+                    <p id="NumeDoc-${rezultat.id}" style="margin: 0; font-weight: 500; color: #1e293b; font-size: 0.95rem;">${rezultat.nume}</p>
+                </div>
+                <i id="StergeDoc-${rezultat.id}" class="fa-solid fa-xmark" style="cursor: pointer; color: #cbd5e1;" onclick="EliminaDoc(${rezultat.id})"></i>
+            </div>`;
+        lista.insertAdjacentHTML('beforeend', nouRand);
+    }
+}
+
+async function EliminaDoc(id) {
+    const raspuns = await fetch(`/TravelGroup/StergeDocument?id=${id}`, { method: 'POST' });
+    const rezultat = await raspuns.json();
+    if (rezultat.success) {
+        const element = document.getElementById(`RandDoc-${id}`);
+        if (element) 
+            element.remove();
     }
 }

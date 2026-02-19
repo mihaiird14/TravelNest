@@ -14,6 +14,23 @@
             nrZile = 0;
     }
 }
+@functions {
+    public string IconitaFisier(string numeFisier)
+    {
+        if (string.IsNullOrEmpty(numeFisier)) return "fa-solid fa-file";
+
+        string extensie = System.IO.Path.GetExtension(numeFisier).ToLower();
+
+        return extensie switch
+        {
+            ".jpg" or ".jpeg" or ".png" => "fa-solid fa-file-image",
+            ".pdf" => "fa-solid fa-file-pdf",
+            ".doc" or ".docx" => "fa-solid fa-file-word",
+            ".xls" or ".xlsx" => "fa-solid fa-file-excel",
+            _ => "fa-solid fa-file"
+        };
+    }
+}
 <html>
 
     <head>
@@ -305,10 +322,8 @@
                 <section id="mapBox">
                     <div id="mapHeader">
                         <h5 id="mapTitle">Trip Map</h5>
-                        <a href="#" id="mapLink">Open Full Map</a>
                     </div>
                     <div id="mapDisplay" style="height: 300px; position: relative;">
-                        @* Harta se va randa aici, înlocuind placeholder-ul *@
                         <div id="tripMainMap" style="width: 100%; height: 100%; border-radius: 12px;"></div>
                     </div>
                 </section>
@@ -342,39 +357,24 @@
                             </div>
                         </div>
                     </section>
-                    <section id="docsBox">
-                        <h5 id="docsTitle">Trip Documents</h5>
-
-                        <div id="docsList">
-                            <div id="docRow_1">
-                                <div id="docIcon_1">
-                                    <i class="fa-solid fa-file-pdf"></i>
+                    <section id="CasetaDoc">
+                        <h5 id="TitluDoc">Trip Documents</h5>
+                        <div id="ListaDoc">
+                            @foreach (var doc in Model.Documente)
+                            {
+                                <div id="RandDoc-@doc.Id">
+                                    <div id="InfoDoc-@doc.Id">
+                                        <div id="IconDoc-@doc.Id">
+                                            <i id="ImagineIcon-@doc.Id" class="@IconitaFisier(doc.NumeFisier)"></i>
+                                        </div>
+                                        <p id="NumeDoc-@doc.Id">@doc.NumeFisier</p>
+                                    </div>
+                                    <i id="StergeDoc-@doc.Id" class="fa-solid fa-xmark" style="cursor: pointer; color: #cbd5e1;" onclick="EliminaDoc(@doc.Id)"></i>
                                 </div>
-                                <div id="docInfo_1">
-                                    <p id="docName_1">Flight_Tickets.pdf</p>
-                                </div>
-                            </div>
-
-                            <div id="docRow_2">
-                                <div id="docIcon_2">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </div>
-                                <div id="docInfo_2">
-                                    <p id="docName_2">Hotel_Confirmation.pdf</p>
-                                </div>
-                            </div>
-
-                            <div id="docRow_3">
-                                <div id="docIcon_3">
-                                    <i class="fa-solid fa-passport"></i>
-                                </div>
-                                <div id="docInfo_3">
-                                    <p id="docName_3">Travel_Insurance.pdf</p>
-                                </div>
-                            </div>
+                            }
                         </div>
-
-                        <button id="uploadBtn">Upload New</button>
+                        <input type="file" id="InputFisier" style="display:none" onchange="IncarcaDoc(this)">
+                        <button id="ButonIncarca" onclick="document.getElementById('InputFisier').click()">Upload New</button>
                     </section>
                 </div>
             </div>

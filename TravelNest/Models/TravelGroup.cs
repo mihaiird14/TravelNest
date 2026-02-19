@@ -20,5 +20,6 @@ namespace TravelNest.Models
         public string? Thumbnail { get; set; }
         public List<MembruGrup> ListaParticipanti { get; set; } = new List<MembruGrup>();
         public List<LocatieGrup> Locatii { get; set; } = new List<LocatieGrup>();
+        public List<DocumenteTG> Documente { get; set; } = new List<DocumenteTG>();
     }
 }

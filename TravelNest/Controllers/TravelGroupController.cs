@@ -103,7 +103,8 @@ namespace TravelNest.Controllers
             var utilizatorConectat = await _userManager.GetUserAsync(User);
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
             var grup = await _context.TravelGroups
-                .Include(x => x.Locatii) 
+                .Include(x => x.Locatii)
+                .Include(x => x.Documente)
                 .Include(x => x.ListaParticipanti)
                     .ThenInclude(x => x.Profil)
                         .ThenInclude(pr => pr.User)
@@ -225,6 +226,60 @@ namespace TravelNest.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> IncarcaDocument(int groupId, IFormFile fisier)
+        {
+            if (fisier == null || fisier.Length == 0)
+                return Json(new { success = false, message = "Iinvalid." });
+            string folderDoc = Path.Combine(_env.WebRootPath, "documenteGrup");
+            if (!Directory.Exists(folderDoc))
+                Directory.CreateDirectory(folderDoc);
+            string numeUnic = Guid.NewGuid().ToString() + "_" + fisier.FileName;
+            string caleSistem = Path.Combine(folderDoc, numeUnic);
+            using (var flux = new FileStream(caleSistem, FileMode.Create))
+            {
+                await fisier.CopyToAsync(flux);
+            }
+            var nouDoc = new DocumenteTG
+            {
+                NumeFisier = fisier.FileName,
+                CaleFisier = "/documenteGrup/" + numeUnic,
+                GroupId = groupId
+            };
+
+            _context.Documents.Add(nouDoc);
+            await _context.SaveChangesAsync();
+            return Json(new
+            {
+                success = true,
+                id = nouDoc.Id,
+                nume = nouDoc.NumeFisier
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> StergeDocument(int id)
+        {
+            var doc = await _context.Documents.FindAsync(id);
+            if (doc == null)
+                return Json(new { success = false, message = "The Doc does not exist." });
+
+            try
+            {
+                string caleFizica = Path.Combine(_env.WebRootPath, doc.CaleFisier.TrimStart('/'));
+                if (System.IO.File.Exists(caleFizica))
+                {
+                    System.IO.File.Delete(caleFizica);
+                }
+                _context.Documents.Remove(doc);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }
