@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<LocatieGrup> LocatieGrups { get; set; }
     public DbSet<MembruGrup> MembruGrups { get; set; }
     public DbSet<DocumenteTG> Documents { get; set; }
+    public DbSet<Notificare> Notificari { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -137,5 +138,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(g => g.Documente)
             .HasForeignKey(d => d.GroupId) 
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Notificare>()
+            .HasOne(n => n.Destinatar) 
+            .WithMany(p => p.NotificariPrimite) 
+            .HasForeignKey(n => n.destinatarId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Notificare>()
+            .HasOne(n => n.Expeditor)
+            .WithMany(p => p.NotificariTrimise)
+            .HasForeignKey(n => n.expeditorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

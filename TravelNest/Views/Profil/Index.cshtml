@@ -8,12 +8,15 @@
 }
 <html>
     <head>
-         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="~/css/Profil.css">
         <link rel="stylesheet" href="~/css/comentarii.css">
         <link rel="stylesheet" href="~/css/replyComs.css">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <style>
+
+        </style>
     </head>
     <body>
         <i id="menuBtn" class="fa-solid fa-bars"></i>
@@ -22,6 +25,12 @@
             <div id="butonMeniu">
                 <a asp-controller="Profil" asp-action="Index">
                 <p id="paginaCurenta">Profile</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="Notifications" asp-action="Index">
+                    <p>Notifications</p>
+                    <span id="punctRosu" style="display:none;">0</span>
                 </a>
             </div>
             <div id="butonMeniu">
@@ -258,7 +267,7 @@
             </div>
             </div>
         <div id="paginaTravelGr">
-            @if (!Model.MembruGrupuri.Any())
+            @if (!Model.MembruGrupuri.Any(m => m.Confirmare == "MEMBER" || m.Confirmare == "ORGANIZER"))
             {
                 <img src="~/images/notrGr.png" />
                 <br />

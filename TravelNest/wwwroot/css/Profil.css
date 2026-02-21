@@ -1461,3 +1461,17 @@ textarea {
     background: #ff6a1e;
     box-shadow: 0 0 12px rgba(238, 86, 7, 0.4);
 }
+#punctRosu {
+    position: absolute;
+    background-color: #ff4d4d;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    right: 8px;
+    display: inline-block;
+    min-width: 18px;
+    text-align: center;
+    box-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+}

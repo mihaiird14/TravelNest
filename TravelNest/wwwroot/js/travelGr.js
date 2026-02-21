@@ -143,7 +143,7 @@ async function centrareHartaPeOras(numeOras) {
             }
         }
     } catch (err) {
-        console.error("Error!")
+        console.error(err)
    }
 }
 async function cautaOras() {
@@ -163,7 +163,9 @@ async function cautaOras() {
                 afisareOraseSelectate();
             }
         }
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+        console.error(err); 
+    }
 }
 
 window.removeCity = function(cityName) {
@@ -312,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const friendInput = document.getElementById('friendSearch');
     const resultsContainer = document.getElementById('friendResults');
     const friendsList = document.getElementById('prieteniAdaugati');
-    let listaIdPrieteni = new Set();
     if (friendInput && resultsContainer) {
         friendInput.addEventListener('input', async () => {
             const username = friendInput.value.trim();
@@ -354,7 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsContainer.style.display = 'none';
         });
         function adaugaChipPrieten(id, name) {
-            listaIdPrieteni.add(id);
+            listaIdPrieteni.add(id); 
+    
+            const friendsList = document.getElementById('prieteniAdaugati');
             const prietenAdaugat = document.createElement('div');
             prietenAdaugat.className = 'chip';  
             prietenAdaugat.style.cssText = "background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; margin: 5px; font-weight: 600; border: 1px solid #e2e8f0;";
@@ -362,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span>${name}</span>
                 <i class="fa-solid fa-circle-xmark" style="cursor:pointer; color: #64748b;" data-id="${id}"></i>
             `;
+    
             prietenAdaugat.querySelector('i').onclick = () => {
                 listaIdPrieteni.delete(id);
                 prietenAdaugat.remove();

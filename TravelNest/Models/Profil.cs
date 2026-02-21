@@ -32,5 +32,9 @@ namespace TravelNest.Models
         public bool manualTag { get; set; } = false;
         public List<TravelGroup> GrupuriAdministrate { get; set; } = new List<TravelGroup>();
         public List<MembruGrup> MembruGrupuri { get; set; } = new List<MembruGrup>();
+        [InverseProperty("Expeditor")]
+        public List<Notificare> NotificariTrimise { get; set; } = new List<Notificare>();
+        [InverseProperty("Destinatar")]
+        public List<Notificare> NotificariPrimite { get; set; } = new List<Notificare>();
     }
 }

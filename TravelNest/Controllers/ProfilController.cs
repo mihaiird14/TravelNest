@@ -80,7 +80,7 @@ namespace TravelNest.Controllers
         {
             var profil = await _context.Profils.FindAsync(profilId);
             if (profil == null)
-                return NotFound("Profilul nu există!");
+                return NotFound("Profile not found!");
 
             Postare postare = new Postare
             {
@@ -157,7 +157,7 @@ namespace TravelNest.Controllers
                         var responseJson = await response.Content.ReadAsStringAsync();
                         if (!response.IsSuccessStatusCode || string.IsNullOrWhiteSpace(responseJson))
                         {
-                            Console.WriteLine("[EROARE] Python a returnat eroare sau raspuns gol.");
+                            //Console.WriteLine("[EROARE] Python a returnat eroare sau raspuns gol.");
                             continue;
                         }
                         var embeddingResponse = JsonSerializer.Deserialize<FaceEmbeddingResponse>(

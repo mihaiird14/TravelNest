@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+@using Microsoft.AspNetCore.Identity
+@using TravelNest.Models
+@model List<TravelNest.Models.Notificare>
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var userId = UserManager.GetUserId(User);
+}
+<html>
+    <head>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="~/css/Profil.css">
+        <link rel="stylesheet" href="~/css/notificari.css">
+    </head>
+    <body>
+        <i id="menuBtn" class="fa-solid fa-bars"></i>
+        <div class="sideMenu">
+            <img id="logoMenu" src="~/images/logoMenu.png" />
+            <div id="butonMeniu">
+                <a asp-controller="Profil" asp-action="Index">
+                    <p>Profile</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="Notifications" asp-action="Index">
+                    <p id="paginaCurenta">Notifications</p>
+                    <span id="punctRosu" style="display:none;">0</span>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>For You</p>
+            </div>
+            <div id="butonMeniu" class="AddPost2">
+                <p>New Post</p>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelGroup" asp-action="Index">
+                    <p>New Travel Group</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>Search Destination</p>
+            </div>
+            <div id="butonMeniu">
+                <p>Find Accommodation</p>
+            </div>
+            <div id="butonMeniu">
+                <p>Travel Map</p>
+            </div>
+            <div class="butoaneJos">
+
+                <div id="butonMeniu">
+                    <a asp-controller="Settings" asp-action="Index">
+                        <p>Settings</p>
+                    </a>
+                </div>
+                <div id="butonMeniu" class="logoutBtn">
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="zonaContinut">
+            <div id="antetPagina">
+                <h2 id="titluPagina">Notifications</h2>
+            </div>
+            <div id="listaNotificari">
+                @if (!Model.Any())
+                {
+                    <p id="mesajGrup">There are no notifications!</p>
+                }
+                else
+                {
+                    @foreach (var x in Model)
+                    {
+                        <div id="cardNotif" class="@(x.EsteCitita ? "" : "notificareNoua")">
+                            <div id="infoNotif">
+                                <i class="fa-solid @(x.TipNotificare == "TGInvite" ? "fa-envelope-open-text" : "fa-bell")"></i>
+                                <div id="textNotif">
+                                    <p id="mesajNotif">@x.MesajNotificare</p>
+                                    <span id="dataNotif">@x.DataTrimitere.ToString("dd MMM, HH:mm")</span>
+                                </div>
+                            </div>
+
+                            @if (x.TipNotificare == "TGInvite")
+                            {
+                                <div id="actiuniNotif">
+                                    <button id="butonAccept" onclick="raspundeInvitatie(event,@x.Id, true)">Accept</button>
+                                    <button id="butonRefuz" onclick="raspundeInvitatie(event,@x.Id, false)">Reject</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </body>
+</html>

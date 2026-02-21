@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using SendGrid.Helpers.Mail;
 using System.Globalization;
 using TravelNest.Data;
+using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
 
@@ -23,13 +24,15 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddTransient<IEmailSender, MailSend>();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
 .AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
 //Adaugare serviciu Python
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();
 builder.Services.AddHostedService<TravelNest.Services.PythonRunnerService>();
-var app = builder.Build();
 
+var app = builder.Build();
+app.MapHub<NotificariHub>("/NotificariHub");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

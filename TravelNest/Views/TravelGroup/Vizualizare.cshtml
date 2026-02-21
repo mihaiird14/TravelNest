@@ -51,6 +51,12 @@
                 </a>
             </div>
             <div id="butonMeniu">
+                <a asp-controller="Notifications" asp-action="Index">
+                    <p>Notifications</p>
+                    <span id="punctRosu" style="display:none;">0</span>
+                </a>
+            </div>
+            <div id="butonMeniu">
                 <p>For You</p>
             </div>
             <div id="butonMeniu" class="AddPost2">
@@ -191,16 +197,26 @@
                         <div id="membersList">
                             @foreach (var membru in Model.ListaParticipanti)
                             {
-                                <div id="memberRow_@membru.ProfilId">
+                                <div id="memberRow_@membru.ProfilId" class="rand-membru @(membru.Confirmare == "PENDING" ? "status-asteptare" : "")">
                                     <img src="@(string.IsNullOrEmpty(membru.Profil.ImagineProfil) ? "/images/default.png" : membru.Profil.ImagineProfil)"
-                                         id="memberAvatar_@membru.ProfilId">
+                                         id="memberAvatar_@membru.ProfilId" class="avatar-membru">
+
                                     <div id="memberInfo_@membru.ProfilId">
-                                        <p id="memberName_@membru.ProfilId">@membru.Profil.User.UserName</p>
-                                        <p id="memberRole_@membru.ProfilId">@membru.Confirmare</p>
+                                        <p id="memberName_@membru.ProfilId" class="nume-membru">@membru.Profil.User.UserName</p>
+                                        <p id="memberRole_@membru.ProfilId" class="rol-membru @membru.Confirmare.ToLower()">
+                                            @if (membru.Confirmare == "PENDING")
+                                            {
+                                                <span style="color: teal">Pending</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@membru.Confirmare</span>
+                                            }
+                                        </p>
                                     </div>
                                 </div>
                             }
-                        </div>
+                            </div>
                         <button id="inviteBtn">Invite Friends</button>
                     </section>
                     <section id="calendarGrup">
@@ -379,6 +395,22 @@
                 </div>
             </div>
         </div>
+        <div id="popUpInvitatieTG">
+            <div id="editInvitatieTG">
+                <div id="headerPopUpDestinatieManuala">
+                    <h3><i class="fa-solid fa-user-plus"></i> Invite Friends</h3>
+                    <button type="button" id="xMeniuInvitatieTG" class="close-btn" onclick="meniuInvitatieTG(false)">&times;</button>
+                </div>
+                <div id="popUpBody">
+                    <div id="destinatieSearchManual">
+                        <input type="text" id="cautaPrietenInput" placeholder="Search by username...">
+                        <button type="button" id="btnCautaPrieten" onclick="cautaPrieteni()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                    <div id="listaRezultatePrieteni">
+                    </div>
+                </div>
+            </div>
+        </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const btnConfirm = document.getElementById('confirmareData');
@@ -514,7 +546,8 @@
 
     </body>
     @section Scripts {
-    <script src="~/js/vizualizareTG.js"></script>
-    <script src="~/js/butonSideMenu.js" asp-append-version="true"></script>
-}
+        <script src="~/js/vizualizareTG.js"></script>
+        <script src="~/js/butonSideMenu.js" asp-append-version="true"></script>
+        <script src="~/js/inviteTG.js" asp-append-version="true"></script>
+    }
 </html>
