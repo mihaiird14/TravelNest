@@ -161,6 +161,7 @@ namespace TravelNest.Controllers
                     .ThenInclude(x => x.Profil)
                         .ThenInclude(pr => pr.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
+            ViewBag.CurrentProfilId = profil?.Id;
             if (grup == null)
             {
                 return NotFound(); 
@@ -354,7 +355,7 @@ namespace TravelNest.Controllers
 
             if (profilDestinatar == null)
             {
-                return Json(new { success = false, message = "Recipient profile not found." });
+                return Json(new { success = false, message = "Profile not found." });
             }
             var grup = await _context.TravelGroups.FindAsync(groupId);
             if (grup == null)
@@ -421,6 +422,63 @@ namespace TravelNest.Controllers
                 .ToListAsync();
 
             return Json(rezultate);
+        }
+        [HttpPost]
+        public async Task<IActionResult> StergeMembru(int groupId, int profilIdDeEliminat)
+        {
+            var userConectat = _userManager.GetUserId(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userConectat);
+            var grup = await _context.TravelGroups
+                .Include(g => g.ListaParticipanti)
+                .Include(g => g.Locatii) 
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (grup == null || profil == null)
+                return Json(new { success = false, message = "Data error" });
+
+            bool admin = grup.AdminId == profil.Id;
+            bool stergeSelf = profil.Id == profilIdDeEliminat;
+
+            if (!admin && !stergeSelf)
+                return Json(new { success = false, message = "Permission denied" });
+
+            var membruDeEliminat = grup.ListaParticipanti.FirstOrDefault(m => m.ProfilId == profilIdDeEliminat);
+            if (membruDeEliminat == null)
+            {
+                return Json(new { success = false, message = "Member not found" });
+            }
+            if (membruDeEliminat.Confirmare == "ORGANIZER")
+            {
+                var nextOrganizer = grup.ListaParticipanti
+                    .Where(m => m.ProfilId != profilIdDeEliminat && m.Confirmare == "MEMBER")
+                    .OrderBy(m => m.DataInscrierii)
+                    .FirstOrDefault();
+
+                if (nextOrganizer != null)
+                {
+                    nextOrganizer.Confirmare = "ORGANIZER";
+                    grup.AdminId = nextOrganizer.ProfilId;
+                }
+                else
+                {
+                    if (grup.Locatii.Any())
+                    {
+                        _context.LocatieGrups.RemoveRange(grup.Locatii);
+                    }
+                    if (grup.ListaParticipanti.Any())
+                    {
+                        _context.MembruGrups.RemoveRange(grup.ListaParticipanti);
+                    }
+                    _context.TravelGroups.Remove(grup);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, redirected = true, url = Url.Action("Index", "Profil") });
+                }
+            }
+
+            _context.MembruGrups.Remove(membruDeEliminat);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, redirected = stergeSelf, url = Url.Action("Index", "Profil") });
         }
     }
 

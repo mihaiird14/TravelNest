@@ -495,3 +495,64 @@ async function EliminaDoc(id) {
             element.remove();
     }
 }
+//functii sterge membru tg
+let dateEliminareCurenta = null;
+window.deschidePopUpStergeMembru = function(groupId, profilId, nume, esteAutoEliminare) {
+    const popup = document.getElementById('stergeMembru');
+    if (!popup) {
+        return;
+    }
+    const titlu = document.getElementById('popUpTitlu');
+    const mesaj = document.getElementById('popUpMesaj');
+    const btnConfirmare = document.getElementById('btnStergeMembruPopUp');
+    dateEliminareCurenta = { groupId, profilId, esteAutoEliminare };
+
+    if (esteAutoEliminare) {
+        titlu.innerText = "Leave Group?";
+        mesaj.innerText = "Are you sure you want to leave this group?";
+        btnConfirmare.innerText = "Leave";
+    } else {
+        titlu.innerText = "Remove Member?";
+        mesaj.innerText = `Are you sure you want to remove ${nume}?`;
+        btnConfirmare.innerText = "Remove";
+    }
+
+    btnConfirmare.onclick = window.executaEliminareMembru;
+    popup.style.display = 'flex';
+    popup.style.zIndex = '9999'; 
+};
+window.inchidePopUpEliminare = function() {
+    const popup = document.getElementById('stergeMembru');
+    if(popup) popup.style.display = 'none';
+    dateEliminareCurenta = null;
+};
+
+window.executaEliminareMembru = async function() {
+    if (!dateEliminareCurenta) return;
+    
+    const { groupId, profilId } = dateEliminareCurenta;
+    console.log("Se execută eliminarea pentru profilul:", profilId);
+
+    const formData = new FormData();
+    formData.append("groupId", groupId);
+    formData.append("profilIdDeEliminat", profilId);
+
+    try {
+        const response = await fetch('/TravelGroup/StergeMembru', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = data.url || window.location.href;
+            if (!data.redirected) location.reload();
+        } else {
+            alert(data.message || "Error processing request.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    } finally {
+        window.inchidePopUpEliminare();
+    }
+};

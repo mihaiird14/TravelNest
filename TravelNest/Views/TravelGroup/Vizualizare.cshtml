@@ -14,6 +14,9 @@
             nrZile = 0;
     }
 }
+@{
+    int? currentProfilId = ViewBag.CurrentProfilId;
+}
 @functions {
     public string IconitaFisier(string numeFisier)
     {
@@ -214,6 +217,12 @@
                                             }
                                         </p>
                                     </div>
+                                    @if (Model.AdminId == currentProfilId || membru.ProfilId == currentProfilId)
+                                    {
+                                        <button id="btnStergeMembru" onclick="deschidePopUpStergeMembru(@Model.Id, @membru.ProfilId, '@membru.Profil.User.UserName', @(membru.ProfilId == currentProfilId ? "true" : "false"))">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    }
                                 </div>
                             }
                             </div>
@@ -411,6 +420,17 @@
                 </div>
             </div>
         </div>
+    <div id="stergeMembru" class="popUp" style="display: none;">
+        <div class="popUpbox">
+            <h3 id="popUpTitlu">Action Title</h3>
+            <p id="popUpMesaj">...</p>
+
+            <div class="butoanePopUp">
+                <button onclick="inchidePopUpEliminare()" id="btnAnularePopUp">Cancel</button>
+                <button id="btnStergeMembruPopUp">Confirm</button>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const btnConfirm = document.getElementById('confirmareData');
