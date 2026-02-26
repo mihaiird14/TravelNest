@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<MembruGrup> MembruGrups { get; set; }
     public DbSet<DocumenteTG> Documents { get; set; }
     public DbSet<Notificare> Notificari { get; set; }
+    public DbSet<ZborGrupuri> ZborGrupuris { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -148,5 +149,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(p => p.NotificariTrimise)
             .HasForeignKey(n => n.expeditorId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<ZborGrupuri>()
+            .HasOne(z => z.Grup)
+            .WithMany(g => g.Zboruri)
+            .HasForeignKey(z => z.GrupId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ZborGrupuri>()
+            .Property(z => z.Pret)
+            .HasColumnType("decimal(18,2)");
     }
 }

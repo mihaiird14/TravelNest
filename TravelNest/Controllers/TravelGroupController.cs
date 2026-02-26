@@ -9,6 +9,7 @@ using TravelNest.Data.Migrations;
 using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
+using TravelNest.ViewModels;
 
 namespace TravelNest.Controllers
 {
@@ -19,12 +20,14 @@ namespace TravelNest.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _env;
         private readonly IHubContext<NotificariHub> _hubContext;
-        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext)
+        private readonly FlightService _flightService;
+        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService)
         {
             _userManager = userManager;
             _context = context;
             _env = env;
             _hubContext = hubContext;
+            _flightService = flightService;
         }
         public IActionResult Index()
         {
@@ -157,6 +160,7 @@ namespace TravelNest.Controllers
             var grup = await _context.TravelGroups
                 .Include(x => x.Locatii)
                 .Include(x => x.Documente)
+                .Include(x=>x.Zboruri)
                 .Include(x => x.ListaParticipanti)
                     .ThenInclude(x => x.Profil)
                         .ThenInclude(pr => pr.User)
@@ -479,6 +483,82 @@ namespace TravelNest.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, redirected = stergeSelf, url = Url.Action("Index", "Profil") });
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetLocatiiTG(int idGrup)
+        {
+            var orase = await _context.LocatieGrups
+                .Where(loc => loc.GroupId == idGrup)
+                .OrderBy(loc => loc.Id) 
+                .Select(loc => loc.Locatie)
+                .ToListAsync();
+
+            return Json(orase);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CautaZboruri([FromBody] List<CerereZbor> rute)
+        {
+            var rezultate = new List<object>();
+
+            foreach (var ruta in rute)
+            {
+                await Task.Delay(1000);
+
+                string iataPlecare = !string.IsNullOrEmpty(ruta.IataDeLa) ? ruta.IataDeLa : await _flightService.GenerareCodAeroport(ruta.DeLa);
+                string iataSosire = !string.IsNullOrEmpty(ruta.IataLa) ? ruta.IataLa : await _flightService.GenerareCodAeroport(ruta.La);
+
+                if (string.IsNullOrEmpty(iataPlecare) || string.IsNullOrEmpty(iataSosire))
+                        continue;
+                var doc = await _flightService.SearchFlights(iataPlecare, iataSosire, ruta.DataZbor);
+                doc.RootElement.TryGetProperty("data", out var dataElement);
+                doc.RootElement.TryGetProperty("dictionaries", out var dictElement);
+
+                rezultate.Add(new
+                {
+                    titluRuta = $"{ruta.DeLa} ({iataPlecare}) - {ruta.La} ({iataSosire})",
+                    zboruri = dataElement,   
+                    dictionare = dictElement 
+                });
+            }
+
+            return Ok(rezultate);
+        }
+        [HttpPost]
+        public async Task<IActionResult> SalveazaZboruriTG([FromBody] List<ZborGrupuri> biletePrimite)
+        {
+            if (biletePrimite == null || biletePrimite.Count == 0)
+            {
+                return BadRequest(new { eroare = "No tickets received." });
+            }
+
+            try
+            {
+                _context.ZborGrupuris.AddRange(biletePrimite);
+                await _context.SaveChangesAsync();
+                return Ok(new { succes = true, mesaj = "Tickets have been saved successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { eroare = ex.Message });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetZboruriGrup(int idGrup)
+        {
+            try
+            {
+                var zboruri = await _context.ZborGrupuris
+                    .Where(z => z.GrupId == idGrup)
+                    .OrderBy(z => z.DataPlecare)
+                    .ToListAsync();
+
+                return Ok(zboruri);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { eroare = ex.Message });
+            }
         }
     }
 

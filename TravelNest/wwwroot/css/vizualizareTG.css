@@ -876,47 +876,47 @@
 }
 .zi-calendar {
     cursor: pointer;
-    padding: 10px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    border-radius: 50%;
     transition: all 0.2s ease;
     user-select: none;
 }
+
 #containerZile {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); 
-    gap: 5px; 
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
     margin-top: 15px;
-    text-align: center;
-    font-size: 13px;
-    border-radius: 50%;
-    transition: 0.3s;
-    padding: 0 !important;
-    margin: 0;
+    padding: 0;
 }
+
 .perioada-oficiala {
-    width: 34px;
-    height: 34px;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    border-radius: 50%;
-    transition: 0.3s;
-    padding: 0 !important;
-    margin: 0;
     background: lime !important;
-}
-.zi-selectata {
-    width: 34px;
-    height: 34px;
+    width: 34px !important;
+    height: 34px !important;
     display: flex !important;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    border-radius: 50%;
-    transition: 0.3s;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    margin: auto !important;
     padding: 0 !important;
-    margin: 0;
+}
+
+.zi-selectata {
     background: yellow !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    margin: auto !important;
+    padding: 0 !important;
 }
 #titluSiEditLocatii {
     display: flex;
@@ -1187,4 +1187,435 @@ i[id^="StergeDoc"] {
 #btnStergeMembruPopUp:hover {
     background: #dc2626;
     transform: translateY(-1px);
+}
+/*cod ptr cautare zbor*/
+#titluFormular {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+div[id^="rutaZbor"], #zonaPlecare {
+    margin-bottom: 15px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+label[id^="etichetaRuta"], #etichetaPlecare {
+    display: block;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+#orasPlecare, input[type="date"] {
+    width: 100%;
+    box-sizing: border-box; 
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 15px;
+    color: #495057;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#orasPlecare:focus, input[type="date"]:focus {
+    border-color: #EE5607;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(238, 86, 7, 0.15);
+}
+#butonCauta {
+    width: 100%;
+    padding: 14px;
+    background-color: #EE5607;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 6px rgba(238, 86, 7, 0.2);
+}
+#butonCauta:hover {
+    background-color: #d14a04;
+}
+
+#butonCauta:active {
+    transform: scale(0.98); 
+}
+#butonCauta:disabled {
+    background-color: #a0a0a0;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+#popUpRezultateZboruri {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+#conitnutPopUp {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 25px;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+#inchidePopUpEditLocatie{
+    border: none;
+    background:none;
+}
+#inchidePopUp, #inchidePopUpEditLocatie {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+#inchidePopUp:hover, #inchidePopUpEditLocatie:hover {
+    color: #EE5607;
+}
+
+#titluPopUp {
+    margin-top: 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+#zonaSortare {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+#sortareZbor {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    background-color: #fff;
+}
+.card-zbor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background-color: #f8f9fa;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.card-zbor:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-color: #EE5607;
+}
+
+.detalii-zbor p {
+    margin: 4px 0;
+    color: #495057;
+    font-size: 14px;
+}
+
+.pret-zbor {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.btn-alege {
+    background-color: #EE5607;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-alege:hover {
+    background-color: #d14a04;
+}
+#detaliiBiletContainer {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+}
+
+#flightTitleMain {
+    color: #EE5607;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+[id^="rutaCompacta"] {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+[id^="rutaCompacta"]:last-child {
+    border-bottom: none;
+    margin-bottom: 5px;
+}
+
+[id^="legLabel"] {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #e67e22; 
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+[id^="rowSus"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+[id^="airlineInfo"] {
+    display: flex;
+    align-items: center;
+    width: 45%;
+}
+
+[id^="airlineLogo"] {
+    width: 45px;
+    height: 45px;
+    margin-right: 12px;
+}
+
+[id^="airlineLogo"] img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+[id^="flightCode"] p {
+    margin: 0;
+}
+
+[id^="airlineName"] {
+    font-size: 15px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+[id^="planeModel"] {
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-top: 2px !important;
+}
+[id^="flightTimes"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1; 
+    margin-left: 20px;
+    background-color: #f8f9fa;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+    gap: 20px;
+}
+
+[id^="departCol"], [id^="arriveCol"] {
+    display: flex;
+    flex-direction: column;
+    min-width: 80px; 
+}
+
+[id^="arriveCol"] {
+    text-align: right;
+}
+
+[id^="departLabel"], [id^="arriveLabel"] {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #95a5a6;
+    font-weight: bold;
+}
+
+[id^="departTime"], [id^="arriveTime"] {
+    font-size: 17px;
+    font-weight: bold;
+    color: #34495e;
+    margin: 5px 0 !important; 
+    white-space: nowrap; 
+}
+
+[id^="departDate"], [id^="arriveDate"] {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+#ticketBtnMain {
+    width: 100%;
+    background-color: #EE5607;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#ticketBtnMain:hover {
+    background-color: #d14a04;
+}
+
+#ticketBtnMain:active {
+    transform: scale(0.98);
+}
+.autocomplete-container {
+    position: relative;
+    width: 100%;
+}
+.autocomplete-lista {
+    position: absolute;
+    top: calc(100% + 5px); 
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+}
+.autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    transition: background-color 0.2s ease;
+}
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+        background-color: #fef1ec; 
+    }
+
+.autocomplete-text-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; 
+    text-align: left;
+}
+
+.autocomplete-text-info strong {
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.autocomplete-text-info span.nume-aeroport {
+    font-size: 12px;
+    color: #94a3b8;
+}
+.iata-badge {
+    background-color: #f1f5f9; 
+    color: #64748b;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease; 
+}
+.autocomplete-item:hover .iata-badge {
+    background-color: #EE5607;
+    color: #ffffff;
+    border-color: #EE5607;
+}
+#formularZbor, #detaliiBiletContainer {
+    min-width: 400px;
+}
+[id^="itemRow_"] {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+[id^="evenimentCalendarZbor_"] {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 60px;
+}
+[id^="lunaText_"] {
+    display: block;
+    font-size: 12px;
+    color: #EE5607;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+[id^="ziText_"] {
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+[id^="titluEveniment_"] {
+    margin: 0;
+    font-weight: bold;
+    color: #34495e;
+    font-size: 15px;
+}
+[id^="eventDesc_"] {
+    margin: 0;
+    font-size: 13px;
+    color: #7f8c8d;
 }

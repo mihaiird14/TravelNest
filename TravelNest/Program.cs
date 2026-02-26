@@ -26,6 +26,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 .AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<AmadeusSettings>(builder.Configuration.GetSection("Amadeus"));
+builder.Services.AddHttpClient<FlightService>();
 //Adaugare serviciu Python
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();

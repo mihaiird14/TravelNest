@@ -162,6 +162,8 @@ let selectedCities = window.selectedCities || [];
 let harta, marker;
 let listaIdPrieteni = new Set();
 document.addEventListener('DOMContentLoaded', () => {
+    window.incarcaBileteExistente();
+    hartaVizualizareTG();
     afisareLocatii();
 });
 function afisareLocatii() {
@@ -366,7 +368,7 @@ async function salveazaLocatiiNoi(id, orase) {
                 thumbnailLink = dataWiki.originalimage.source;
             }
         } catch (err) {
-            console.error("Wikipedia fetch error:", err);
+            console.error(err);
         }
     }
 
@@ -392,10 +394,6 @@ async function salveazaLocatiiNoi(id, orase) {
 }
 
 //harta si pin uri 
-document.addEventListener('DOMContentLoaded', () => {
-    hartaVizualizareTG();
-});
-
 async function hartaVizualizareTG() {
     const mapDiv = document.getElementById('tripMainMap');
     if (!mapDiv || !window.selectedCities || window.selectedCities.length === 0)
@@ -555,4 +553,572 @@ window.executaEliminareMembru = async function() {
     } finally {
         window.inchidePopUpEliminare();
     }
+};
+window.rezultateZboruriGlobale = [];
+window.selectiiItinerariu = {};
+
+window.genereazaSegmente = async function() {
+    const orasPlecare = document.getElementById('orasPlecare').value;
+    const containerSegmente = document.getElementById('segmenteZbor');
+    const butonCauta = document.getElementById('butonCauta');
+
+    if (!orasPlecare.trim()) {
+        containerSegmente.style.display = 'none';
+        butonCauta.style.display = 'none';
+        return;
+    }
+
+    const idGrup = document.getElementById('idGrup').value;
+    const raspunsServer = await fetch(`/TravelGroup/GetLocatiiTG?idGrup=${idGrup}`);
+    const oraseGrup = await raspunsServer.json();
+
+    if (oraseGrup.length === 0) {
+        containerSegmente.innerHTML = "<p>Adaugă mai întâi locații în grup pentru a genera rutele.</p>";
+        containerSegmente.style.display = 'block';
+        butonCauta.style.display = 'none';
+        return;
+    }
+
+    let rute = [];
+    rute.push({ deLa: orasPlecare, la: oraseGrup[0] }); 
+    for (let i = 0; i < oraseGrup.length - 1; i++) {
+        rute.push({ deLa: oraseGrup[i], la: oraseGrup[i + 1] }); 
+    }
+    rute.push({ deLa: oraseGrup[oraseGrup.length - 1], la: orasPlecare }); 
+    const azi = new Date().toISOString().split('T')[0];
+    let htmlSegmente = "";
+    rute.forEach((ruta, index) => {
+        htmlSegmente += `
+            <div id="rutaZbor${index}" style="margin-bottom: 10px;">
+                <label id="etichetaRuta${index}" for="dataZbor${index}" style="display: block; font-weight: bold;">
+                    ${ruta.deLa} - ${ruta.la}:
+                </label>
+                <input type="date" id="dataZbor${index}" min="${azi}" onchange="window.actualizeazaDataZbor(${index})">
+            </div>
+        `;
+    });
+
+    containerSegmente.innerHTML = htmlSegmente;
+    containerSegmente.style.display = 'block';
+    butonCauta.style.display = 'block';
+};
+window.actualizeazaDataZbor = function(index) {
+    const dataCurentaInput = document.getElementById(`dataZbor${index}`);
+    const dataUrmatoareInput = document.getElementById(`dataZbor${index + 1}`); 
+    if (dataUrmatoareInput && dataCurentaInput.value) {
+        dataUrmatoareInput.min = dataCurentaInput.value;
+        if (dataUrmatoareInput.value && dataUrmatoareInput.value < dataCurentaInput.value) {
+            dataUrmatoareInput.value = "";
+        }
+    }
+};
+window.cautaZboruri = async function() {
+    const butonCauta = document.getElementById('butonCauta');
+    
+    // UI Initial: Dezactivăm butonul și informăm utilizatorul
+    butonCauta.innerText = "Searching Cities...";
+    butonCauta.disabled = true;
+
+    try {
+        // 1. Descarcă baza de date de aeroporturi (Algolia Dataset) pentru mapare locală
+        const raspunsAirports = await fetch('https://raw.githubusercontent.com/algolia/datasets/master/airports/airports.json');
+        if (!raspunsAirports.ok) throw new Error("Nu s-a putut încărca baza de date de aeroporturi.");
+        const listaAeroporturi = await raspunsAirports.json();
+
+        let dateCerere = [];
+        const divuriRute = document.querySelectorAll('[id^="rutaZbor"]');
+
+        // 2. Procesăm fiecare rând de zbor din interfață
+        divuriRute.forEach((div, index) => {
+            const etichetaElement = document.getElementById(`etichetaRuta${index}`);
+            const dataInputElement = document.getElementById(`dataZbor${index}`);
+            
+            if (!etichetaElement || !dataInputElement) return;
+
+            const textEticheta = etichetaElement.innerText.replace(':', '').trim();
+            // Split după separatorii posibili (linie sau iconiță avion)
+            const parti = textEticheta.split(/-|✈️|✈/).map(p => p.trim());
+            
+            if (parti.length < 2) return;
+
+            const orasPlecare = parti[0].split('(')[0].trim();
+            const orasSosire = parti[1].split('(')[0].trim();
+            const dataSelectata = dataInputElement.value;
+
+            // Funcție helper pentru căutarea codului IATA în JSON-ul de pe GitHub
+            const gasesteIataInFisier = (numeOras) => {
+                const aero = listaAeroporturi.find(a => 
+                    a.city && a.city.toLowerCase() === numeOras.toLowerCase() && a.iata_code
+                );
+                return aero ? aero.iata_code : "";
+            };
+
+            // Extragere IATA: încercăm întâi regex din paranteze, apoi căutăm în fișier
+            const regexIata = /\(([^)]+)\)/;
+            let iataDeLa = parti[0].match(regexIata)?.[1] || gasesteIataInFisier(orasPlecare);
+            let iataLa = parti[1].match(regexIata)?.[1] || gasesteIataInFisier(orasSosire);
+
+            console.log(`🔎 Rută ${index}: ${orasPlecare}(${iataDeLa}) -> ${orasSosire}(${iataLa})`);
+
+            if (dataSelectata) {
+                dateCerere.push({
+                    DeLa: orasPlecare,
+                    La: orasSosire,
+                    IataDeLa: iataDeLa,
+                    IataLa: iataLa,
+                    DataZbor: dataSelectata
+                });
+            }
+        });
+
+        if (dateCerere.length === 0) {
+            alert("Vă rugăm să selectați cel puțin o dată de plecare.");
+            resetButonCauta();
+            return;
+        }
+
+        // 3. Trimiterea datelor către Server (C#)
+        console.log("Date trimise la server:", JSON.stringify(dateCerere, null, 2));
+        butonCauta.innerText = "Searching Flights...";
+
+        const raspuns = await fetch('/TravelGroup/CautaZboruri', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dateCerere)
+        });
+
+        const textRaspuns = await raspuns.text();
+
+        // Gestionare erori HTTP (ex: 400 Bad Request)
+        if (!raspuns.ok) {
+            console.error("Eroare Server:", textRaspuns);
+            alert("Eroare de la server:\n" + textRaspuns);
+            resetButonCauta();
+            return;
+        }
+
+        // 4. Procesarea Rezultatelor
+        let rezultateReale;
+        try {
+            rezultateReale = JSON.parse(textRaspuns);
+        } catch (e) {
+            throw new Error("Răspunsul serverului nu a putut fi procesat (JSON invalid).");
+        }
+
+        if (rezultateReale.eroare) {
+            alert("Eroare: " + rezultateReale.detalii);
+            resetButonCauta();
+            return;
+        }
+
+        // Afișare Pop-up Rezultate
+        window.rezultateZboruriGlobale = rezultateReale;
+        document.getElementById('popUpRezultateZboruri').style.display = 'flex';
+        
+        if (typeof window.aplicaSortare === "function") {
+            window.aplicaSortare();
+        }
+
+    } catch (error) {
+        console.error("Eroare critică JS:", error);
+        alert("A apărut o problemă la căutare. Verifică consola pentru detalii.");
+    } finally {
+        resetButonCauta();
+    }
+
+    // Funcție internă pentru a activa butonul la loc
+    function resetButonCauta() {
+        butonCauta.innerText = "Search Flights";
+        butonCauta.disabled = false;
+    }
+};
+function parseDurataAmadeus(pt) {
+    let ore = 0, minute = 0;
+    let match = pt.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+    if (match) {
+        ore = match[1] ? parseInt(match[1]) : 0;
+        minute = match[2] ? parseInt(match[2]) : 0;
+    }
+    return (ore * 60) + minute;
+}
+
+window.aplicaSortare = function() {
+    const criteriuElement = document.getElementById('sortareZbor');
+    if (!criteriuElement) return;
+    
+    const criteriu = criteriuElement.value;
+    const containerOptiuni = document.getElementById('containerOptiuni');
+    let htmlOptiuni = "";
+
+    if (Array.isArray(window.rezultateZboruriGlobale)) {
+        window.rezultateZboruriGlobale.forEach((segment, indexSegment) => {
+            htmlOptiuni += `<div id="containerRuta${indexSegment}" style="margin-bottom: 30px;">`;
+            htmlOptiuni += `<h5 style="color: #EE5607; border-bottom: 2px solid #EE5607; padding-bottom: 5px; margin-top: 20px;">${segment.titluRuta}</h5>`;
+            
+            // Verificăm dacă există zboruri
+            if (segment.zboruri && Array.isArray(segment.zboruri) && segment.zboruri.length > 0) {
+                let zboruriSortate = [...segment.zboruri];
+                
+                // SORTARE SIGURĂ (Optional Chaining ?. previne crash-ul)
+                zboruriSortate.sort((a, b) => {
+                    try {
+                        if (criteriu === 'pretAsc') return parseFloat(a.price?.total || 0) - parseFloat(b.price?.total || 0);
+                        if (criteriu === 'pretDesc') return parseFloat(b.price?.total || 0) - parseFloat(a.price?.total || 0);
+                        
+                        const escaleA = a.itineraries?.[0]?.segments?.length || 1;
+                        const escaleB = b.itineraries?.[0]?.segments?.length || 1;
+                        if (criteriu === 'escaleAsc') return (escaleA - 1) - (escaleB - 1);
+                        
+                        // Folosim o funcție de siguranță pentru durată
+                        if (criteriu === 'durataAsc') {
+                            const durA = typeof parseDurataAmadeus === 'function' ? parseDurataAmadeus(a.itineraries?.[0]?.duration) : 0;
+                            const durB = typeof parseDurataAmadeus === 'function' ? parseDurataAmadeus(b.itineraries?.[0]?.duration) : 0;
+                            return durA - durB;
+                        }
+                    } catch (e) { return 0; }
+                    return 0;
+                });
+
+                zboruriSortate.forEach((zbor, indexZbor) => {
+                    // Accesăm datele folosind ?. pentru a evita "undefined"
+                    const itinerariu = zbor.itineraries?.[0];
+                    if (!itinerariu) return;
+
+                    const segmentZbor = itinerariu.segments?.[0];
+                    if (!segmentZbor) return;
+
+                    const codCompanie = segmentZbor.carrierCode || "??";
+                    
+                    // FALLBACK pentru numele companiei (dacă dictionare lipsește)
+                    const numeCompanieFull = (segment.dictionare?.carriers && segment.dictionare.carriers[codCompanie]) 
+                                            ? segment.dictionare.carriers[codCompanie] 
+                                            : `Airline ${codCompanie}`;
+
+                    const urlLogo = `https://images.kiwi.com/airlines/64/${codCompanie}.png`;
+                    const numarZbor = segmentZbor.number || "";
+                    const plecare = (segmentZbor.departure?.at || "").replace('T', ' ').substring(0, 16);
+                    const sosire = (segmentZbor.arrival?.at || "").replace('T', ' ').substring(0, 16);
+                    const pret = (zbor.price?.total || "0") + " " + (zbor.price?.currency || "EUR");
+                    const escale = (itinerariu.segments?.length || 1) - 1;
+                    const textDurata = (itinerariu.duration || "").replace('PT', '').toLowerCase();
+
+                    const idCard = `cardZbor${indexSegment}_${indexZbor}`;
+                    const idBtn = `btnAlege${indexSegment}_${indexZbor}`;
+
+                    htmlOptiuni += `
+                        <div id="${idCard}" class="card-zbor" style="border: 1px solid #e9ecef; padding: 15px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: white;">
+                            <div class="detalii-zbor" style="display: flex; align-items: center; gap: 15px;">
+                                <img src="${urlLogo}" onerror="this.src='https://via.placeholder.com/40?text=✈️'" alt="${numeCompanieFull}" style="width: 40px; height: 40px; object-fit: contain;">
+                                <div>
+                                    <p style="margin:0;"><strong>${numeCompanieFull}</strong> <span style="color: #666; font-size: 12px;">(${codCompanie} ${numarZbor})</span></p>
+                                    <p style="margin:0; font-size: 13px;">${plecare} ➡️ ${sosire}</p>
+                                    <p style="margin:0; font-size: 12px; color: #666;">Stops: ${escale} | Duration: ${textDurata}</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="pret-zbor" style="font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 5px;">${pret}</div>
+                                <button id="${idBtn}" class="btn-alege" 
+                                    style="background: #EE5607; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;"
+                                    onclick="window.selecteazaZborPentruRuta(${indexSegment}, '${numeCompanieFull.replace(/'/g, "\\'")}', '${numarZbor}', '${plecare}', '${sosire}', '${idCard}', '${idBtn}', '${urlLogo}')">
+                                    Select
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                htmlOptiuni += `
+                    <div style="padding: 20px; text-align: center; background: #fff5f5; border-radius: 8px; border: 1px solid #feb2b2;">
+                        <p style="color: #c53030; margin: 0; font-weight: bold;">No flights found for this segment.</p>
+                        <p style="color: #c53030; margin: 0; font-size: 12px;">Try another date or airport.</p>
+                    </div>`;
+            }
+            htmlOptiuni += `</div>`;
+        });
+    }
+
+    containerOptiuni.innerHTML = htmlOptiuni;
+};
+window.selecteazaZborPentruRuta = function(indexSegment, companieNumeComplet, model, oraPlecare, oraSosire, idCard, idBtn, urlLogo) {
+    window.selectiiItinerariu[indexSegment] = { companie: companieNumeComplet, model, oraPlecare, oraSosire, urlLogo };
+    const containerRuta = document.getElementById(`containerRuta${indexSegment}`);
+    const toateButoanele = containerRuta.querySelectorAll('.btn-alege');
+    const toateCardurile = containerRuta.querySelectorAll('.card-zbor');
+
+    toateButoanele.forEach(btn => {
+        btn.innerText = "Select";
+        btn.style.backgroundColor = "#EE5607";
+    });
+    toateCardurile.forEach(card => {
+        card.style.borderColor = "#e9ecef";
+        card.style.backgroundColor = "#f8f9fa";
+    });
+
+    document.getElementById(idCard).style.borderColor = "#28a745";
+    document.getElementById(idCard).style.backgroundColor = "#eafbf0";
+    const btnAles = document.getElementById(idBtn);
+    btnAles.innerText = "Selected ✓";
+    btnAles.style.backgroundColor = "#28a745";
+
+    if (Object.keys(window.selectiiItinerariu).length === window.rezultateZboruriGlobale.length) {
+        document.getElementById('butonConfirmaItinerariu').style.display = 'block';
+    }
+};
+
+window.confirmaItinerariul = function() {
+    window.inchidePopUp();
+    document.getElementById('formularZbor').style.display = 'none';
+    let htmlBilete = `
+    <div id="detaliiBiletContainer">
+        <h5 id="flightTitleMain">Confirmed Flights</h5>
+        <div id="listaZboruriCompacte">
+    `;
+    for (let i = 0; i < window.rezultateZboruriGlobale.length; i++) {
+        let bilet = window.selectiiItinerariu[i];
+        let plecareSplit = bilet.oraPlecare.split(' ');
+        let sosireSplit = bilet.oraSosire.split(' ');
+        let dataPlecare = plecareSplit[0];
+        let oraPlecare = plecareSplit[1] || plecareSplit[0];
+        let dataSosire = sosireSplit[0];
+        let oraSosire = sosireSplit[1] || sosireSplit[0];
+
+        htmlBilete += `
+        <div id="rutaCompacta${i}">
+            <span id="legLabel${i}">Leg ${i + 1}</span>
+            
+            <div id="rowSus${i}">
+                <div id="airlineInfo${i}">
+                    <div id="airlineLogo${i}">
+                        <img src="${bilet.urlLogo}" alt="${bilet.companie}">
+                    </div>
+                    <div id="flightCode${i}">
+                        <p id="airlineName${i}">${bilet.companie}</p>
+                        <p id="planeModel${i}">Flight ${bilet.model}</p>
+                    </div>
+                </div>
+
+                <div id="flightTimes${i}">
+                    <div id="departCol${i}">
+                        <span id="departLabel${i}">DEP</span>
+                        <p id="departTime${i}">${oraPlecare}</p>
+                        <span id="departDate${i}">${dataPlecare}</span>
+                    </div>
+                    <div id="arriveCol${i}">
+                        <span id="arriveLabel${i}">ARR</span>
+                        <p id="arriveTime${i}">${oraSosire}</p>
+                        <span id="arriveDate${i}">${dataSosire}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+    }
+    htmlBilete += `
+        </div>
+        <button id="ticketBtnMain" onclick="window.genereazaDetaliiBilete()">Generate Tickets Details</button>
+    </div>
+    `;
+
+    const containerBilete = document.getElementById('containerBilete');
+    containerBilete.innerHTML = htmlBilete;
+    containerBilete.style.display = 'block';
+};
+document.getElementById('inchidePopUp').addEventListener('click', function() {
+    document.getElementById('popUpRezultateZboruri').style.display = 'none';
+});
+window.genereazaDetaliiBilete = async function() {
+    const btn = document.getElementById('ticketBtnMain');
+    btn.innerText = "Saving Tickets...";
+    btn.disabled = true;
+    const idGrup = parseInt(document.getElementById('idGrup').value);
+    let bileteDeSalvat = [];
+    for (let i = 0; i < window.rezultateZboruriGlobale.length; i++) {
+        let biletSelectat = window.selectiiItinerariu[i];
+        let segmentGlobal = window.rezultateZboruriGlobale[i];
+        let zborOriginal = segmentGlobal.zboruri.find(z => z.itineraries[0].segments[0].number === biletSelectat.model);
+        let segmentZbor = zborOriginal.itineraries[0].segments[0];
+        let ruteParts = segmentGlobal.titluRuta.split('-');
+        let orasPlecareExtras = ruteParts[0].replace(/\([A-Z]{3}\)/, '').trim();
+        let orasSosireExtras = ruteParts[1].replace(/\([A-Z]{3}\)/, '').trim();
+        bileteDeSalvat.push({
+            grupId: idGrup,
+            numeCompanie: biletSelectat.companie,
+            numarZbor: biletSelectat.model,
+            logo: biletSelectat.urlLogo,
+            orasPlecare: orasPlecareExtras,
+            orasSosire: orasSosireExtras,
+            aeroportPlecare: segmentZbor.departure.iataCode,
+            aeroportSosire: segmentZbor.arrival.iataCode,
+            dataPlecare: segmentZbor.departure.at, 
+            dataSosire: segmentZbor.arrival.at,
+            pret: parseFloat(zborOriginal.price.total) 
+        });
+    }
+    try {
+        const raspuns = await fetch('/TravelGroup/SalveazaZboruriTG', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bileteDeSalvat)
+        });
+
+        const rezultat = await raspuns.json();
+
+        if (raspuns.ok) {
+            btn.innerText = "Saved ✓";
+            btn.style.backgroundColor = "#28a745";
+            setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        } else {
+            btn.innerText = "Generate Tickets Details";
+            btn.disabled = false;
+        }
+    } catch (er) {
+        btn.innerText = "Generate Tickets Details";
+        btn.disabled = false;
+    }
+};
+
+window.bazaDateAeroporturi = [];
+//fisier de pe github cu toate aeroporturile =)))
+window.onload = async function() {
+    try {
+        const raspuns = await fetch('https://raw.githubusercontent.com/algolia/datasets/master/airports/airports.json');
+        window.bazaDateAeroporturi = await raspuns.json();
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+document.getElementById('orasPlecare').addEventListener('input', function() {
+    const textCautat = this.value.toLowerCase().trim();
+    const containerSugestii = document.getElementById('listaSugestii');
+    
+    if (textCautat.length < 2) {
+        containerSugestii.style.display = 'none';
+        return;
+    }
+
+    const rezultate = window.bazaDateAeroporturi.filter(a => 
+        (a.city && a.city.toLowerCase().includes(textCautat)) || 
+        (a.name && a.name.toLowerCase().includes(textCautat)) ||
+        (a.iata_code && a.iata_code.toLowerCase().includes(textCautat))
+    ).slice(0, 7);
+
+    if (rezultate.length > 0) {
+        let htmlSugestii = "";
+        rezultate.forEach(aeroport => {
+            if(!aeroport.iata_code) return; 
+
+            const valoareDeSalvat = `${aeroport.city} (${aeroport.iata_code})`;
+            
+            htmlSugestii += `
+                <div class="autocomplete-item" onclick="window.selecteazaAeroport('${valoareDeSalvat}')">
+                    <div>
+                        <strong>${aeroport.city}</strong>, ${aeroport.country}<br>
+                        <span style="font-size: 11px; color: #888;">${aeroport.name}</span>
+                    </div>
+                    <span class="iata-badge">${aeroport.iata_code}</span>
+                </div>
+            `;
+        });
+        containerSugestii.innerHTML = htmlSugestii;
+        containerSugestii.style.display = 'block';
+    } else {
+        containerSugestii.style.display = 'none';
+    }
+});
+
+
+window.selecteazaAeroport = function(valoare) {
+    document.getElementById('orasPlecare').value = valoare;
+    document.getElementById('listaSugestii').style.display = 'none';
+    if (typeof window.genereazaSegmente === 'function') {
+        window.genereazaSegmente();
+    }
+};
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.autocomplete-container')) {
+        document.getElementById('listaSugestii').style.display = 'none';
+    }
+});
+function inchidePopUpLocatii(){
+    document.getElementById('popUpDestinatieManuala').style.display = 'none';
+}
+window.inchidePopUp = function() {
+    document.getElementById('popUpRezultateZboruri').style.display = 'none';
+};
+
+window.incarcaBileteExistente = async function() {
+    const idGrup = parseInt(document.getElementById('idGrup').value);
+    if (!idGrup) 
+        return;
+
+    try {
+        const raspuns = await fetch(`/TravelGroup/GetZboruriGrup?idGrup=${idGrup}`);
+        if (raspuns.ok) {
+            const zboruriSalvate = await raspuns.json();
+            if (zboruriSalvate && zboruriSalvate.length > 0) {
+                document.getElementById('formularZbor').style.display = 'none';
+                
+                let htmlBilete = `
+                <div id="detaliiBiletContainer">
+                    <h5 id="flightTitleMain">Confirmed Itinerary</h5>
+                    <div id="listaZboruriCompacte">
+                `;
+
+                zboruriSalvate.forEach((bilet, i) => {
+                    let dataPlecare = bilet.dataPlecare.split('T')[0];
+                    let oraPlecare = bilet.dataPlecare.split('T')[1].substring(0, 5);
+                    let dataSosire = bilet.dataSosire.split('T')[0];
+                    let oraSosire = bilet.dataSosire.split('T')[1].substring(0, 5);
+
+                    htmlBilete += `
+                    <div id="rutaCompacta${i}">
+                        <span id="legLabel${i}">Leg ${i + 1}</span>
+                        
+                        <div id="rowSus${i}">
+                            <div id="airlineInfo${i}">
+                                <div id="airlineLogo${i}">
+                                    <img src="${bilet.logo}" alt="${bilet.numeCompanie}">
+                                </div>
+                                <div id="flightCode${i}">
+                                    <p id="airlineName${i}">${bilet.numeCompanie}</p>
+                                    <p id="planeModel${i}">Flight ${bilet.numarZbor}</p>
+                                </div>
+                            </div>
+
+                            <div id="flightTimes${i}">
+                                <div id="departCol${i}">
+                                    <span id="departLabel${i}">DEP (${bilet.aeroportPlecare})</span>
+                                    <p id="departTime${i}">${oraPlecare}</p>
+                                    <span id="departDate${i}">${dataPlecare}</span>
+                                </div>
+                                <div id="arriveCol${i}">
+                                    <span id="arriveLabel${i}">ARR (${bilet.aeroportSosire})</span>
+                                    <p id="arriveTime${i}">${oraSosire}</p>
+                                    <span id="arriveDate${i}">${dataSosire}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                });
+                htmlBilete += `
+                    </div>
+                    <button id="butonEditareZboruri" style="width: 100%; background-color: #f8f9fa; color: #34495e; border: 1px solid #ced4da; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 20px;" onclick="window.editeazaItinerariul()">Edit Flights</button>
+                </div>
+                `;
+                const containerBilete = document.getElementById('containerBilete');
+                containerBilete.innerHTML = htmlBilete;
+                containerBilete.style.display = 'block';
+            }
+        }
+    } catch (eroare) {
+        console.error(eroare);
+    }
+};
+window.editeazaItinerariul = function() {
+
 };

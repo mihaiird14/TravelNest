@@ -239,6 +239,51 @@
                         <div id="containerZile"></div>
                     </section>
                     <section id="flightBox">
+                        <input type="hidden" id="idGrup" value="@Model.Id">
+
+                        <div id="formularZbor">
+                            <h5 id="titluFormular">Plan Flights</h5>
+
+                            <div id="zonaPlecare">
+                                <label id="etichetaPlecare" for="orasPlecare">Departure City:</label>
+                                <div class="autocomplete-container">
+                                    <input type="text" id="orasPlecare" placeholder="Search city or airport" autocomplete="off">
+                                    <div id="listaSugestii" class="autocomplete-lista" style="display: none;"></div>
+                                </div>
+                            </div>
+
+                            <div id="segmenteZbor" style="display: none; margin-top: 15px;"></div>
+
+                            <button id="butonCauta" style="display: none; margin-top: 15px;" onclick="window.cautaZboruri()">Search Flights</button>
+                        </div>
+                        <div id="popUpRezultateZboruri" style="display: none;">
+                            <div id="conitnutPopUp">
+                                <span id="inchidePopUp" onclick="inchidePopUpZbor()">&times;</span>
+                                <h4 id="titluPopUp">Select Your Flights for Each Route</h4>
+
+                                <div id="zonaSortare">
+                                    <label for="sortareZbor">Sort by:</label>
+                                    <select id="sortareZbor" onchange="window.aplicaSortare()">
+                                        <option value="pretAsc">Price (Lowest to Highest)</option>
+                                        <option value="pretDesc">Price (Highest to Lowest)</option>
+                                        <option value="durataAsc">Duration (Shortest)</option>
+                                        <option value="escaleAsc">Stops (Fewest)</option>
+                                    </select>
+                                </div>
+
+                                <div id="containerOptiuni"></div>
+
+                                <button id="butonConfirmaItinerariu" style="display: none; width: 100%; margin-top: 20px; padding: 15px; background-color: #28a745; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer;" onclick="window.confirmaItinerariul()">
+                                    Confirm Itinerary & Generate Tickets
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="containerBilete" style="display: none; margin-top: 20px;">
+                        </div>
+                    </section>
+
+                    <div id="detaliiBilet" style="display: none; margin-top: 20px;">
                         <h5 id="flightTitle">Flight Tickets</h5>
                         <div id="airlineInfo">
                             <div id="airlineLogo">
@@ -260,8 +305,8 @@
                             </div>
                         </div>
                         <button id="ticketBtn">View Ticket</button>
-                    </section>
-
+                    </div>
+                </section>
                     <section id="hotelBox">
                         <h5 id="hotelTitle">Booking Accommodation</h5>
                         <p id="hotelName">Grace Hotel Santorini</p>
@@ -302,7 +347,7 @@
                             <div id="continutPopUp">
                                 <div id="headerPopUpDestinatieManuala">
                                     <h3><i class="fa-solid fa-map-location-dot"></i> Add Destinations</h3>
-                                    <button type="button" id="inchidePopUp" class="close-btn">&times;</button>
+                                <button type="button" id="inchidePopUpEditLocatie" onclick="inchidePopUpLocatii()" close-btn">&times;</button>
                                 </div>
 
                                 <div id="popUpBody">
@@ -326,32 +371,52 @@
                             </div>
                         </div>
                     </section>
-                    <section id="scheduleBox">
-                        <h5 id="scheduleTitle">Upcoming Schedule</h5>
-                        <div id="scheduleList">
-                            @foreach (var loc in Model.Locatii)
+                <section id="scheduleBox">
+                    <h5 id="scheduleTitle">Upcoming Events</h5>
+                    <div id="scheduleList">
+                        @if (Model.Zboruri != null && Model.Zboruri.Any())
+                        {     
+                            @foreach (var zbor in Model.Zboruri.OrderBy(z => z.DataPlecare))
                             {
-                                <div id="itemRow_@loc.Id">
-                                    <div id="dateMarker_@loc.Id">
-                                        <span id="monthText_@loc.Id">@Model.DataPlecare?.ToString("MMM")</span>
-                                        <span id="dayText_@loc.Id">@(Model.DataPlecare?.Day.ToString() ?? "00")</span>
+                                <div id="itemRow_@zbor.Id">
+
+                                    <div id="evenimentCalendarZbor_@zbor.Id">
+                                        <span id="lunaText_@zbor.Id" >
+                                            @zbor.DataPlecare.ToString("MMM")
+                                        </span>
+                                        <span id="ziText_@zbor.Id">
+                                            @zbor.DataPlecare.ToString("dd")
+                                        </span>
                                     </div>
-                                    <div id="eventDetails_@loc.Id">
-                                        <p id="eventTitle_@loc.Id">Arrival & Exploration: @loc.Locatie</p>
-                                        <p id="eventDesc_@loc.Id">Check-in at local stay • 02:00 PM</p>
+
+                                    <div id="eventDetails_@zbor.Id">
+                                        <p id="titluEveniment_@zbor.Id">
+                                            Flight to @zbor.OrasSosire (@zbor.AeroportSosire)
+                                        </p>
+                                        <p id="eventDesc_@zbor.Id">
+                                            Departs from @zbor.OrasPlecare • <strong style="color: #2c3e50;">@zbor.DataPlecare.ToString("HH:mm")</strong>
+                                        </p>
                                     </div>
+
                                 </div>
                             }
-                        </div>
-                    </section>
-                <section id="mapBox">
-                    <div id="mapHeader">
-                        <h5 id="mapTitle">Trip Map</h5>
-                    </div>
-                    <div id="mapDisplay" style="height: 300px; position: relative;">
-                        <div id="tripMainMap" style="width: 100%; height: 100%; border-radius: 12px;"></div>
+                        }
+                        else
+                        {
+                            <p style="color: #95a5a6; font-size: 14px; font-style: italic;">
+                                No flights scheduled yet. Use the planner to book your tickets!
+                            </p>
+                        }
                     </div>
                 </section>
+                    <section id="mapBox">
+                        <div id="mapHeader">
+                            <h5 id="mapTitle">Trip Map</h5>
+                        </div>
+                        <div id="mapDisplay" style="height: 300px; position: relative;">
+                            <div id="tripMainMap" style="width: 100%; height: 100%; border-radius: 12px;"></div>
+                        </div>
+                    </section>
                     <section id="budgetBox">
                         <div id="budgetHeader">
                             <h5 id="budgetTitle">Budget Progress</h5>
