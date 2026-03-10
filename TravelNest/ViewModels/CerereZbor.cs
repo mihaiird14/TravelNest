@@ -2,6 +2,7 @@
 {
     public class CerereZbor
     {
+        public int IdGrup { get; set; }
         public string DeLa { get; set; }
         public string La { get; set; }
         public string IataDeLa { get; set; }

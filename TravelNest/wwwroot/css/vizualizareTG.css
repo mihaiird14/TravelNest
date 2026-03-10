@@ -1619,3 +1619,15 @@ label[id^="etichetaRuta"], #etichetaPlecare {
     font-size: 13px;
     color: #7f8c8d;
 }
+#verificaZbor {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}

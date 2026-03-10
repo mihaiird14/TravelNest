@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 using TravelNest.Data;
 using TravelNest.Data.Migrations;
 using TravelNest.Hubs;
@@ -499,48 +500,79 @@ namespace TravelNest.Controllers
         [HttpPost]
         public async Task<IActionResult> CautaZboruri([FromBody] List<CerereZbor> rute)
         {
-            var rezultate = new List<object>();
+            var rezultateFinale = new List<object>();
 
             foreach (var ruta in rute)
             {
-                await Task.Delay(1000);
-
-                string iataPlecare = !string.IsNullOrEmpty(ruta.IataDeLa) ? ruta.IataDeLa : await _flightService.GenerareCodAeroport(ruta.DeLa);
-                string iataSosire = !string.IsNullOrEmpty(ruta.IataLa) ? ruta.IataLa : await _flightService.GenerareCodAeroport(ruta.La);
-
-                if (string.IsNullOrEmpty(iataPlecare) || string.IsNullOrEmpty(iataSosire))
-                        continue;
-                var doc = await _flightService.SearchFlights(iataPlecare, iataSosire, ruta.DataZbor);
-                doc.RootElement.TryGetProperty("data", out var dataElement);
-                doc.RootElement.TryGetProperty("dictionaries", out var dictElement);
-
-                rezultate.Add(new
+                var zboruriUnice = new Dictionary<string, ZborGrupuri>();
+                var tAmadeus = _flightService.SearchFlights(ruta.IataDeLa, ruta.IataLa, ruta.DataZbor);
+                var tKiwi = _flightService.cautaKiwi(ruta.IataDeLa, ruta.IataLa, ruta.DataZbor, ruta.IdGrup);
+                try
                 {
-                    titluRuta = $"{ruta.DeLa} ({iataPlecare}) - {ruta.La} ({iataSosire})",
-                    zboruri = dataElement,   
-                    dictionare = dictElement 
+                    await Task.WhenAll(tAmadeus, tKiwi);
+                }
+                catch { }
+                if (tAmadeus.Status == TaskStatus.RanToCompletion)
+                {
+                    var lAmadeus = _flightService.cautaAmadeus(tAmadeus.Result, ruta.IdGrup, ruta.DeLa, ruta.La);
+                    foreach (var z in lAmadeus)
+                    {
+                        string cheie = $"{z.NumeCompanie}{z.NumarZbor}_{z.DataPlecare:yyyyMMddHHmm}";
+                        zboruriUnice[cheie] = z;
+                    }
+                }
+
+                if (tKiwi.Status == TaskStatus.RanToCompletion)
+                {
+                    var kiwiList = tKiwi.Result;
+                    foreach (var z in kiwiList)
+                    {
+                        string cheie = $"{z.NumeCompanie}{z.NumarZbor}_{z.DataPlecare:yyyyMMddHHmm}";
+                        if (zboruriUnice.ContainsKey(cheie))
+                        {
+                            if (z.Pret < zboruriUnice[cheie].Pret) zboruriUnice[cheie] = z;
+                        }
+                        else
+                        {
+                            zboruriUnice.Add(cheie, z);
+                        }
+                    }
+                }
+
+                rezultateFinale.Add(new
+                {
+                    titluRuta = $"{ruta.DeLa} - {ruta.La}",
+                    zboruri = zboruriUnice.Values.OrderBy(x => x.Pret).ToList()
                 });
             }
 
-            return Ok(rezultate);
+            return Ok(rezultateFinale);
         }
         [HttpPost]
         public async Task<IActionResult> SalveazaZboruriTG([FromBody] List<ZborGrupuri> biletePrimite)
         {
-            if (biletePrimite == null || biletePrimite.Count == 0)
+            if (biletePrimite == null || !biletePrimite.Any())
             {
                 return BadRequest(new { eroare = "No tickets received." });
             }
-
+            int idGrup = biletePrimite.First().GrupId;
+            using var tranzactie = await _context.Database.BeginTransactionAsync();
             try
             {
+                //sterg zborurile vechi ca sa pot sa editez
+                //dupa adaug
+                var zboruriExistente = _context.ZborGrupuris.Where(z => z.GrupId == idGrup);
+                _context.ZborGrupuris.RemoveRange(zboruriExistente);
                 _context.ZborGrupuris.AddRange(biletePrimite);
                 await _context.SaveChangesAsync();
-                return Ok(new { succes = true, mesaj = "Tickets have been saved successfully!" });
+                await tranzactie.CommitAsync();
+
+                return Ok(new { succes = true, mesaj = "Tickets have been updated!" });
             }
             catch (Exception ex)
-            {
-                return BadRequest(new { eroare = ex.Message });
+            {          
+                await tranzactie.RollbackAsync();
+                return BadRequest(new { eroare = "Database error: " + ex.Message });
             }
         }
         [HttpGet]

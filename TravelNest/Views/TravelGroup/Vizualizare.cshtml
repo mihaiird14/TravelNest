@@ -496,6 +496,16 @@
             </div>
         </div>
     </div>
+    <div id="verificaZbor" class="popUp" style="display: none;">
+        <div class="popUpbox">
+            <h3 id="popUpTitlu">Itinerary Update Needed</h3>
+            <p id="popUpMesaj">You've changed the dates or destinations. Don't forget to update your flights to match the new plan!</p>
+
+            <div class="butoanePopUp">
+                <button onclick="inchidePopupReminder()" id="btnAnularePopUp">Ok</button>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const btnConfirm = document.getElementById('confirmareData');
@@ -621,6 +631,9 @@
                 });
 
                 if (res.ok) {
+                    if (document.getElementById('detaliiBiletContainer')) {
+                        sessionStorage.setItem('reminderZboruri', 'true');
+                    }
                     location.reload();
                 }
             } catch (err) {
