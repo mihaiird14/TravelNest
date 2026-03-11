@@ -1047,19 +1047,24 @@ window.incarcaBileteExistente = async function() {
 window.editeazaItinerariul = async function() {
     document.getElementById('containerBilete').style.display = 'none';
     document.getElementById('formularZbor').style.display = 'block';
+    
     const idGrup = document.getElementById('idGrup').value;
+    
     try {
         const ras = await fetch(`/TravelGroup/GetZboruriGrup?idGrup=${idGrup}`);
         const zbSalvate = await ras.json();
+        
         if (zbSalvate && zbSalvate.length > 0) {  
             const bilet1 = zbSalvate[0];
-            const orasPlec = document.getElementById('orasPlecare');
-            orasPlec.value = `${bilet1.orasPlec} (${bilet1.aeroportPlecare})`;
+            const orasPlecInput = document.getElementById('orasPlecare');
+            if (bilet1.orasPlecare && bilet1.aeroportPlecare) {
+                orasPlecInput.value = `${bilet1.orasPlecare} (${bilet1.aeroportPlecare})`;
+            }
             await window.genereazaSegmente();
             zbSalvate.forEach((bilet, index) => {
-                const val = document.getElementById(`dataZbor${index}`);
-                if (val) {
-                    val.value = bilet.dataPlecare.split('T')[0];
+                const inputData = document.getElementById(`dataZbor${index}`);
+                if (inputData && bilet.dataPlecare) {
+                    inputData.value = bilet.dataPlecare.split('T')[0];
                 }
             });
         }
