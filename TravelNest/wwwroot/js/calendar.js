@@ -138,7 +138,7 @@
         }
 
         this.zileSel.sort();
-        this.render();
+        this.afisare();
         this.updateConfirmBtn();
     }
 
