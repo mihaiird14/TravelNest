@@ -9,12 +9,12 @@ using TravelNest.Data;
 using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
-
+using QuestPDF.Infrastructure;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+QuestPDF.Settings.License = LicenseType.Community;
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

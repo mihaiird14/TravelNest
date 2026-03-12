@@ -904,7 +904,7 @@ window.genereazaDetaliiBilete = async function() {
         });
 
         if (raspuns.ok) {
-            btn.innerText = "Saved ✓";
+            btn.innerText = "Saved";
             btn.style.backgroundColor = "#28a745";
             setTimeout(() => { location.reload(); }, 1000);
         } else {
@@ -977,6 +977,7 @@ window.inchidePopUp = function() {
 
 window.incarcaBileteExistente = async function() {
     const idGrup = parseInt(document.getElementById('idGrup').value);
+    const esteAdmin = document.getElementById('esteAdmin')?.value === "true";
     if (!idGrup) 
         return;
 
@@ -1030,11 +1031,13 @@ window.incarcaBileteExistente = async function() {
                     </div>
                     `;
                 });
-                htmlBilete += `
+                if(esteAdmin){
+                    htmlBilete += `
+                        </div>
+                        <button id="butonEditareZboruri" style="width: 100%; background-color: #f8f9fa; color: #34495e; border: 1px solid #ced4da; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 20px;" onclick="window.editeazaItinerariul()">Edit Flights</button>
                     </div>
-                    <button id="butonEditareZboruri" style="width: 100%; background-color: #f8f9fa; color: #34495e; border: 1px solid #ced4da; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 20px;" onclick="window.editeazaItinerariul()">Edit Flights</button>
-                </div>
-                `;
+                    `;
+                }
                 const containerBilete = document.getElementById('containerBilete');
                 containerBilete.innerHTML = htmlBilete;
                 containerBilete.style.display = 'block';
@@ -1043,6 +1046,17 @@ window.incarcaBileteExistente = async function() {
     } catch (eroare) {
         console.error(eroare);
     }
+};
+window.previzualizareZboruri = function(idGrup) {
+    const containerBilete = document.getElementById('detaliiBiletContainer');
+    if (!containerBilete) {
+        return;
+    }
+    const url = `/TravelGroup/GenerarePDFZboruri?idGrup=${idGrup}&previzualizare=true`;
+    window.open(url, '_blank');
+};
+window.descarcaPDFZb = function(idGrup) {
+    window.location.href = `/TravelGroup/GenerarePDFZboruri?idGrup=${idGrup}`;
 };
 window.editeazaItinerariul = async function() {
     document.getElementById('containerBilete').style.display = 'none';

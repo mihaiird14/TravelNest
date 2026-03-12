@@ -686,7 +686,11 @@
     color: #1e293b;
     margin: 0;
 }
-
+#confirmareData {
+    display: none;
+    color: #f1c40f;
+    cursor: pointer;
+}
 #controaleLuna button {
     background: none;
     border: none;
@@ -1630,4 +1634,68 @@ label[id^="etichetaRuta"], #etichetaPlecare {
     display: none;
     align-items: center;
     justify-content: center;
+}
+#btnGenerarePDFZb {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+#btnPrevZb {
+    width: 120px;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+    justify-content: center;
+}
+#btnDownloadZb {
+    background: #EE5607;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+#documentZbor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FEEDE5;
+    padding: 12px 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px dashed #EE5607;
+}
+#documentZbor div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.fa-file-pdf {
+    color: #EE5607;
+    font-size: 1.2rem;
+}
+.zi-calendar.clickable {
+    cursor: pointer;
+}
+
+#confirmareData {
+    display: none;
+    color: #f1c40f;
+    cursor: pointer;
+}
+
+#confirmareData.visible {
+    display: inline-block;
 }
