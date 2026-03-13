@@ -91,7 +91,7 @@ public class FlightService
         }
         return null;
     }
-    //adaugam si kiwiAPi
+    // kiwiAPi
     public async Task<List<ZborGrupuri>> cautaKiwi(string plecare, string destinatie, string data, int idGrup)
     {
         DateTime d = DateTime.Parse(data);
@@ -126,7 +126,8 @@ public class FlightService
                     AeroportSosire = z.GetProperty("flyTo").GetString(),
                     DataPlecare = DateTime.Parse(z.GetProperty("local_departure").GetString()),
                     DataSosire = DateTime.Parse(z.GetProperty("local_arrival").GetString()),
-                    Pret = z.GetProperty("price").GetDecimal()
+                    Pret = z.GetProperty("price").GetDecimal(),
+                    LinkZbor = z.GetProperty("deep_link").GetString()
                 });
             }
         }

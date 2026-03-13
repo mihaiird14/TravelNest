@@ -6,7 +6,9 @@
 
         this.inceputPerioda = this.container.dataset.startDate || '';
         this.sfarsitPerioda = this.container.dataset.endDate || '';
-        this.lunaCurenta = new Date(this.inceputPerioda) || new Date();
+        this.lunaCurenta = (this.inceputPerioda && !isNaN(Date.parse(this.inceputPerioda))) 
+                   ? new Date(this.inceputPerioda) 
+                   : new Date();
         this.zileSel = [];
         this.esteAdmin = document.getElementById('esteAdmin')?.value === 'true';
         this.btnConfirm = document.getElementById('confirmareData');

@@ -18,5 +18,6 @@ namespace TravelNest.Models
         public DateTime DataPlecare { get; set; }
         public DateTime DataSosire { get; set; }
         public decimal Pret { get; set; }
+        public string? LinkZbor { get; set; }
     }
 }

@@ -510,7 +510,7 @@ namespace TravelNest.Controllers
                 var zboruriUnice = new Dictionary<string, ZborGrupuri>();
                 var tAmadeus = _flightService.SearchFlights(ruta.IataDeLa, ruta.IataLa, ruta.DataZbor);
                 var tKiwi = _flightService.cautaKiwi(ruta.IataDeLa, ruta.IataLa, ruta.DataZbor, ruta.IdGrup);
-                try
+               try
                 {
                     await Task.WhenAll(tAmadeus, tKiwi);
                 }
@@ -524,8 +524,7 @@ namespace TravelNest.Controllers
                         zboruriUnice[cheie] = z;
                     }
                 }
-
-                if (tKiwi.Status == TaskStatus.RanToCompletion)
+                /*if (tKiwi.Status == TaskStatus.RanToCompletion)
                 {
                     var kiwiList = tKiwi.Result;
                     foreach (var z in kiwiList)
@@ -540,7 +539,7 @@ namespace TravelNest.Controllers
                             zboruriUnice.Add(cheie, z);
                         }
                     }
-                }
+                }*/
 
                 rezultateFinale.Add(new
                 {
@@ -597,6 +596,10 @@ namespace TravelNest.Controllers
         }
         private string LinkZbor(ZborGrupuri zbor)
         {
+            if (!string.IsNullOrEmpty(zbor.LinkZbor))
+            {
+                return zbor.LinkZbor;
+            }
             string query = Uri.EscapeDataString($"Flights from {zbor.AeroportPlecare} to {zbor.AeroportSosire} on {zbor.DataPlecare:yyyy-MM-dd} {zbor.NumeCompanie}");
             return $"https://www.google.com/travel/flights?q={query}";
 
@@ -672,11 +675,10 @@ namespace TravelNest.Controllers
 
                                         r.RelativeItem().PaddingLeft(15).Column(c => {
                                             c.Item().Text($"{z.NumeCompanie} • Flight {z.NumarZbor}").Bold().FontSize(13);
-                                            c.Item().Hyperlink(LinkZbor(z))
+                                            /*c.Item().Hyperlink(LinkZbor(z))
                                                     .Text("Book on Google FLights →")
-                                                    .FontColor("#EE5607").Underline().FontSize(10);
+                                                    .FontColor("#EE5607").Underline().FontSize(10);*/
                                         });
-
                                         r.ConstantItem(120).AlignRight().Column(c => {
                                             c.Item().Text("Total Price").FontSize(9).AlignRight();
                                             c.Item().Text($"{z.Pret} EUR").FontSize(18).ExtraBold().FontColor("#EE5607");
