@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Niste SQL reset\" />
+    <Folder Include="sql-reset\" />
   </ItemGroup>
 
 </Project>

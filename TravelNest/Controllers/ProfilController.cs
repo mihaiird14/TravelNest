@@ -27,32 +27,51 @@ namespace TravelNest.Controllers
             _context = context;
             _faceService = faceService;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var userIdCurent = _userManager.GetUserId(User);
 
-            if (user == null)
+            Models.Profil? profil = null;
+
+            if (id.HasValue)
             {
-                return RedirectToPage("/Account/Login", new { area = "Identity" });
+                profil = await _context.Profils
+                    .Include(p => p.User)
+                    .Include(p => p.Posts).ThenInclude(post => post.FisiereMedia)
+                    .Include(p => p.MembruGrupuri).ThenInclude(mg => mg.TravelGroup).ThenInclude(l => l.Locatii)
+                    .FirstOrDefaultAsync(p => p.Id == id.Value);
             }
-            var profil = await _context.Profils
-                .Include(p => p.User)
-                .Include(p => p.Posts) 
-                    .ThenInclude(post => post.FisiereMedia) 
-                .Include(p => p.MembruGrupuri) 
-                    .ThenInclude(mg => mg.TravelGroup)
-                        .ThenInclude(l=>l.Locatii)
-                .FirstOrDefaultAsync(p => p.UserId == user.Id);
-            if (profil == null)
+            else
             {
-                profil = new Models.Profil
+                if (string.IsNullOrEmpty(userIdCurent))
                 {
-                    UserId = user.Id,
-                    ImagineProfil = "/images/profilDefault.png",
-                };
-                _context.Profils.Add(profil);
-                await _context.SaveChangesAsync();
+                    return RedirectToPage("/Account/Login", new { area = "Identity" });
+                }
+
+                profil = await _context.Profils
+                    .Include(p => p.User)
+                    .Include(p => p.Posts).ThenInclude(post => post.FisiereMedia)
+                    .Include(p => p.MembruGrupuri).ThenInclude(mg => mg.TravelGroup).ThenInclude(l => l.Locatii)
+                    .FirstOrDefaultAsync(p => p.UserId == userIdCurent);
+
+                
+                if (profil == null)
+                {
+                    profil = new Models.Profil
+                    {
+                        UserId = userIdCurent,
+                        ImagineProfil = "/images/profilDefault.png"
+                    };
+                    _context.Profils.Add(profil);
+                    await _context.SaveChangesAsync();
+                }
             }
+
+            if (profil == null) 
+                return NotFound();
+
+            ViewBag.EsteProfilPropriu = profil.UserId == userIdCurent;
+
             return View(profil);
         }
         [HttpGet]
