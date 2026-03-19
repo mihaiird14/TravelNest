@@ -18,7 +18,7 @@
     <div class="sideMenu">
         <img id="logoMenu" src="~/images/logoMenu.png" />
         <div id="butonMeniu">
-            <a asp-controller="Profil" asp-action="Index">
+            <a asp-controller="Profil" asp-action="Index" asp-route-id="">
                 <p>Profile</p>
             </a>
         </div>
@@ -97,7 +97,7 @@
       
                 <br />
                 <h5 id="bioh5">Bio</h5>
-                <textarea asp-for="Bio" maxlength="255" value="@Model.Bio" placeholder="Bio"></textarea>
+                <textarea asp-for="Bio" maxlength="100" value="@Model.Bio" placeholder="Bio"></textarea>
                 <br />
                 <button type="submit">Save Changes</button>
             </form>

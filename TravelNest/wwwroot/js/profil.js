@@ -53,13 +53,18 @@
 
     if (addPostBtn2) {
         addPostBtn2.addEventListener("click", function (event) {
+            const estePropriu = document.getElementById("esteProfilPropriu")?.value === "true";
+            if (!estePropriu) {
+                window.location.href = "/Profil/Index?openPost=true";
+                return; 
+            }
             const vechiulActiv = document.getElementById("paginaCurenta");
             if (vechiulActiv) {
                 vechiulActiv.removeAttribute("id");
             }
-            const pId = this.querySelector("p");
-            if (pId) {
-                pId.id = "paginaCurenta";
+            const pInside = this.querySelector("p");
+            if (pInside) {
+                pInside.id = "paginaCurenta";
             }
             event.stopPropagation();
             newPostForm.style.display = "flex";

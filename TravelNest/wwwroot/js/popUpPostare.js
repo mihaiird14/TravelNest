@@ -85,39 +85,64 @@ function afisCom(data) {
 }
 function genComs(com) {
     const comId = com.id;
-    //apare edited daca este editat
-    const etichetaEditat = com.esteEditat 
-        ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
-        : '';
-    const butonEditare = (com.AutorComentariu === true || com.AutorComentariu === undefined) 
+
+    const poateEditaCom = com.autorComentariu === true || com.AutorComentariu === true;
+    const poateStergeCom = poateEditaCom || com.esteProprietarPostare === true || com.EsteProprietarPostare === true;
+    const afiseazaMeniuCom = poateEditaCom || poateStergeCom;
+
+    const butonEditareCom = poateEditaCom 
         ? `<div class="ElementeDinMeniu btn-editare-custom" onclick="EditCommentOn(${comId})" style="color: #1e293b;">
                <i class="fas fa-pencil-alt"></i> Edit
            </div>` 
         : '';
-    //apreciere buton like uri
+
+    const butonStergereCom = poateStergeCom
+        ? `<div class="ElementeDinMeniu" onclick="stergeComentariu(${comId})">
+                <i class="fas fa-trash-alt"></i> Delete
+            </div>`
+        : '';
+
+    const iconitaOptiuniCom = afiseazaMeniuCom 
+        ? `<i class="fas fa-ellipsis-h optiuni-comentariu" title="Options" onclick="AfisOptiuniComs(${comId})"></i>`
+        : '';
+
+    const etichetaEditat = com.esteEditat 
+        ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
+        : '';
+
     const clasaInima = com.esteApreciat ? 'fas fa-heart text-danger' : 'fa-regular fa-heart';
     const comentariiNrLikes = (com.nrLikeuriComentariu > 0) ? com.nrLikeuriComentariu : '0';
+
     let htmlRaspunsuri = "";
     if (com.raspunsuri && com.raspunsuri.length > 0) {
         com.raspunsuri.forEach(rep => {
             const etichetaEditatRep = rep.esteEditat 
-                    ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
-                    : '';
-        
-            // Calculăm starea inimii pentru reply
+                ? `<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic;">(edited)</span>` 
+                : '';
+
             const clasaInimaRep = rep.euAmDatLikeReply ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart';
             const textNrLikeuriRep = (rep.nrLikeuriReply > 0) ? rep.nrLikeuriReply : '0';
-        
-            const meniuReply = rep.autorReply ? `
-                    <i class="fas fa-ellipsis-h optiuni-comentariu" style="font-size: 10px; cursor:pointer; position:absolute; right:10px; top:10px;" onclick="vizualizareMeniureplys(${rep.id})"></i>
-                    <div id="IdMeniuReply-${rep.id}" class="MeniuOptiuniComs" style="font-size: 11px;">
-                        <div class="ElementeDinMeniu" onclick="EditareReply(${rep.id})" style="color: #1e293b;">
-                            <i class="fas fa-pencil-alt"></i> Edit
-                        </div>
-                        <div class="ElementeDinMeniu" onclick="stergeReply(${rep.id})">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </div>
-                    </div>` : '';
+
+            const poateEditaRep = rep.esteAutor === true;
+            const poateStergeRep = rep.esteAutor === true || rep.esteProprietarPostare === true || rep.esteAutorComentariuParinte === true;
+            const afiseazaMeniuRep = poateEditaRep || poateStergeRep;
+
+            const htmlEditRep = poateEditaRep ? `
+                <div class="ElementeDinMeniu" onclick="EditareReply(${rep.id})" style="color: #1e293b;">
+                    <i class="fas fa-pencil-alt"></i> Edit
+                </div>` : '';
+
+            const htmlDeleteRep = poateStergeRep ? `
+                <div class="ElementeDinMeniu" onclick="stergeReply(${rep.id})">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </div>` : '';
+
+            const meniuReply = afiseazaMeniuRep ? `
+                <i class="fas fa-ellipsis-h optiuni-comentariu" style="font-size: 10px; cursor:pointer; position:absolute; right:10px; top:10px;" onclick="vizualizareMeniureplys(${rep.id})"></i>
+                <div id="IdMeniuReply-${rep.id}" class="MeniuOptiuniComs" style="font-size: 11px;">
+                    ${htmlEditRep}
+                    ${htmlDeleteRep}
+                </div>` : '';
 
             htmlRaspunsuri += `
                 <div class="rand-descriere" id="reply-container-${rep.id}" style="position: relative; margin-bottom: 10px; padding: 10px; background: transparent; border: none; box-shadow: none;">
@@ -129,11 +154,9 @@ function genComs(com) {
                                 <span class="nume-bold" style="font-size: 13px;">${rep.username}</span>
                                 <span id="labelEditatReply-${rep.id}">${etichetaEditatRep}</span>
                             </div>
-                        
                             <div id="zonaTextReply-${rep.id}">
                                 <span class="text-normal text-reply-wrap" id="textReply-${rep.id}" style="font-size: 13px;">${rep.mesaj}</span>
                             </div>
-
                             <div id="zonaEditareReply-${rep.id}" style="display:none; margin-top: 5px;">
                                 <textarea id="inputEditareReply-${rep.id}" class="input-editare-custom" rows="2" style="width:100%; border:1px solid #ccc; border-radius:5px; padding:5px; font-size:12px;">${rep.mesaj}</textarea>
                                 <div style="display:flex; gap:5px; margin-top:5px;">
@@ -145,7 +168,6 @@ function genComs(com) {
                     </div>
                     <div class="zona-actiuni-com" style="margin-left: 38px; margin-top: 5px; display: flex; align-items: center; gap: 15px;">
                         <span class="data-text" style="font-size: 10px;">${rep.data}</span>
-                    
                         <div class="btn-like-reply" onclick="apreciazaReply(${rep.id})" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
                             <i class="${clasaInimaRep}" id="icon-like-reply-${rep.id}" style="font-size: 11px;"></i> 
                             <span id="count-like-reply-${rep.id}" style="font-size: 11px; font-weight: 600;">${textNrLikeuriRep}</span>
@@ -154,7 +176,7 @@ function genComs(com) {
                 </div>`;
         });
     }
-    //afis nr + raspunsuri
+
     const butonVeziRaspunsuri = `
         <div id="btn-raspunsuri-container-${comId}" class="btn-vezi-raspunsuri" onclick="ListaRaspunsuri(${comId})" 
              style="margin-left: 50px; margin-top: 5px; cursor: pointer; font-size: 12px; color: #8e8e8e; font-weight: 600; 
@@ -165,28 +187,21 @@ function genComs(com) {
 
     return `
     <div class="rand-descriere" id="comm-${comId}" style="position: relative;"> 
-        
-        <i class="fas fa-ellipsis-h optiuni-comentariu" title="Options" onclick="AfisOptiuniComs(${comId})"></i>
+        ${iconitaOptiuniCom}
         <div id="IdMeniuCom-${comId}" class="MeniuOptiuniComs">
-            ${butonEditare}
-            <div class="ElementeDinMeniu" onclick="stergeComentariu(${comId})">
-                <i class="fas fa-trash-alt"></i> Delete
-            </div>
+            ${butonEditareCom}
+            ${butonStergereCom}
         </div>
-
         <div class="comentariu-top">
             <img src="${com.poza}" class="poza-rotunda mica">
-            
             <div class="continut-text" style="width: 100%; display: flex; flex-direction: column;">
                 <div style="display: flex; align-items: baseline; gap: 8px;">
                     <span class="nume-bold">${com.username}</span>
                     <span id="labelEditat-${comId}">${etichetaEditat}</span>
                 </div>
-                
                 <div id="zonaTextCom-${comId}" style="display: block;">
                     <span class="text-normal text-reply-wrap" id="textCom-${comId}">${com.continut}</span>
                 </div>
-
                 <div id="zonaEditareCom-${comId}" style="display:none; margin-top: 5px;">
                     <textarea id="inputEditare-${comId}" class="input-editare-custom" rows="2" style="width:100%; border:1px solid #ccc; border-radius:5px; padding:5px;">${com.continut}</textarea>
                     <div style="display:flex; gap:5px; margin-top:5px;">
@@ -196,7 +211,6 @@ function genComs(com) {
                 </div>
             </div>
         </div>
-
         <div class="zona-actiuni-com">
             <span class="data-text">${com.data}</span>
            <div class="btn-like-com" onclick="apreciazaComentariu(${comId})" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
@@ -207,16 +221,13 @@ function genComs(com) {
                 <span>Reply</span>
             </div>
         </div>
-
         <div id="idReply-${comId}" class="RaspunsuriComentarii" style="display:none; margin-left: 50px; margin-top: 10px;">
             <form onsubmit="trimiteReply(event, this, ${comId})" style="display:flex; width:100%; gap:5px;">
                 <input type="text" name="text" class="RaspunsInput" placeholder="Reply to ${com.username}" autocomplete="off" maxlength="100" style="border: none; border-bottom: 1px solid #ccc; background: transparent; width: 100%; outline: none; font-size: 13px;">
                 <button type="submit" id="BtnRaspunsuri" style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer;">Post</button>
             </form>
         </div>
-
         ${butonVeziRaspunsuri}
-
         <div id="container-raspunsuri-${comId}" class="sectiuneReplys" style="display:none; margin-left: 50px;">
             ${htmlRaspunsuri}
         </div>

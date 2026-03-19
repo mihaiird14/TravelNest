@@ -97,10 +97,11 @@
     border: 1px solid aquamarine;
     object-fit: cover;
 }
-#sectiuneSus{
+#sectiuneSus {
     position: absolute;
     display: flex;
     margin-left: 8vw;
+    height: auto;
 }
 #sectiuneSus h5 {
     font-weight: 800;
@@ -113,9 +114,11 @@
 }
 #bio {
     white-space: pre-wrap;
-    width: 20vw;
-    height: 12vh;
-    margin-top: 25px;
+    width: 40vw;
+    height: auto;
+    min-height: 12vh;
+    margin-top: 10px;
+    overflow-wrap: break-word;
 }
 #PaginaProfil {
     position: absolute;
@@ -135,6 +138,7 @@ hr{
     display: flex;
     flex-direction: row;
     gap: 15px;
+    margin-top: 90px;
 }
 #butoane{
     display: flex;
@@ -1474,4 +1478,64 @@ textarea {
     min-width: 18px;
     text-align: center;
     box-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+}
+/*cod ptr butoanele de follow si mesaj*/
+#btnFlMs {
+    display: flex;
+    gap: 20px;
+    margin-top: 35px;
+    margin-left:30px;
+}
+
+#btnFollow {
+    background-color: #EE5607;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s;
+    height: 40px;
+}
+
+#btnFollow:hover {
+    background-color: #d44d06;
+}
+
+#btnMesaj {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    height: 40px;
+}
+
+#btnMesaj:hover {
+    background-color: cornflowerblue;
+    color: white;
+}
+#numeSiButoane{
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: center;
+    position: fixed;
+}
+#imgContPrivat {
+    height: 150px;
+    width: 150px;
+
+}
+#anuntContPrivat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transform: translate(80%, 150%);
+    width: 40%;
 }

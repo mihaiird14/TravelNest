@@ -72,28 +72,37 @@ async function trimiteReply(event, formElement, idComentariu) {
             containerButon.style.display = 'flex';
         }
             
-        } else {
-            alert(result.message || "Eroare la trimitere.");
         }
     } catch (err) {
-        console.error("Eroare rețea:", err);
+        console.error(err);
     }
 }
 function generareReply(idParinte, data) {
     const container = document.getElementById(`container-raspunsuri-${idParinte}`);
     if (container) {
+        const poateEdita = data.esteAutor; 
+        const poateSterge = data.esteAutor || data.esteProprietarPostare || data.esteAutorComentariuParinte;
+        const afiseazaMeniu = poateEdita || poateSterge;
+        const htmlEdit = poateEdita ? `
+            <div class="ElementeDinMeniu" onclick="EditareReply(${data.id})" style="color: #1e293b;">
+                <i class="fas fa-pencil-alt"></i> Edit
+            </div>` : '';
+
+        const htmlDelete = poateSterge ? `
+            <div class="ElementeDinMeniu" onclick="stergeReply(${data.id})">
+                <i class="fas fa-trash-alt"></i> Delete
+            </div>` : '';
+
+        const iconitaOptiuni = (poateEdita || poateSterge) ? `
+            <i class="fas fa-ellipsis-h optiuni-comentariu" style="font-size: 10px; cursor:pointer; position:absolute; right:10px; top:10px;" onclick="vizualizareMeniureplys(${data.id})"></i>` : '';
+
         const htmlReply = `
             <div class="rand-descriere" id="reply-container-${data.id}" style="position: relative; margin-bottom: 10px; padding: 10px; background: transparent; border: none; box-shadow: none;">
-                <i class="fas fa-ellipsis-h optiuni-comentariu" style="font-size: 10px; cursor:pointer; position:absolute; right:10px; top:10px;" onclick="vizualizareMeniureplys(${data.id})"></i>
+                ${iconitaOptiuni}
                 <div id="IdMeniuReply-${data.id}" class="MeniuOptiuniComs" style="font-size: 11px;">
-                    <div class="ElementeDinMeniu" onclick="EditareReply(${data.id})" style="color: #1e293b;">
-                        <i class="fas fa-pencil-alt"></i> Edit
-                    </div>
-                    <div class="ElementeDinMeniu" onclick="stergeReply(${data.id})">
-                        <i class="fas fa-trash-alt"></i> Delete
-                    </div>
+                    ${htmlEdit}
+                    ${htmlDelete}
                 </div>
-
                 <div class="comentariu-top">
                     <img src="${data.userImage}" class="poza-rotunda mica" style="width: 25px; height: 25px;">
                     <div class="continut-text" style="display:flex; flex-direction:column; width:100%;">
@@ -112,7 +121,6 @@ function generareReply(idParinte, data) {
                 </div>
                 <div class="zona-actiuni-com" style="margin-left: 38px; margin-top: 5px; display: flex; align-items: center; gap: 15px;">
                     <span class="data-text" style="font-size: 10px;">${data.data}</span>
-                    
                     <div class="btn-like-reply" onclick="apreciazaReply(${data.id})" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
                         <i class="fa-regular fa-heart" id="icon-like-reply-${data.id}" style="font-size: 11px;"></i> 
                         <span id="count-like-reply-${data.id}" style="font-size: 11px; font-weight: 600;">0</span>
@@ -171,8 +179,6 @@ async function StergeCom() {
                 }, 300);
             }
             
-        } else {
-            alert(rezultat.message || "Error!");
         }
     } catch (eroare) {
         console.error(eroare);
@@ -203,7 +209,6 @@ async function saveEdit(id) {
     const mesajUpdated = input.value;
 
     if (!mesajUpdated.trim()) {
-        alert("Comentariul nu poate fi gol!");
         return;
     }
 
@@ -214,7 +219,7 @@ async function saveEdit(id) {
             body: `id=${id}&continutUpdated=${encodeURIComponent(mesajUpdated)}`
         });
         if (!raspuns.ok) {
-            console.error("Server Error:", raspuns);
+            console.error(raspuns);
             return;
         }
         const rezultat = await raspuns.json();
@@ -225,12 +230,9 @@ async function saveEdit(id) {
                 label.innerHTML = '<span class="eticheta-editat" style="color:#94a3b8; font-size:11px; font-style:italic; margin-left:5px;">(edited)</span>';
             }
             anuleazaEditareComentariu(id);
-        } else {
-            alert(rezultat.message || "Eroare la salvare.");
         }
     } catch (err) {
         console.error(err);
-        alert("Eroare tehnică (JS). Verifică consola (F12).");
     }
 }
 
@@ -271,10 +273,10 @@ async function apreciazaComentariu(idComentariu) {
                 icon.className = 'fa-regular fa-heart';
             }
         } else {
-            console.error("Error:", date.message);
+            console.error(date.message);
         }
     } catch (eroare) {
-        console.error("Error:", eroare);
+        console.error(eroare);
     }
 }
 //functi like reply
@@ -306,7 +308,7 @@ async function apreciazaReply(replyId) {
             icon.className = date.liked ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart';
         }
     } catch (eroare) {
-        console.error("Eroare like reply:", eroare);
+        console.error(eroare);
     }
 }
 //functii dropdown edit/delete replys
@@ -348,7 +350,7 @@ async function saveEditReply(id) {
             anuleazaEditareReply(id);
         }
     } catch (e) {
-        console.error("Eroare la editare reply:", e);
+        console.error(e);
     }
 }
 let idReplyDeSters = null;
@@ -409,11 +411,9 @@ async function ConfirmaStergereReply() {
                 }
             }
 
-        } else {
-            alert("Error deleting reply!");
         }
     } catch (e) {
-        console.error("Eroare la ștergere reply:", e);
+        console.error(e);
     } finally {
         inchidePopUpReply();
     }

@@ -373,15 +373,13 @@ namespace TravelNest.Controllers
         {
             var utilizatorConectat = await _userManager.GetUserAsync(User);
             var postare = await _context.Postares
-                    .Include(p => p.Profil)
-                        .ThenInclude(pr => pr.User)
+                    .Include(p => p.Profil).ThenInclude(pr => pr.User)
                     .Include(p => p.FisiereMedia)
                     .Include(p => p.Likes)
                     .Include(p => p.Comentarii)
-                         .ThenInclude(c => c.LikeComentariu)
+                        .ThenInclude(c => c.LikeComentariu)
                     .Include(p => p.Comentarii)
-                        .ThenInclude(c => c.Profil)
-                            .ThenInclude(u => u.User)
+                        .ThenInclude(c => c.Profil).ThenInclude(u => u.User)
                     .Include(p => p.Comentarii)
                         .ThenInclude(c => c.Raspunsuri)
                             .ThenInclude(r => r.User).ThenInclude(u => u.User)
@@ -389,13 +387,12 @@ namespace TravelNest.Controllers
                         .ThenInclude(c => c.Raspunsuri)
                             .ThenInclude(r => r.LikeReplyComentarii)
                     .FirstOrDefaultAsync(p => p.Id == postId);
-            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
-            if (postare == null)
-            {
-                return NotFound();
-            }
-            var userIds = postare.UseriMentionati ?? new List<string>();
 
+            if (postare == null) return NotFound();
+
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+
+            var userIds = postare.UseriMentionati ?? new List<string>();
             var listaTaguri = await _context.Users
                 .Where(u => userIds.Contains(u.Id))
                 .Select(u => new {
@@ -403,8 +400,8 @@ namespace TravelNest.Controllers
                     userImage = (u.Profil != null && !string.IsNullOrEmpty(u.Profil.ImagineProfil))
                                 ? u.Profil.ImagineProfil
                                 : "/images/profilDefault.png"
-                })
-                .ToListAsync();
+                }).ToListAsync();
+
             var rezultatPostare = new
             {
                 id = postare.Id,
@@ -414,16 +411,10 @@ namespace TravelNest.Controllers
                 data = postare.DataCr.ToString("dd MMM yyyy"),
                 esteAutorPostare = (profil != null && postare.Profil.Id == profil.Id),
                 username = postare.Profil.User.UserName,
-                userImage = !string.IsNullOrEmpty(postare.Profil.ImagineProfil)
-                            ? postare.Profil.ImagineProfil
-                            : "/images/profilDefault.png",
+                userImage = !string.IsNullOrEmpty(postare.Profil.ImagineProfil) ? postare.Profil.ImagineProfil : "/images/profilDefault.png",
                 nrLikeuri = postare.Likes.Count(),
                 esteApreciata = utilizatorConectat != null && postare.Likes.Any(l => l.UserId == utilizatorConectat.Id),
-                media = postare.FisiereMedia.Select(f => new
-                {
-                    url = f.Url,
-                    tip = f.fisier.ToString()
-                }).ToList(),
+                media = postare.FisiereMedia.Select(f => new { url = f.Url, tip = f.fisier.ToString() }).ToList(),
                 totalComentarii = postare.Comentarii.Count() + postare.Comentarii.SelectMany(c => c.Raspunsuri).Count(),
                 comentarii = postare.Comentarii
                     .OrderBy(c => c.DataCr)
@@ -436,6 +427,7 @@ namespace TravelNest.Controllers
                         data = c.DataCr.ToString("dd MMM"),
                         esteEditat = c.ComentariuEditat,
                         AutorComentariu = utilizatorConectat != null && c.Profil.UserId == utilizatorConectat.Id,
+                        esteProprietarPostare = (profil != null && postare.Profil.Id == profil.Id),
                         nrRaspunsuri = c.Raspunsuri.Count(),
                         nrLikeuriComentariu = c.LikeComentariu.Count(),
                         esteApreciat = c.LikeComentariu.Any(l => l.ProfilId == profil.Id),
@@ -449,10 +441,11 @@ namespace TravelNest.Controllers
                             nrLikeuriReply = r.LikeReplyComentarii.Count(),
                             euAmDatLikeReply = r.LikeReplyComentarii.Any(l => l.ProfilId == profil.Id),
                             esteEditat = r.RaspunsEditat,
-                            autorReply = utilizatorConectat != null && r.UserId == profil.Id
+                            esteAutor = (profil != null && r.UserId == profil.Id),
+                            esteProprietarPostare = (profil != null && postare.Profil.Id == profil.Id),
+                            esteAutorComentariuParinte = (profil != null && c.Profil.Id == profil.Id)
                         }).ToList()
                     }).ToList()
-
             };
 
             return Json(rezultatPostare);
@@ -466,6 +459,7 @@ namespace TravelNest.Controllers
             var p = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
             if (p == null) 
                 return NotFound("Profil negăsit");
+            var postare = await _context.Postares.FindAsync(input.PostareId);
             var comm = new Comentariu
             {
                 PostareId = input.PostareId,
@@ -483,6 +477,8 @@ namespace TravelNest.Controllers
                 username = user.UserName,
                 poza = p.ImagineProfil ?? "/images/profilDefault.png",
                 continut = comm.Continut,
+                AutorComentariu = true,
+                esteProprietarPostare = postare.CreatorId == p.Id,
                 data = "ACUM"
             });
         }
@@ -517,43 +513,47 @@ namespace TravelNest.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(mesaj))
-                {
-                    return Json(new { success = false, message = "The message cannot be empty!" });
-                }
-                if (comentariuId <= 0)
-                {
-                    return Json(new { success = false, message = "Invalid comment ID!" });
-                }
+                if (string.IsNullOrWhiteSpace(mesaj)) return Json(new { success = false, message = "Empty message!" });
+
                 var utilizator = await _userManager.GetUserAsync(User);
-                if (utilizator == null)
-                    return Unauthorized();
-                var profil = await _context.Profils.FirstOrDefaultAsync(pr => pr.UserId == utilizator.Id);
-                if (profil == null)
-                {
-                    return Json(new { success = false, message = "Profile not found!" });
-                }
+                if (utilizator == null) return Unauthorized();
+                var comentariuParinte = await _context.Comentarii
+                    .Include(c => c.Postare)
+                        .ThenInclude(p => p.Profil)
+                    .Include(c => c.Profil)
+                    .FirstOrDefaultAsync(c => c.Id == comentariuId);
+
+                if (comentariuParinte == null) return Json(new { success = false, message = "Comment not found!" });
+
+                var profilLogat = await _context.Profils.FirstOrDefaultAsync(pr => pr.UserId == utilizator.Id);
+                if (profilLogat == null) return Json(new { success = false, message = "Profile not found!" });
+
                 var raspunsComentariu = new ReplyCom
                 {
                     ComentariuId = comentariuId,
                     Mesaj = mesaj,
                     DataPost = DateTime.UtcNow,
-                    UserId = profil.Id
+                    UserId = profilLogat.Id
                 };
+
                 _context.ReplyComs.Add(raspunsComentariu);
                 await _context.SaveChangesAsync();
                 return Json(new
                 {
                     success = true,
+                    id = raspunsComentariu.Id,
                     username = utilizator.UserName,
-                    userImage = profil.ImagineProfil ?? "/images/profilDefault.png",
+                    userImage = profilLogat.ImagineProfil ?? "/images/profilDefault.png",
                     mesaj = raspunsComentariu.Mesaj,
-                    data = "ACUM"
+                    data = "ACUM",
+                    esteAutor = true,
+                    esteProprietarPostare = comentariuParinte.Postare.Profil.UserId == utilizator.Id,
+                    esteAutorComentariuParinte = comentariuParinte.Profil.UserId == utilizator.Id
                 });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error: " + ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
         [HttpPost]
