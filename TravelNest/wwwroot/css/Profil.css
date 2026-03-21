@@ -1539,3 +1539,14 @@ textarea {
     transform: translate(80%, 150%);
     width: 40%;
 }
+#btnFollow.following {
+    background-color: #A2E4C1;
+    color: black;
+    border: 1px solid #dbdbdb;
+}
+
+#btnFollow.requested {
+    background-color: #dbdbdb;
+    color: #555;
+    cursor: default;
+}

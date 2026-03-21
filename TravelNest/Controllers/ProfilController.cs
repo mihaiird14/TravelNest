@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Text;
 using System.Text.Json;
 using TravelNest.Data;
 using TravelNest.Data.Migrations;
+using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
 using TravelNest.ViewModels;
@@ -21,11 +24,13 @@ namespace TravelNest.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly CalculFaceRec _faceService;
-        public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService)
+        private readonly IHubContext<NotificariHub> _hubContext;
+        public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService, IHubContext<NotificariHub> hubContext)
         {
             _userManager = userManager;
             _context = context;
             _faceService = faceService;
+            _hubContext = hubContext;
         }
         public async Task<IActionResult> Index(int? id)
         {
@@ -71,7 +76,25 @@ namespace TravelNest.Controllers
                 return NotFound();
 
             ViewBag.EsteProfilPropriu = profil.UserId == userIdCurent;
+            var profilLogat = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userIdCurent);
+            string statusFollow = "None";
+            if (profilLogat != null && profil.Id != profilLogat.Id)
+            {
+                var fl = await _context.Follows
+                    .FirstOrDefaultAsync(u => u.FollowerId == profilLogat.Id && u.FollowedId == profil.Id);
 
+                if (fl != null)
+                {
+                    statusFollow = fl.Status.ToString();
+                }
+            }
+
+            ViewBag.StatusFl = statusFollow;
+            var nrFollowers = await _context.Follows.CountAsync(f => f.FollowedId == profil.Id && f.Status == StatusUrmarire.Accepted);
+            var nrFollowing = await _context.Follows
+                .CountAsync(f => f.FollowerId == profil.Id && f.Status == StatusUrmarire.Accepted);
+            ViewBag.NrFollowers = nrFollowers;
+            ViewBag.NrFollowing = nrFollowing;
             return View(profil);
         }
         [HttpGet]
@@ -819,6 +842,140 @@ namespace TravelNest.Controllers
             {
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> CerereFollow(int idProfilPtrFollow)
+        {
+            var idUtilizatorConectat = _userManager.GetUserId(User);
+            var profilUserCurent = await _context.Profils
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == idUtilizatorConectat);
+
+            var profilTarget = await _context.Profils
+                .Include(p => p.User) 
+                .FirstOrDefaultAsync(p => p.Id == idProfilPtrFollow);
+
+            if (profilUserCurent == null || profilTarget == null || profilUserCurent.Id == idProfilPtrFollow)
+                return Json(new { success = false, message = "Acțiune invalidă." });
+
+            var checkFollow = await _context.Follows
+                .FirstOrDefaultAsync(u => u.FollowerId == profilUserCurent.Id && u.FollowedId == idProfilPtrFollow);
+
+            if (checkFollow != null)
+            {
+                _context.Follows.Remove(checkFollow);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, status = "None" });
+            }
+            else
+            {
+                var newFollow = new Follow
+                {
+                    FollowerId = profilUserCurent.Id,
+                    FollowedId = idProfilPtrFollow,
+                    DataCreat = DateTime.Now,
+                    Status = profilTarget.isPrivate ? StatusUrmarire.Pending : StatusUrmarire.Accepted
+                };
+
+                _context.Follows.Add(newFollow);
+                await _context.SaveChangesAsync();
+
+                var notificare = new Notificare
+                {
+                    destinatarId = idProfilPtrFollow,
+                    expeditorId = profilUserCurent.Id,
+                    DataTrimitere = DateTime.Now,
+                    EsteCitita = false,
+                    TitluNotificare = profilTarget.isPrivate ? "Follow Request" : "New Follower",
+                    MesajNotificare = $"@{profilUserCurent.User.UserName} {(profilTarget.isPrivate ? "wants to follow you" : "started following you")}",
+                    TipNotificare = profilTarget.isPrivate ? "FollowRequest" : "Follow",
+                    Link = $"/Profil/Index/{profilUserCurent.Id}"
+                };
+
+                _context.Notificari.Add(notificare);
+                await _context.SaveChangesAsync();
+                await _hubContext.Clients.User(profilTarget.UserId).SendAsync(
+                    "PrimesteNotificare",
+                    notificare.TitluNotificare,
+                    notificare.MesajNotificare,
+                    notificare.TipNotificare,
+                    profilUserCurent.User.UserName, 
+                    notificare.Id,
+                    profilUserCurent.Id,
+                    profilUserCurent.ImagineProfil 
+                );
+
+                return Json(new { success = true, status = newFollow.Status.ToString() });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> AcceptFollow(int notificareId)
+        {
+            var utilizatorConectat = await _userManager.GetUserAsync(User);
+            var profilLogat = await _context.Profils
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+
+            var notificareVeche = await _context.Notificari.FindAsync(notificareId);
+            if (notificareVeche == null) 
+                return NotFound();
+
+            var urmarire = await _context.Follows
+                .Include(u => u.Follower).ThenInclude(f => f.User) 
+                .FirstOrDefaultAsync(u => u.FollowerId == notificareVeche.expeditorId && u.FollowedId == profilLogat.Id);
+
+            if (urmarire != null)
+            {
+                urmarire.Status = StatusUrmarire.Accepted;
+                var notificareAccept = new Notificare
+                {
+                    destinatarId = urmarire.FollowerId,
+                    expeditorId = profilLogat.Id,
+                    DataTrimitere = DateTime.Now,
+                    EsteCitita = false,
+                    TitluNotificare = "Request Accepted",
+                    MesajNotificare = $"@{profilLogat.User.UserName} accepted your follow request.",
+                    TipNotificare = "Follow",
+                    Link = $"/Profil/Index/{profilLogat.Id}"
+                };
+
+                _context.Notificari.Add(notificareAccept);
+                notificareVeche.EsteCitita = true;
+                await _context.SaveChangesAsync();
+                string userFollowerIdentityId = urmarire.Follower.UserId;
+                await _hubContext.Clients.User(userFollowerIdentityId).SendAsync(
+                    "PrimesteNotificare",
+                    notificareAccept.TitluNotificare,
+                    notificareAccept.MesajNotificare,
+                    notificareAccept.TipNotificare,
+                    profilLogat.User.UserName, 
+                    notificareAccept.Id,
+                    profilLogat.ImagineProfil 
+                );
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RefuzaFollow(int notificareId)
+        {
+            var notf = await _context.Notificari.FindAsync(notificareId);
+            if (notf == null) 
+                return NotFound();
+
+            var fl = await _context.Follows
+                .FirstOrDefaultAsync(u => u.FollowerId == notf.expeditorId && u.FollowedId == notf.destinatarId);
+
+            if (fl != null)
+                _context.Follows.Remove(fl);
+
+            _context.Notificari.Remove(notf);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
         }
     }
 }

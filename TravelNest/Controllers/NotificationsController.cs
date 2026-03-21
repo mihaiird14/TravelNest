@@ -32,7 +32,16 @@ namespace TravelNest.Controllers
                             .Where(n => n.destinatarId == user.Profil.Id)
                             .OrderByDescending(n => n.DataTrimitere)
                             .ToListAsync();
+            var notificariNecitite = notificari.Where(n => !n.EsteCitita).ToList();
 
+            if (notificariNecitite.Any())
+            {
+                foreach (var n in notificariNecitite)
+                {
+                    n.EsteCitita = true; 
+                }
+                await _context.SaveChangesAsync();
+            }
             return View(notificari);
         }
         [HttpPost]

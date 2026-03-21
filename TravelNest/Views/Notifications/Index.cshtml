@@ -76,26 +76,46 @@
                 {
                     @foreach (var x in Model)
                     {
-                        <div id="cardNotif" class="@(x.EsteCitita ? "" : "notificareNoua")">
+                        <div id="cardNotif" class="@(x.EsteCitita ? "" : "notificareNoua")" id="notif-@x.Id">
                             <div id="infoNotif">
-                                <i class="fa-solid @(x.TipNotificare == "TGInvite" ? "fa-envelope-open-text" : "fa-bell")"></i>
+                                @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow")
+                                {
+                                    <img id="pozaNotif" src="@(x.Expeditor?.ImagineProfil ?? "/images/profilDefault.png")"/>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid @(x.TipNotificare == "TGInvite" ? "fa-envelope-open-text" : "fa-bell")"></i>
+                                }
+
                                 <div id="textNotif">
                                     <p id="mesajNotif">@x.MesajNotificare</p>
                                     <span id="dataNotif">@x.DataTrimitere.ToString("dd MMM, HH:mm")</span>
                                 </div>
                             </div>
 
-                            @if (x.TipNotificare == "TGInvite")
-                            {
-                                <div id="actiuniNotif">
+                            <div id="actiuniNotif">
+                                @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow")
+                                {
+                                    <a href="/Profil/Index/@x.expeditorId" class="btnView">View</a>
+                                }
+
+                                @if (x.TipNotificare == "TGInvite")
+                                {
                                     <button id="butonAccept" onclick="raspundeInvitatie(event,@x.Id, true)">Accept</button>
                                     <button id="butonRefuz" onclick="raspundeInvitatie(event,@x.Id, false)">Reject</button>
-                                </div>
-                            }
+                                }
+
+                                @if (x.TipNotificare == "FollowRequest")
+                                {
+                                    <button id="butonAccept" onclick="raspundeCerere(@x.Id, 'Accept')">Accept</button>
+                                    <button id="butonRefuz" onclick="raspundeCerere(@x.Id, 'Decline')">Decline</button>
+                                }
+                            </div>
                         </div>
                     }
                 }
             </div>
         </div>
     </body>
+    <script src="~/js/profil.js" asp-append-version="true"></script>
 </html>

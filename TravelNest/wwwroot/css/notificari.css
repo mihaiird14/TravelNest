@@ -62,7 +62,9 @@
 
 #actiuniNotif {
     display: flex;
-    gap: 10px;
+    gap: 5px;
+    margin-top: 10px;
+    justify-content: flex-end;
 }
 
 #butonAccept {
@@ -94,4 +96,47 @@
     background-color: #c82333;
     color: white;
     transform: scale(1.05);
+}
+#pozaNotif {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.btnView {
+    background-color: #efefef;
+    color: #262626;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    border: 1px solid #dbdbdb;
+}
+
+.btnView:hover {
+    background-color: #dbdbdb;
+}
+
+#punctRosu {
+    background-color: #ff3b30;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    padding: 2px;
 }

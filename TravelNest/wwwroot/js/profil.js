@@ -179,3 +179,45 @@
         resetMediaOnly();
     }
 });
+//ptr follow/unfollow
+const btnFollow = document.getElementById('btnFollow');
+
+if (btnFollow) {
+    btnFollow.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-id');
+
+        fetch('/Profil/CerereFollow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `idProfilPtrFollow=${targetId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                updateBtnFollow(data.status);
+                window.location.reload();
+            }
+        })
+    });
+}
+function updateBtnFollow(status) {
+    const btn = document.getElementById('btnFollow');
+    if (!btn) return;
+
+    if (status === "Accepted") {
+        btn.innerText = "Following";
+        btn.classList.add('following');
+        btn.classList.remove('requested');
+    } 
+    else if (status === "Pending") {
+        btn.innerText = "Requested";
+        btn.classList.add('requested');
+        btn.classList.remove('following');
+    } 
+    else {
+        btn.innerText = "Follow";
+        btn.classList.remove('following', 'requested');
+    }
+}

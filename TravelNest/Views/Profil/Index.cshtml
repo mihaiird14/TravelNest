@@ -79,20 +79,31 @@
                         @if (!ViewBag.EsteProfilPropriu)
                         {
                             <div id="btnFlMs">
-                                <button id="btnFollow">Follow</button>
+                                @if (ViewBag.StatusFl == "Accepted")
+                                {
+                                    <button id="btnFollow" data-id="@Model.Id" class="following">Following</button>
+                                }
+                                else if (ViewBag.StatusFl == "Pending")
+                                {
+                                    <button id="btnFollow" data-id="@Model.Id" class="requested">Requested</button>
+                                }
+                                else
+                                {
+                                    <button id="btnFollow" data-id="@Model.Id">Follow</button>
+                                }
                                 <button id="btnMesaj">Message</button>
                             </div>
                         }
                     </div>
                     <div id="dateFllw">
-                        <p>@Model.Posts.Count(p => !p.Arhivata) posts </p>
-                        <p>0 followers</p>
-                        <p>0 following</p>
+                        <p><strong>@Model.Posts.Count(p => !p.Arhivata)</strong> posts </p>
+                        <p><strong>@ViewBag.NrFollowers</strong> followers</p>
+                        <p><strong>@ViewBag.NrFollowing</strong> following</p>
                     </div>
                     <p id="bio">@Model.Bio</p>
                 </div>
             </div>
-        @if (ViewBag.EsteProfilPropriu || (!ViewBag.EsteProfilPropriu && Model.isPrivate == false)){
+        @if (ViewBag.EsteProfilPropriu || (!ViewBag.EsteProfilPropriu && Model.isPrivate == false) || ViewBag.StatusFl == "Accepted"){
                 <div id="butoanePaginiProfil">
                     <button id="PostsProfil">Posts</button>
                     @if (ViewBag.EsteProfilPropriu){

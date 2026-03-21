@@ -26,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<DocumenteTG> Documents { get; set; }
     public DbSet<Notificare> Notificari { get; set; }
     public DbSet<ZborGrupuri> ZborGrupuris { get; set; }
+    public DbSet<Follow> Follows { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -157,5 +158,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<ZborGrupuri>()
             .Property(z => z.Pret)
             .HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Follow>()
+            .HasOne(u => u.Follower)
+            .WithMany(p => p.Following)
+            .HasForeignKey(u => u.FollowerId)
+            .OnDelete(DeleteBehavior.Restrict); 
+
+        modelBuilder.Entity<Follow>()
+            .HasOne(u => u.Followed)
+            .WithMany(p => p.Followers)
+            .HasForeignKey(u => u.FollowedId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
