@@ -1,4 +1,15 @@
 ﻿document.addEventListener("DOMContentLoaded", function() {
+    const butoaneFeed = document.querySelectorAll('.btn-like');
+    butoaneFeed.forEach(buton => {
+        buton.addEventListener('click', function () {
+            const idPostare = this.getAttribute('data-id');
+            const iconitaInima = this.querySelector('i');
+            const elementNumar = document.getElementById(`nrLike-${idPostare}`);
+            if (typeof apreciazaPostare === "function") {
+                apreciazaPostare(idPostare, iconitaInima, elementNumar);
+            }
+        });
+    });
     const inputCautare = document.getElementById('inputCautare');
     const listaSugestii = document.getElementById('rezultateCautare');
     inputCautare.addEventListener('input', async function() {

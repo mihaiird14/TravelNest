@@ -107,3 +107,293 @@
     font-size: 14px;
     color: #1e293b;
 }
+#fluxPrincipal {
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.articolJurnal {
+    background: #fff;
+    border-radius: 25px;
+    margin-bottom: 50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+}
+
+
+.ramaPatrata {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border-radius: 25px 25px 0 0;
+}
+
+.imagineFit {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+}
+
+.antetPlutitor {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
+.imgProfilPostare {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 5px 12px 5px 5px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    text-decoration: none !important;
+    color: #000;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.imgProfilPostare img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+}
+
+.coloanaButoane {
+    position: absolute;
+    right: 12px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+.butonActiune {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 45px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.butonActiune i {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.butonActiune span {
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+.butonActiune:hover {
+    transform: scale(1.05);
+    background: #fff;
+}
+
+.sectiuneText {
+    padding: 20px;
+}
+
+.textLocatie {
+    color: #3498db;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.textDescriere {
+    font-size: 0.95rem;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.numeBold {
+    font-weight: 800;
+}
+
+.zonaEtichete {
+    margin-top: 12px;
+}
+
+.eticheta {
+    display: inline-block;
+    background: #f8f9fa;
+    color: #7f8c8d;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    margin-right: 5px;
+    font-weight: 600;
+}
+
+.textData {
+    margin-top: 15px;
+    font-size: 0.7rem;
+    color: #bdc3c7;
+    text-transform: uppercase;
+}
+#fluxPrincipal {
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.articolJurnal {
+    background: #fff;
+    border-radius: 25px;
+    margin-bottom: 50px;
+    border: 1px solid #eee;
+}
+
+.ramaPatrata {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    border-radius: 25px;
+}
+
+.imagineFit {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sageataCarusel {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(5px);
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    z-index: 10;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.sageataCarusel:hover {
+    background: #fff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.stanga {
+    left: 10px;
+}
+
+.dreapta {
+    right: 10px;
+}
+
+.antetPlutitor {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
+.pastilaProfil {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 5px 12px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.pastilaProfil img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.coloanaButoane {
+    position: absolute;
+    right: 12px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+.butonActiune {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 45px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.butonActiune i {
+    font-size: 1.1rem;
+}
+
+.butonActiune span {
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+.sectiuneText {
+    padding: 20px;
+}
+
+.textLocatie {
+    color: #3498db;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.textDescriere {
+    font-size: 0.95rem;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.numeBold {
+    font-weight: 800;
+}
+
+.zonaEtichete {
+    margin-top: 10px;
+}
+
+.eticheta {
+    display: inline-block;
+    background: #f1f2f6;
+    color: #7f8c8d;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    margin-right: 5px;
+    font-weight: 600;
+}

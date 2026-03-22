@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MailKit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -25,17 +26,18 @@ namespace TravelNest.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly CalculFaceRec _faceService;
         private readonly IHubContext<NotificariHub> _hubContext;
-        public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService, IHubContext<NotificariHub> hubContext)
+        private readonly RecomandariForYou _recomandariForYou;
+        public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService, IHubContext<NotificariHub> hubContext, RecomandariForYou recomandariForYou)
         {
             _userManager = userManager;
             _context = context;
             _faceService = faceService;
             _hubContext = hubContext;
+            _recomandariForYou = recomandariForYou;
         }
         public async Task<IActionResult> Index(int? id)
         {
             var userIdCurent = _userManager.GetUserId(User);
-
             Models.Profil? profil = null;
 
             if (id.HasValue)
@@ -45,6 +47,30 @@ namespace TravelNest.Controllers
                     .Include(p => p.Posts).ThenInclude(post => post.FisiereMedia)
                     .Include(p => p.MembruGrupuri).ThenInclude(mg => mg.TravelGroup).ThenInclude(l => l.Locatii)
                     .FirstOrDefaultAsync(p => p.Id == id.Value);
+
+                if (profil == null) 
+                    return NotFound();
+                var profilVizitator = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userIdCurent);
+
+                if (profilVizitator != null && profil.Id != profilVizitator.Id)
+                {
+                    var vizitaRecenta = await _context.VizualizareProfils
+                        .AnyAsync(v => v.TargetProfilId == profil.Id &&
+                                       v.VisitorProfilId == profilVizitator.Id &&
+                                       v.DataVizualizare > DateTime.Now.AddMinutes(-30));
+
+                    if (!vizitaRecenta)
+                    {
+                        var v = new VizualizareProfil
+                        {
+                            TargetProfilId = profil.Id,
+                            VisitorProfilId = profilVizitator.Id,
+                            DataVizualizare = DateTime.Now
+                        };
+                        _context.VizualizareProfils.Add(v);
+                        await _context.SaveChangesAsync();
+                    }
+                }
             }
             else
             {
@@ -59,7 +85,6 @@ namespace TravelNest.Controllers
                     .Include(p => p.MembruGrupuri).ThenInclude(mg => mg.TravelGroup).ThenInclude(l => l.Locatii)
                     .FirstOrDefaultAsync(p => p.UserId == userIdCurent);
 
-                
                 if (profil == null)
                 {
                     profil = new Models.Profil
@@ -71,30 +96,22 @@ namespace TravelNest.Controllers
                     await _context.SaveChangesAsync();
                 }
             }
-
-            if (profil == null) 
-                return NotFound();
-
             ViewBag.EsteProfilPropriu = profil.UserId == userIdCurent;
-            var profilLogat = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userIdCurent);
             string statusFollow = "None";
+            var profilLogat = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userIdCurent);
+
             if (profilLogat != null && profil.Id != profilLogat.Id)
             {
                 var fl = await _context.Follows
                     .FirstOrDefaultAsync(u => u.FollowerId == profilLogat.Id && u.FollowedId == profil.Id);
 
-                if (fl != null)
-                {
-                    statusFollow = fl.Status.ToString();
-                }
+                if (fl != null) statusFollow = fl.Status.ToString();
             }
 
             ViewBag.StatusFl = statusFollow;
-            var nrFollowers = await _context.Follows.CountAsync(f => f.FollowedId == profil.Id && f.Status == StatusUrmarire.Accepted);
-            var nrFollowing = await _context.Follows
-                .CountAsync(f => f.FollowerId == profil.Id && f.Status == StatusUrmarire.Accepted);
-            ViewBag.NrFollowers = nrFollowers;
-            ViewBag.NrFollowing = nrFollowing;
+            ViewBag.NrFollowers = await _context.Follows.CountAsync(f => f.FollowedId == profil.Id && f.Status == StatusUrmarire.Accepted);
+            ViewBag.NrFollowing = await _context.Follows.CountAsync(f => f.FollowerId == profil.Id && f.Status == StatusUrmarire.Accepted);
+
             return View(profil);
         }
         [HttpGet]
@@ -177,7 +194,18 @@ namespace TravelNest.Controllers
 
                 _context.FisierMedias.Add(media);
                 await _context.SaveChangesAsync();
+                //adaugam taguri gasite
 
+                if (type == Tip.Image && string.IsNullOrEmpty(postare.MetaDate))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Trimit la AI imaginea: {newFile}");
+                    string pathImg = Path.Combine(uploadPath, newFile);
+                    string descriereSigura = descriere ?? "";
+                    var taguriGasite = await _recomandariForYou.ObtineMetaDate(descriereSigura, pathImg);
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] AI a returnat: '{taguriGasite}'");
+                    postare.MetaDate = taguriGasite;
+                    await _context.SaveChangesAsync();
+                }
                 //python face embeddings
                 if (type == Tip.Image)
                 {
@@ -289,7 +317,7 @@ namespace TravelNest.Controllers
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("EROARE CRITICA LA PROCESARE: " + ex.ToString());
+                        Console.WriteLine(ex.ToString());
                     }
                 }
             }
@@ -380,7 +408,7 @@ namespace TravelNest.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("EROARE CheckFacesInPhoto: " + ex.Message);
+                Console.WriteLine("EROARE: " + ex.Message);
                 return Json(new { success = false, error = ex.Message });
             }
             finally
@@ -411,10 +439,31 @@ namespace TravelNest.Controllers
                             .ThenInclude(r => r.LikeReplyComentarii)
                     .FirstOrDefaultAsync(p => p.Id == postId);
 
-            if (postare == null) return NotFound();
+            if (postare == null) 
+                return NotFound();
 
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
+            if (profil != null && postare.Profil.Id != profil.Id)
+            {
+                //inregistram o vizualizare
+                //la fiecare 30min ca sa nu apara non stop la refresh 
+                var v = await _context.VizualizarePostares
+                    .AnyAsync(x =>  x.PostareId == postId &&
+                                    x.VisitorProfilId == profil.Id &&
+                                    x.DataVizualizare > DateTime.Now.AddMinutes(-30));
 
+                if (!v)
+                {
+                    var view = new VizualizarePostare
+                    {
+                        PostareId = postare.Id,
+                        VisitorProfilId = profil.Id,
+                        DataVizualizare = DateTime.Now
+                    };
+                    _context.VizualizarePostares.Add(view);
+                    await _context.SaveChangesAsync();
+                }
+            }
             var userIds = postare.UseriMentionati ?? new List<string>();
             var listaTaguri = await _context.Users
                 .Where(u => userIds.Contains(u.Id))
@@ -536,20 +585,24 @@ namespace TravelNest.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(mesaj)) return Json(new { success = false, message = "Empty message!" });
+                if (string.IsNullOrWhiteSpace(mesaj)) 
+                    return Json(new { success = false, message = "Empty message!" });
 
                 var utilizator = await _userManager.GetUserAsync(User);
-                if (utilizator == null) return Unauthorized();
+                if (utilizator == null) 
+                    return Unauthorized();
                 var comentariuParinte = await _context.Comentarii
                     .Include(c => c.Postare)
                         .ThenInclude(p => p.Profil)
                     .Include(c => c.Profil)
                     .FirstOrDefaultAsync(c => c.Id == comentariuId);
 
-                if (comentariuParinte == null) return Json(new { success = false, message = "Comment not found!" });
+                if (comentariuParinte == null) 
+                    return Json(new { success = false, message = "Comment not found!" });
 
                 var profilLogat = await _context.Profils.FirstOrDefaultAsync(pr => pr.UserId == utilizator.Id);
-                if (profilLogat == null) return Json(new { success = false, message = "Profile not found!" });
+                if (profilLogat == null) 
+                    return Json(new { success = false, message = "Profile not found!" });
 
                 var raspunsComentariu = new ReplyCom
                 {

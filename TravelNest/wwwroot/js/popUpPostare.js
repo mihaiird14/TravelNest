@@ -16,7 +16,8 @@ window.deschidePostare = async function(idPostare) {
     try {
         const raspuns = await fetch(`/Profil/InfoPostari?postId=${idPostare}`);
 
-        if (!raspuns.ok) throw new Error('Nu am putut încărca postarea.');
+        if (!raspuns.ok) 
+            throw new Error('Nu am putut încărca postarea.');
 
         const date = await raspuns.json();
         populeazaFereastra(date);
@@ -391,9 +392,13 @@ document.getElementById('fereastra-postare').addEventListener('click', function(
         inchideFereastra();
     }
 });
-function apreciazaPostare(idPostare) {
-    const icon = document.getElementById('iconInima');
-    const countSpan = document.getElementById('text-like-count-modal');
+function apreciazaPostare(idPostare, iconitaManual = null, numarManual = null) {
+    const icon = iconitaManual || document.getElementById('iconInima');
+    const countSpan = numarManual || document.getElementById('text-like-count-modal');
+    
+    if (!icon || !countSpan) 
+        return;
+
     const esteRosieAcum = icon.classList.contains('text-danger');
     let numarCurent = parseInt(countSpan.innerText) || 0;
     if (esteRosieAcum) {
@@ -403,6 +408,7 @@ function apreciazaPostare(idPostare) {
         icon.className = 'fa-solid fa-heart text-danger';
         countSpan.innerText = numarCurent + 1;
     }
+
     fetch('/Profil/LikePostare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -411,11 +417,11 @@ function apreciazaPostare(idPostare) {
     .then(r => r.json())
     .then(data => {
         if (data.success && data.nrLikeuri !== undefined) {
-                countSpan.innerText = data.nrLikeuri;
+            countSpan.innerText = data.nrLikeuri;
         }
     })
     .catch(err => {
-        console.error("Eroare rețea:", err);
+        console.error( err);
         if (esteRosieAcum) {
             icon.className = 'fa-solid fa-heart text-danger';
             countSpan.innerText = numarCurent;

@@ -1,15 +1,16 @@
+using MailKit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+using QuestPDF.Infrastructure;
 using SendGrid.Helpers.Mail;
 using System.Globalization;
 using TravelNest.Data;
 using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
-using QuestPDF.Infrastructure;
 
 
 
@@ -28,6 +29,7 @@ builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<AmadeusSettings>(builder.Configuration.GetSection("Amadeus"));
 builder.Services.AddHttpClient<FlightService>();
+builder.Services.AddHttpClient<RecomandariForYou>();
 //Adaugare serviciu Python
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();
