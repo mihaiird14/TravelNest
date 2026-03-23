@@ -13,89 +13,99 @@ namespace TravelNest.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public ForYouController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        private readonly GrafInterfata _grafService;
+        public ForYouController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, GrafInterfata grafService)
         {
             _userManager = userManager;
             _context = context;
+            _grafService = grafService;
         }
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
             var userProfil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userId);
-            if (userProfil == null) 
-                return NotFound();
+            if (userProfil == null) return NotFound();
+
             ViewBag.UserLog = userId;
+            await _grafService.SincronizareUtilizator(userProfil.Id);
+            var profiluriSugerateIds = await _grafService.ConturiSugerate(userProfil.Id);
+            var conturiSugerate = await _context.Profils
+                .Include(p => p.User)
+                .Where(p => profiluriSugerateIds.Contains(p.Id))
+                .ToListAsync();
+            ViewBag.ConturiSugerate = conturiSugerate.OrderBy(x => profiluriSugerateIds.IndexOf(x.Id)).ToList();
             var urmaritiIds = await _context.Follows
                 .Where(f => f.FollowerId == userProfil.Id && f.Status == StatusUrmarire.Accepted)
-                .Select(f => f.FollowedId)
-                .ToListAsync();
+                .Select(f => f.FollowedId).ToListAsync();
 
             var vazuteIds = await _context.VizualizarePostares
                 .Where(v => v.VisitorProfilId == userProfil.Id)
-                .Select(v => v.PostareId)
-                .ToListAsync();
-            IQueryable<Postare> queryBaza = _context.Postares
+                .Select(v => v.PostareId).ToListAsync();
+
+            // postari de la useri pe care ii urmaresc
+            var postariFL = await _context.Postares
                 .Include(p => p.FisiereMedia)
                 .Include(p => p.Profil).ThenInclude(pr => pr.User)
-                .Include(p => p.Likes) 
-                .Include(p => p.Comentarii)
-                       .ThenInclude(c => c.Raspunsuri)
-                .Where(p => !p.Arhivata);
-            var postariPrieteni = queryBaza
-                    .Where(p => urmaritiIds.Contains(p.CreatorId))
-                    .AsEnumerable()
-                    .OrderByDescending(p => !vazuteIds.Contains(p.Id))
-                    .ThenByDescending(p => p.DataCr)
-                    .Take(21)
-                    .ToList();
-            //selectam metadatele de la postari la care userul a dat like
-            var intereseLike = await _context.LikesPostari
-                .Where(l => l.UserId == userId)
-                .Select(l => l.Postare.MetaDate)
+                .Include(p => p.Likes)
+                .Include(p => p.Comentarii).ThenInclude(c => c.Raspunsuri)
+                .Where(p => urmaritiIds.Contains(p.CreatorId) && !p.Arhivata)
                 .ToListAsync();
-            //si metadate de la propriile postari
-            var intereseProprii = await _context.Postares
-                .Where(p => p.CreatorId == userProfil.Id)
-                .Select(p => p.MetaDate)
-                .ToListAsync();
-            var interese = intereseLike.Concat(intereseProprii).ToList();
-            var topTags = interese
+
+            // sortare, daca a fost vazuta sau nu si dupa data
+            postariFL = postariFL
+                .OrderByDescending(p => !vazuteIds.Contains(p.Id))
+                .ThenByDescending(p => p.DataCr)
+                .Take(21).ToList();
+
+            //metaDate
+            var intereseLike = await _context.LikesPostari.Where(l => l.UserId == userId).Select(l => l.Postare.MetaDate).ToListAsync();
+            var intereseProprii = await _context.Postares.Where(p => p.CreatorId == userProfil.Id).Select(p => p.MetaDate).ToListAsync();
+            var topTags = intereseLike.Concat(intereseProprii)
                 .Where(t => !string.IsNullOrEmpty(t))
                 .SelectMany(t => t.Split(", "))
                 .GroupBy(tag => tag)
                 .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .Take(3)
+                .Select(g => g.Key).
+                Take(3)
                 .ToList();
-
-            var queryRecomandari = _context.Postares
+            //postari recomandare dupa metaTAgs
+            //doar conturi publice
+            IQueryable<Postare> queryRecomandari = _context.Postares
                 .Include(p => p.FisiereMedia)
-                .Include(p => p.Profil).ThenInclude(pr => pr.User)
+                .Include(p => p.Profil)
+                    .ThenInclude(pr => pr.User)
                 .Where(p => !urmaritiIds.Contains(p.CreatorId) &&
                             p.CreatorId != userProfil.Id &&
                             !p.Arhivata &&
-                            !vazuteIds.Contains(p.Id));
-
-            List<Postare> postariNoi;
-            if (topTags.Any())
+                            !p.Profil.isPrivate);
+            var postariNoi = await ObtinePostariSugerate(queryRecomandari, topTags, vazuteIds, true);
+            //daca nu exista postari pe fyp, se elimina restrictia de vizualizare
+            if (!postariFL.Any() && !postariNoi.Any())
             {
-                postariNoi = queryRecomandari.AsEnumerable()
-                    .Where(p => !string.IsNullOrEmpty(p.MetaDate) &&
-                                topTags.Any(tag => p.MetaDate.Contains(tag)))
+                postariNoi = await ObtinePostariSugerate(queryRecomandari, topTags, vazuteIds, false);
+            }
+
+            var feedFinal = postariFL.Concat(postariNoi).OrderBy(x => Guid.NewGuid()).ToList();
+            return View(feedFinal);
+        }
+        private async Task<List<Postare>> ObtinePostariSugerate(IQueryable<Postare> query, List<string> tags, List<int> vazute, bool doarNevazute)
+        {
+            var q = query;
+            if (doarNevazute)
+            {
+                q = q.Where(p => !vazute.Contains(p.Id));
+            }
+
+            if (tags.Any())
+            {
+                return q.AsEnumerable()
+                    .Where(p => !string.IsNullOrEmpty(p.MetaDate) && tags.Any(tag => p.MetaDate.Contains(tag)))
                     .OrderBy(x => Guid.NewGuid())
                     .Take(9)
                     .ToList();
             }
-            else
-            {
-                postariNoi = await queryRecomandari.OrderByDescending(p => p.DataCr).Take(9).ToListAsync();
-            }
-            //afisare amestecat
-            var feedFinal = postariPrieteni.Concat(postariNoi)
-                .OrderBy(x => Guid.NewGuid())
-                .ToList();
 
-            return View(feedFinal);
+            return await q.OrderByDescending(p => p.DataCr).Take(9).ToListAsync();
         }
         [HttpGet]
         public async Task<IActionResult> CautaUtilizatori(string un)
@@ -115,5 +125,6 @@ namespace TravelNest.Controllers
 
             return Json(useri);
         }
+
     }
 }

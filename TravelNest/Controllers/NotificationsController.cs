@@ -28,7 +28,7 @@ namespace TravelNest.Controllers
             var p = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
             var notificari = await _context.Notificari
                             .Include(n => n.Expeditor)
-                            .ThenInclude(e => e.User)
+                                .ThenInclude(e => e.User)
                             .Where(n => n.destinatarId == user.Profil.Id)
                             .OrderByDescending(n => n.DataTrimitere)
                             .ToListAsync();

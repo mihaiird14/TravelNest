@@ -27,13 +27,15 @@ namespace TravelNest.Controllers
         private readonly CalculFaceRec _faceService;
         private readonly IHubContext<NotificariHub> _hubContext;
         private readonly RecomandariForYou _recomandariForYou;
-        public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService, IHubContext<NotificariHub> hubContext, RecomandariForYou recomandariForYou)
+        private readonly GrafInterfata _grafService;
+        public ProfilController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, CalculFaceRec faceService, IHubContext<NotificariHub> hubContext, RecomandariForYou recomandariForYou, GrafInterfata grafService)
         {
             _userManager = userManager;
             _context = context;
             _faceService = faceService;
             _hubContext = hubContext;
             _recomandariForYou = recomandariForYou;
+            _grafService = grafService;
         }
         public async Task<IActionResult> Index(int? id)
         {
@@ -44,8 +46,11 @@ namespace TravelNest.Controllers
             {
                 profil = await _context.Profils
                     .Include(p => p.User)
-                    .Include(p => p.Posts).ThenInclude(post => post.FisiereMedia)
-                    .Include(p => p.MembruGrupuri).ThenInclude(mg => mg.TravelGroup).ThenInclude(l => l.Locatii)
+                    .Include(p => p.Posts)
+                        .ThenInclude(post => post.FisiereMedia)
+                    .Include(p => p.MembruGrupuri)
+                        .ThenInclude(mg => mg.TravelGroup)
+                            .ThenInclude(l => l.Locatii)
                     .FirstOrDefaultAsync(p => p.Id == id.Value);
 
                 if (profil == null) 
@@ -54,22 +59,7 @@ namespace TravelNest.Controllers
 
                 if (profilVizitator != null && profil.Id != profilVizitator.Id)
                 {
-                    var vizitaRecenta = await _context.VizualizareProfils
-                        .AnyAsync(v => v.TargetProfilId == profil.Id &&
-                                       v.VisitorProfilId == profilVizitator.Id &&
-                                       v.DataVizualizare > DateTime.Now.AddMinutes(-30));
-
-                    if (!vizitaRecenta)
-                    {
-                        var v = new VizualizareProfil
-                        {
-                            TargetProfilId = profil.Id,
-                            VisitorProfilId = profilVizitator.Id,
-                            DataVizualizare = DateTime.Now
-                        };
-                        _context.VizualizareProfils.Add(v);
-                        await _context.SaveChangesAsync();
-                    }
+                    await _grafService.SincronizareVizualizare(profilVizitator.Id, profil.Id);
                 }
             }
             else
@@ -81,8 +71,11 @@ namespace TravelNest.Controllers
 
                 profil = await _context.Profils
                     .Include(p => p.User)
-                    .Include(p => p.Posts).ThenInclude(post => post.FisiereMedia)
-                    .Include(p => p.MembruGrupuri).ThenInclude(mg => mg.TravelGroup).ThenInclude(l => l.Locatii)
+                    .Include(p => p.Posts)
+                        .ThenInclude(post => post.FisiereMedia)
+                    .Include(p => p.MembruGrupuri)
+                        .ThenInclude(mg => mg.TravelGroup)
+                            .ThenInclude(l => l.Locatii)
                     .FirstOrDefaultAsync(p => p.UserId == userIdCurent);
 
                 if (profil == null)
@@ -94,6 +87,7 @@ namespace TravelNest.Controllers
                     };
                     _context.Profils.Add(profil);
                     await _context.SaveChangesAsync();
+                    profil.User = await _userManager.FindByIdAsync(userIdCurent);
                 }
             }
             ViewBag.EsteProfilPropriu = profil.UserId == userIdCurent;
@@ -127,7 +121,6 @@ namespace TravelNest.Controllers
                 .Take(5)
                 .Select(u => new
                 {
-
                     userName = u.User.UserName,
                     poza = u.ImagineProfil ?? "/images/profilDefault.png"
                 })
@@ -560,25 +553,67 @@ namespace TravelNest.Controllers
             var utilizator = await _userManager.GetUserAsync(User);
             if (utilizator == null)
                 return Unauthorized();
-
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizator.Id);
+            if (profil == null) 
+                return NotFound();
             var likeExistent = await _context.LikesPostari
                 .FirstOrDefaultAsync(l => l.PostareId == postId && l.UserId == utilizator.Id);
-            bool esteLikedAcum;
+            bool existaLikeUpdate;
 
             if (likeExistent != null)
             {
                 _context.LikesPostari.Remove(likeExistent);
-                esteLikedAcum = false;
+                existaLikeUpdate = false;
+                //stergem like din grafDB
+                await _grafService.SincronizareStergeLike(profil.Id, postId);
             }
             else
             {
                 var likeNou = new LikesPostare { PostareId = postId, UserId = utilizator.Id };
                 _context.LikesPostari.Add(likeNou);
-                esteLikedAcum = true;
+                existaLikeUpdate = true;
+                //adaugasm like in grafDB
+                await _grafService.SincronizareLike(profil.Id, postId);
             }
             await _context.SaveChangesAsync();
+            //notificare like la postare
+            if (existaLikeUpdate)
+            {
+                var postare = await _context.Postares
+                    .Include(p => p.Profil)
+                    .FirstOrDefaultAsync(p => p.Id == postId);
+
+                if (postare != null && postare.Profil.UserId != utilizator.Id)
+                { 
+                    var notificare = new Notificare
+                    {
+                        destinatarId = postare.Profil.Id,
+                        expeditorId = profil.Id,
+                        TitluNotificare = "New Like",
+                        MesajNotificare = $"{utilizator.UserName} liked your post!",
+                        TipNotificare = "Like",
+                        Link = $"/Profil/Index/{utilizator.Profil.Id}?openPost={postId}", 
+                        DataTrimitere = DateTime.Now,
+                        EsteCitita = false
+                    };
+
+                    _context.Notificari.Add(notificare);
+                    await _context.SaveChangesAsync();
+
+                    // trimitere SignalR către destinatar
+                    await _hubContext.Clients.User(postare.Profil.UserId).SendAsync("PrimesteNotificare",
+                        notificare.TitluNotificare,
+                        notificare.MesajNotificare,
+                        notificare.TipNotificare,
+                        utilizator.UserName,
+                        notificare.Id,
+                        profil.Id,
+                        profil.ImagineProfil,
+                        notificare.Link);
+                }
+            }
             int numarActualizat = await _context.LikesPostari.CountAsync(l => l.PostareId == postId);
-            return Json(new { success = true, liked = esteLikedAcum, nrLikeuri = numarActualizat });
+            return Json(new { success = true, liked = existaLikeUpdate, nrLikeuri = numarActualizat });
         }
         [HttpPost]
         public async Task<IActionResult> AddComReply(int comentariuId, string mesaj)
@@ -918,6 +953,8 @@ namespace TravelNest.Controllers
             {
                 _context.Follows.Remove(checkFollow);
                 await _context.SaveChangesAsync();
+                //stergem follow din grafDB
+                await _grafService.SincronizareStergeFollow(profilUserCurent.Id, idProfilPtrFollow);
                 return Json(new { success = true, status = "None" });
             }
             else
@@ -932,7 +969,11 @@ namespace TravelNest.Controllers
 
                 _context.Follows.Add(newFollow);
                 await _context.SaveChangesAsync();
-
+                //adaug follow cont public in grafDB
+                if (newFollow.Status == StatusUrmarire.Accepted)
+                {
+                    await _grafService.SincronizareFollow(profilUserCurent.Id, idProfilPtrFollow);
+                }
                 var notificare = new Notificare
                 {
                     destinatarId = idProfilPtrFollow,
@@ -995,6 +1036,8 @@ namespace TravelNest.Controllers
                 _context.Notificari.Add(notificareAccept);
                 notificareVeche.EsteCitita = true;
                 await _context.SaveChangesAsync();
+                //adaug follow dupa accept cont privat in grafDB
+                await _grafService.SincronizareFollow(urmarire.FollowerId, profilLogat.Id);
                 string userFollowerIdentityId = urmarire.Follower.UserId;
                 await _hubContext.Clients.User(userFollowerIdentityId).SendAsync(
                     "PrimesteNotificare",
@@ -1023,8 +1066,11 @@ namespace TravelNest.Controllers
                 .FirstOrDefaultAsync(u => u.FollowerId == notf.expeditorId && u.FollowedId == notf.destinatarId);
 
             if (fl != null)
+            {
                 _context.Follows.Remove(fl);
-
+                //stergem preventiv in caz de refuz la cont privat grafDB
+                await _grafService.SincronizareStergeFollow(fl.FollowerId, fl.FollowedId);
+            }
             _context.Notificari.Remove(notf);
             await _context.SaveChangesAsync();
 

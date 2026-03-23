@@ -78,15 +78,14 @@
                     {
                         <div id="cardNotif" class="@(x.EsteCitita ? "" : "notificareNoua")" id="notif-@x.Id">
                             <div id="infoNotif">
-                                @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow")
+                                @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow" || x.TipNotificare == "Like")
                                 {
-                                    <img id="pozaNotif" src="@(x.Expeditor?.ImagineProfil ?? "/images/profilDefault.png")"/>
+                                    <img id="pozaNotif" src="@(x.Expeditor?.ImagineProfil ?? "/images/profilDefault.png")" />
                                 }
                                 else
                                 {
                                     <i class="fa-solid @(x.TipNotificare == "TGInvite" ? "fa-envelope-open-text" : "fa-bell")"></i>
                                 }
-
                                 <div id="textNotif">
                                     <p id="mesajNotif">@x.MesajNotificare</p>
                                     <span id="dataNotif">@x.DataTrimitere.ToString("dd MMM, HH:mm")</span>
@@ -109,6 +108,10 @@
                                 {
                                     <button id="butonAccept" onclick="raspundeCerere(@x.Id, 'Accept')">Accept</button>
                                     <button id="butonRefuz" onclick="raspundeCerere(@x.Id, 'Decline')">Decline</button>
+                                }
+                                @if (x.TipNotificare == "Like")
+                                {
+                                    <a href="@x.Link" class="btnView">View Post</a>
                                 }
                             </div>
                         </div>

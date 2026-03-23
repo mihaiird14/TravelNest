@@ -74,17 +74,21 @@
             </div>
 
             <div id="postariTrending">
-            <div id="fluxPrincipal">
+            @{
+                var listaSugestii = ViewBag.ConturiSugerate as IEnumerable<TravelNest.Models.Profil>;
+                bool existaSugestii = listaSugestii != null && listaSugestii.Any();
+            }
+            <div id="fluxPrincipal" class="@(existaSugestii ? "" : "faraSugestii")">
                 @foreach (var post in Model)
                 {
-                    <div id="articol-@post.Id" class="articolJurnal">
+                    <div id="articol-@post.Id" class="postareFYP">
 
                         <div id="zonaMedia-@post.Id" class="ramaPatrata">
 
                             <div id="profil-@post.Id" class="antetPlutitor">
                                 <a href="/Profil/Index/@post.Profil.Id" id="user-@post.Id" class="imgProfilPostare">
                                     <img src="@(string.IsNullOrEmpty(post.Profil.ImagineProfil) ? "/images/profilDefault.png" : post.Profil.ImagineProfil)" id="pozaUser-@post.Id" />
-                                    <span>@@@post.Profil.User.UserName</span>
+                                    <span>@post.Profil.User.UserName</span>
                                 </a>
                             </div>
 
@@ -168,6 +172,35 @@
                     </div>
                 }
             </div>
+            @if (existaSugestii)
+            {
+                <aside id="baraSugestii">
+                    <div id="containerSugestii">
+                        <h3 id="titluSugestii">Suggested accounts</h3>
+
+                        <div id="listaConturi">
+                            @if (ViewBag.ConturiSugerate != null)
+                            {
+                                foreach (var profil in (IEnumerable<TravelNest.Models.Profil>)ViewBag.ConturiSugerate)
+                                {
+                                    <div id="randSugestie-@profil.Id" class="randSugestie">
+                                        <div id="infoUserSugestie">
+                                            <img src="@(string.IsNullOrEmpty(profil.ImagineProfil) ? "/images/profilDefault.png" : profil.ImagineProfil)"
+                                                 id="pozaSugestie-@profil.Id" class="pozaSugestie" />
+                                            <div id="detaliiUserSugestie">
+                                                <span id="numeSugestie-@profil.Id" class="numeSugestie">@profil.User.UserName</span>
+                                            </div>
+                                        </div>
+                                        <a href="/Profil/Index/@profil.Id" id="linkVizualizare-@profil.Id" class="butonVizualizare">
+                                            View
+                                        </a>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </aside>
+            }
         </div>
         <div id="fereastra-postare" class="modal-overlay" style="display: none;">
             <div class="modal-container">

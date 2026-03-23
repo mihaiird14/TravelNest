@@ -31,9 +31,9 @@ namespace TravelNest.Controllers
             var profil = await _context.Profils
              .Include(p => p.User)
              .Include(p => p.Posts)
-                 .ThenInclude(post => post.FisiereMedia) // Necesar pentru imagini/video
+                 .ThenInclude(post => post.FisiereMedia) 
              .Include(p => p.Posts)
-                 .ThenInclude(post => post.Likes) // Necesar pentru verificarea aDatLike
+                 .ThenInclude(post => post.Likes) 
              .FirstOrDefaultAsync(p => p.UserId == user.Id);
             if (profil == null)
             {
@@ -50,9 +50,13 @@ namespace TravelNest.Controllers
         [HttpPost]
         public async Task<IActionResult> EditProfil(Profil p, IFormFile? ImagineProfil, bool ResetImage = false)
         {
+            ModelState.Remove("Followers");
+            ModelState.Remove("Following");
             ModelState.Remove("User");
             ModelState.Remove("ImagineProfil");
             ModelState.Remove("FaceEmbeddings");
+            ModelState.ClearValidationState("Posts");
+            ModelState.ClearValidationState("MembruGrupuri");
             foreach (var x in ModelState.Keys.Where(k => k.StartsWith("User.")).ToList())
             {
                 ModelState.Remove(x);

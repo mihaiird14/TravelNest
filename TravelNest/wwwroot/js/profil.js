@@ -1,7 +1,18 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     let currentIndex = 0;
     let totalSlides = 0;
-
+    //bucata ptr a deschide postarea automat prin view din notificare
+    const urlViewPost = new URLSearchParams(window.location.search);
+    const postIdDeDeschis = urlViewPost.get('openPost');
+    if (postIdDeDeschis) {
+        setTimeout(() => {
+            if (typeof deschidePostare === "function") {
+                deschidePostare(postIdDeDeschis);
+            } else {
+                console.error("Eroare!");
+            }
+        }, 500);
+    }
     const xBtn = document.getElementById("xBtn");
     const menuBtn = document.getElementById("menuBtn");
     const sideMenus = document.querySelectorAll(".sideMenu");

@@ -72,6 +72,7 @@
         </div>
         <div id="paginaProfilSet">
             <form method="post" enctype="multipart/form-data" asp-controller="Settings" asp-action="EditProfil">
+                <div asp-validation-summary="All" class="text-danger"></div>
                 <input type="hidden" asp-for="UserId" />
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="User.FirstName" />
@@ -97,7 +98,7 @@
       
                 <br />
                 <h5 id="bioh5">Bio</h5>
-                <textarea asp-for="Bio" maxlength="100" value="@Model.Bio" placeholder="Bio"></textarea>
+                <textarea asp-for="Bio" maxlength="100" placeholder="Bio">@Model.Bio</textarea>
                 <br />
                 <button type="submit">Save Changes</button>
             </form>

@@ -11,19 +11,26 @@
 
     window.resetTagSystem = function() {
         activeTags.clear();
-        if(hiddenInput) hiddenInput.value = '';
-        if(inputTagManual) inputTagManual.value = '';
-        if(rezultateTagManual) rezultateTagManual.innerHTML = '';
-        if(suggestionsArea) suggestionsArea.innerHTML = '';
-        if(loadingMsg) loadingMsg.style.display = 'none';
-        if(selectedTagsContainer) selectedTagsContainer.innerHTML = '';
+        if(hiddenInput) 
+            hiddenInput.value = '';
+        if(inputTagManual)
+            inputTagManual.value = '';
+        if(rezultateTagManual) 
+            rezultateTagManual.innerHTML = '';
+        if(suggestionsArea)
+            suggestionsArea.innerHTML = '';
+        if(loadingMsg) 
+            loadingMsg.style.display = 'none';
+        if(selectedTagsContainer) 
+            selectedTagsContainer.innerHTML = '';
     };
 
     if(fileInput) {
         fileInput.addEventListener("change", function(e) {
             var files = Array.from(e.target.files);
             var imageFiles = files.filter(f => f.type.indexOf('image') !== -1);
-            if (imageFiles.length > 0) scanAllPhotos(imageFiles);
+            if (imageFiles.length > 0) 
+                scanAllPhotos(imageFiles);
         });
     }
 

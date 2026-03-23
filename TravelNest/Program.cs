@@ -11,7 +11,7 @@ using TravelNest.Data;
 using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
-
+using Neo4j.Driver;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,8 +34,28 @@ builder.Services.AddHttpClient<RecomandariForYou>();
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();
 builder.Services.AddHostedService<TravelNest.Services.PythonRunnerService>();
-
+//conexiune driver neo4j + populare bd
+var neo4jConfig = builder.Configuration.GetSection("Neo4j");
+builder.Services.AddSingleton(GraphDatabase.Driver(
+    neo4jConfig["Uri"],
+    AuthTokens.Basic(neo4jConfig["User"], neo4jConfig["Password"])
+));
+builder.Services.AddScoped<GrafInterfata, GraphService>();
 var app = builder.Build();
+//seed graf db
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var grafService = services.GetRequiredService<GrafInterfata>();
+        await grafService.InitializareGraf();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
 app.MapHub<NotificariHub>("/NotificariHub");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

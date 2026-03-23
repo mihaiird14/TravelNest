@@ -46,6 +46,7 @@ conexiune.on("PrimesteNotificare", function (titlu, mesaj, tip, expeditor, id, e
         listaPagina.insertAdjacentHTML('afterbegin', cardNou);
     }
 });
+
 async function deschideMeniuNotificari() {
     await fetch('/Profil/MarcheazaCitite', { method: 'POST' });
     const punct = document.getElementById("punctRosu");
@@ -110,8 +111,6 @@ async function raspundeCerere(id, actiune) {
 
         if (data.success) {
             location.reload();
-        } else {
-            alert(data.message || "A apărut o eroare la procesarea cererii.");
         }
     } catch (err) {
         console.error("Eroare la procesare cerere:", err);

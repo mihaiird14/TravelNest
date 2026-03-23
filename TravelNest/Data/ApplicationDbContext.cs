@@ -28,7 +28,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ZborGrupuri> ZborGrupuris { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<VizualizarePostare> VizualizarePostares { get; set; }
-    public DbSet<VizualizareProfil> VizualizareProfils { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -176,19 +175,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany() 
             .HasForeignKey(pv => pv.PostareId)
             .OnDelete(DeleteBehavior.Cascade); 
-
-        modelBuilder.Entity<VizualizareProfil>()
-            .HasOne<Profil>() 
-            .WithMany()
-            .HasForeignKey(pv => pv.TargetProfilId)
-            .OnDelete(DeleteBehavior.Restrict); 
-
-        modelBuilder.Entity<VizualizareProfil>()
-            .HasOne<Profil>() 
-            .WithMany()
-            .HasForeignKey(pv => pv.VisitorProfilId)
-            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<VizualizarePostare>().HasIndex(pv => pv.PostareId);
-        modelBuilder.Entity<VizualizareProfil>().HasIndex(pv => pv.TargetProfilId);
     }
 }
