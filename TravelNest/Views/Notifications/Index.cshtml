@@ -78,7 +78,7 @@
                     {
                         <div id="cardNotif" class="@(x.EsteCitita ? "" : "notificareNoua")" id="notif-@x.Id">
                             <div id="infoNotif">
-                                @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow" || x.TipNotificare == "Like")
+                                @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow" || x.TipNotificare == "Like" || x.TipNotificare == "LikeComment" || x.TipNotificare == "LikeReply" || x.TipNotificare == "Comment" || x.TipNotificare == "Reply")
                                 {
                                     <img id="pozaNotif" src="@(x.Expeditor?.ImagineProfil ?? "/images/profilDefault.png")" />
                                 }
@@ -109,7 +109,7 @@
                                     <button id="butonAccept" onclick="raspundeCerere(@x.Id, 'Accept')">Accept</button>
                                     <button id="butonRefuz" onclick="raspundeCerere(@x.Id, 'Decline')">Decline</button>
                                 }
-                                @if (x.TipNotificare == "Like")
+                                @if (x.TipNotificare == "Like" || x.TipNotificare == "LikeComment" || x.TipNotificare == "LikeReply" || x.TipNotificare == "Comment" || x.TipNotificare == "Reply")
                                 {
                                     <a href="@x.Link" class="btnView">View Post</a>
                                 }

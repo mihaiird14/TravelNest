@@ -523,8 +523,12 @@ namespace TravelNest.Controllers
                 return Unauthorized();
             var p = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == user.Id);
             if (p == null) 
-                return NotFound("Profil negăsit");
-            var postare = await _context.Postares.FindAsync(input.PostareId);
+                return NotFound("Profile not found");
+            var postare = await _context.Postares
+                .Include(post => post.Profil)
+                .FirstOrDefaultAsync(post => post.Id == input.PostareId);
+            if (postare == null) 
+                return NotFound("Post not found!");
             var comm = new Comentariu
             {
                 PostareId = input.PostareId,
@@ -535,6 +539,33 @@ namespace TravelNest.Controllers
 
             _context.Comentarii.Add(comm);
             await _context.SaveChangesAsync();
+            //notif addaug com
+            if (postare.Profil.UserId != user.Id)
+            {
+                var notificare = new Notificare
+                {
+                    destinatarId = postare.Profil.Id,
+                    expeditorId = p.Id,
+                    TitluNotificare = "New Comment",
+                    MesajNotificare = $"{user.UserName} commented on your post!",
+                    TipNotificare = "Comment",
+                    Link = $"/Profil/Index/{postare.Profil.Id}?openPost={postare.Id}",
+                    DataTrimitere = DateTime.Now,
+                    EsteCitita = false
+                };
+
+                _context.Notificari.Add(notificare);
+                await _context.SaveChangesAsync();
+                await _hubContext.Clients.User(postare.Profil.UserId).SendAsync("PrimesteNotificare",
+                    notificare.TitluNotificare,
+                    notificare.MesajNotificare,
+                    notificare.TipNotificare,
+                    user.UserName,
+                    notificare.Id,
+                    p.Id,
+                    p.ImagineProfil,
+                    notificare.Link);
+            }
             return Json(new
             {
                 success = true,
@@ -649,6 +680,33 @@ namespace TravelNest.Controllers
 
                 _context.ReplyComs.Add(raspunsComentariu);
                 await _context.SaveChangesAsync();
+                //notif adaugare reply com
+                if (comentariuParinte.Profil.UserId != utilizator.Id)
+                {
+                    var notificare = new Notificare
+                    {
+                        destinatarId = comentariuParinte.ProfilId,
+                        expeditorId = profilLogat.Id,
+                        TitluNotificare = "New Reply",
+                        MesajNotificare = $"{utilizator.UserName} replied to your comment!",
+                        TipNotificare = "Reply",
+                        Link = $"/Profil/Index/{comentariuParinte.ProfilId}?openPost={comentariuParinte.PostareId}",
+                        DataTrimitere = DateTime.Now,
+                        EsteCitita = false
+                    };
+
+                    _context.Notificari.Add(notificare);
+                    await _context.SaveChangesAsync();
+                    await _hubContext.Clients.User(comentariuParinte.Profil.UserId).SendAsync("PrimesteNotificare",
+                        notificare.TitluNotificare,
+                        notificare.MesajNotificare,
+                        notificare.TipNotificare,
+                        utilizator.UserName,
+                        notificare.Id,
+                        profilLogat.Id,
+                        profilLogat.ImagineProfil,
+                        notificare.Link);
+                }
                 return Json(new
                 {
                     success = true,
@@ -761,6 +819,38 @@ namespace TravelNest.Controllers
                 };
                 _context.LikeComentarii.Add(likeCom);
                 esteLikedAcum = true;
+                var comentariu = await _context.Comentarii
+                    .Include(c => c.Profil)
+                    .FirstOrDefaultAsync(c => c.Id == comId);
+                //trimitem notificare ptr like com 
+                if (comentariu != null && comentariu.Profil.UserId != utilizatorConectat.Id)
+                {
+                    var notificare = new Notificare
+                    {
+                        destinatarId = comentariu.ProfilId,
+                        expeditorId = profil.Id,
+                        TitluNotificare = "Comment Like",
+                        MesajNotificare = $"{utilizatorConectat.UserName} liked your comment!",
+                        TipNotificare = "LikeComment",
+                        Link = $"/Profil/Index/{comentariu.ProfilId}?openPost={comentariu.PostareId}",
+                        DataTrimitere = DateTime.Now,
+                        EsteCitita = false
+                    };
+
+                    _context.Notificari.Add(notificare);
+                    await _context.SaveChangesAsync();
+
+                    // trimitem signalR
+                    await _hubContext.Clients.User(comentariu.Profil.UserId).SendAsync("PrimesteNotificare",
+                        notificare.TitluNotificare,
+                        notificare.MesajNotificare,
+                        notificare.TipNotificare,
+                        utilizatorConectat.UserName,
+                        notificare.Id,
+                        profil.Id,
+                        profil.ImagineProfil,
+                        notificare.Link);
+                }
             }
             await _context.SaveChangesAsync();
             int nrLikesComs = await _context.LikeComentarii.CountAsync(l => l.ComentariuId == comId);
@@ -793,6 +883,37 @@ namespace TravelNest.Controllers
                 };
                 _context.LikeReplyComentarii.Add(likeReplyCom);
                 esteLikedAcum = true;
+                var reply = await _context.ReplyComs
+                    .Include(r => r.User)
+                    .Include(r => r.Comentariu)
+                    .FirstOrDefaultAsync(r => r.Id == replyId);
+                //notificare ptr like reply
+                if (reply != null && reply.User.UserId != utilizatorConectat.Id)
+                {
+                    var notificare = new Notificare
+                    {
+                        destinatarId = reply.User.Id,
+                        expeditorId = profil.Id,
+                        TitluNotificare = "Reply Like",
+                        MesajNotificare = $"{utilizatorConectat.UserName} liked your reply!",
+                        TipNotificare = "LikeReply", 
+                        Link = $"/Profil/Index/{reply.User.Id}?openPost={reply.Comentariu.PostareId}",
+                        DataTrimitere = DateTime.Now,
+                        EsteCitita = false
+                    };
+                    _context.Notificari.Add(notificare);
+                    await _context.SaveChangesAsync();
+                    await _hubContext.Clients.User(reply.User.UserId).SendAsync("PrimesteNotificare", 
+                        notificare.TitluNotificare, 
+                        notificare.MesajNotificare, 
+                        notificare.TipNotificare, 
+                        utilizatorConectat.UserName, 
+                        notificare.Id, 
+                        profil.Id, 
+                        profil.ImagineProfil,
+                        notificare.Link);
+                }
+
             }
             await _context.SaveChangesAsync();
             int nrLikesReplyComs = await _context.LikeReplyComentarii.CountAsync(l => l.ReplyId == replyId);

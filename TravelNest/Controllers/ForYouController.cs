@@ -24,9 +24,11 @@ namespace TravelNest.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var userProfil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userId);
-            if (userProfil == null) return NotFound();
+            if (userProfil == null) 
+                return NotFound();
 
             ViewBag.UserLog = userId;
+            //add in grafdb
             await _grafService.SincronizareUtilizator(userProfil.Id);
             var profiluriSugerateIds = await _grafService.ConturiSugerate(userProfil.Id);
             var conturiSugerate = await _context.Profils
@@ -47,7 +49,8 @@ namespace TravelNest.Controllers
                 .Include(p => p.FisiereMedia)
                 .Include(p => p.Profil).ThenInclude(pr => pr.User)
                 .Include(p => p.Likes)
-                .Include(p => p.Comentarii).ThenInclude(c => c.Raspunsuri)
+                .Include(p => p.Comentarii)
+                    .ThenInclude(c => c.Raspunsuri)
                 .Where(p => urmaritiIds.Contains(p.CreatorId) && !p.Arhivata)
                 .ToListAsync();
 
@@ -74,6 +77,8 @@ namespace TravelNest.Controllers
                 .Include(p => p.FisiereMedia)
                 .Include(p => p.Profil)
                     .ThenInclude(pr => pr.User)
+                .Include(p => p.Likes)        
+                .Include(p => p.Comentarii)
                 .Where(p => !urmaritiIds.Contains(p.CreatorId) &&
                             p.CreatorId != userProfil.Id &&
                             !p.Arhivata &&
