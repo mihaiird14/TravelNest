@@ -27,13 +27,19 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 .AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
+//api ptr zboruri
 builder.Services.Configure<AmadeusSettings>(builder.Configuration.GetSection("Amadeus"));
 builder.Services.AddHttpClient<FlightService>();
 builder.Services.AddHttpClient<RecomandariForYou>();
+//add api gemini +  serviciu ptr functii
+builder.Services.AddScoped<GeminiService>();
 //Adaugare serviciu Python
 builder.Services.AddHttpClient<PythonFaceService>();
 builder.Services.AddScoped<CalculFaceRec>();
 builder.Services.AddHostedService<TravelNest.Services.PythonRunnerService>();
+//serviciu  unsplash ptr poze travel assistant
+builder.Services.AddScoped<PostariAssistant>();
+builder.Services.AddHttpClient<PostariAssistant>();
 //conexiune driver neo4j + populare bd
 var neo4jConfig = builder.Configuration.GetSection("Neo4j");
 builder.Services.AddSingleton(GraphDatabase.Driver(
@@ -56,6 +62,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine(ex.Message);
     }
 }
+//signalR ptr notificari
 app.MapHub<NotificariHub>("/NotificariHub");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,0 +1,116 @@
+﻿<html>
+    <head>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="~/css/Profil.css">
+        <link rel="stylesheet" href="~/css/travelAssistant.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    </head>
+    <body>
+        <i id="menuBtn" class="fa-solid fa-bars"></i>
+        <div class="sideMenu">
+            <img id="logoMenu" src="~/images/logoMenu.png" />
+            <div id="butonMeniu">
+                <a asp-controller="Profil" asp-action="Index" asp-route-id="">
+                    <p>Profile</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="Notifications" asp-action="Index">
+                    <p>Notifications</p>
+                    <span id="punctRosu" style="display:none;">0</span>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="ForYou" asp-action="Index">
+                    <p>For You</p>
+                </a>
+            </div>
+            <div id="butonMeniu" class="AddPost2">
+                <p>New Post</p>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelGroup" asp-action="Index">
+                    <p>New Travel Group</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelAssistant" asp-action="Index">
+                    <p id="paginaCurenta">Travel Assistant</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>Travel Map</p>
+            </div>
+            <div class="butoaneJos">
+
+                <div id="butonMeniu">
+                    <a asp-controller="Settings" asp-action="Index">
+                        <p>Settings</p>
+                    </a>
+                </div>
+                <div id="butonMeniu" class="logoutBtn">
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="continutAsistent">
+            <div id="headerTitlu">
+                <span id="badgeAsistent">ASSISTANT</span>
+                <h1 id="numeAssistant">Travel Assistant</h1>
+                <p id="descriereSmall">Your personal curator for the world's most breathtaking sanctuaries. Tell me your dream, and I'll map the journey.</p>
+            </div>
+
+            <div id="zonaPrompt">
+                <textarea id="inputVibe" placeholder="I want to go to Iceland, focusing on hidden waterfalls and geothermal springs..."></textarea>
+                <button id="butonGenereaza">
+                    Generate <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
+            </div>
+            <div id="rezultatGenerate" style="display: none;">
+                <div id="sectiuneOrase">
+                    <div id="titluOrase">
+                        <h3 id="textHighlights">Highlights & Cities</h3>
+                        <button id="refreshOrase">
+                            <i class="fa-solid fa-arrows-rotate"></i> Refresh Cities
+                        </button>
+                    </div>
+                    <div id="listaCities">
+                        <div id="itemOras">
+                            <span id="numeOras">Reykjavik</span>
+                            <p id="detaliiCity">Perfect starting point for the Golden Circle and South Coast tours.</p>
+                            <span id="distantaTrip">DAY 01</span>
+                        </div>
+                        <div id="itemOras">
+                            <span id="numeOras">Akureyri</span>
+                            <p id="detaliiCity">The capital of the North, ideal for whale watching and aurora hunting.</p>
+                            <span id="distantaTrip">DAY 04</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="zonaPostari">
+                    <div id="antetPostari">
+                        <h3 id="textInspiratie">Visual Inspiration</h3>
+                    </div>
+                    <div id="gridImagini">
+                        <div id="ramaPoza" style="grid-column: span 2; grid-row: span 2;">
+                            <img id="imaginePostare" src="~/images/placeholder1.jpg" />
+                        </div>
+                        <div id="ramaPoza">
+                            <img id="imaginePostare" src="~/images/placeholder2.jpg" />
+                        </div>
+                        <div id="ramaPoza">
+                            <img id="imaginePostare" src="~/images/placeholder3.jpg" />
+                        </div>
+                        <div id="ramaPoza" style="grid-column: span 2;">
+                            <img id="imaginePostare" src="~/images/placeholder4.jpg" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="~/js/travelAssistant.js" asp-append-version="true"></script>
+</html>

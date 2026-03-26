@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="~/css/foryou.css">
         <link rel="stylesheet" href="~/css/comentarii.css">
         <link rel="stylesheet" href="~/css/replyComs.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     </head>
     <body>
         <i id="menuBtn" class="fa-solid fa-bars"></i>
@@ -37,10 +37,9 @@
                 </a>
             </div>
             <div id="butonMeniu">
-                <p>Search Destination</p>
-            </div>
-            <div id="butonMeniu">
-                <p>Find Accommodation</p>
+                <a asp-controller="TravelAssistant" asp-action="Index">
+                    <p>Travel Assistant</p>
+                </a>
             </div>
             <div id="butonMeniu">
                 <p>Travel Map</p>
