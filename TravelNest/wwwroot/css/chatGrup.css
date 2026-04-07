@@ -1,0 +1,165 @@
+﻿.mesajDiv {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    max-width: 80%;
+}
+.mesajDiv.sent {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.mesajDiv.received {
+    align-self: flex-start;
+}
+.imgProf {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.mesajText {
+    display: flex;
+    flex-direction: column;
+}
+
+.sent .mesajText {
+    align-items: flex-end;
+}
+.mesajUser {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: #64748b;
+    margin-bottom: 4px;
+    margin-left: 5px;
+}
+.bulaChat {
+    padding: 10px 16px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.sent .bulaChat {
+    background: #3b82f6;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.received .bulaChat {
+    background: white;
+    color: #1e293b;
+    border-bottom-left-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.oraChat {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-top: 4px;
+    display: block;
+}
+.actiuniMesaj {
+    display: flex; 
+    gap: 8px;
+    margin-left: 10px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    color: #94a3b8;
+}
+
+.mesajDiv:hover .actiuniMesaj {
+    display: flex !important; 
+}
+
+.actiuniMesaj i:hover {
+    color: #3b82f6;
+}
+
+.headerMesaj {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.modal-chat-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-chat-box {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    width: 350px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modal-chat-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+#butonConfirma {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#butonConfirmaEdit {
+    background: green;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#butonAnulare {
+    background: #e2e8f0;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.bulina-rosie-pulse {
+    display: block; /* Pentru test, pune block în loc de none să vezi dacă apare fizic */
+    position: absolute;
+    top: -5px; /* Scoate-o puțin în afara cercului pentru vizibilitate */
+    right: -5px;
+    width: 15px;
+    height: 15px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 999; /* Pune-o deasupra oricărui alt element */
+}
+@keyframes bulinaPulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}

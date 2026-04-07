@@ -37,6 +37,11 @@ namespace TravelNest.Models
         [InverseProperty("Destinatar")]
         public List<Notificare> NotificariPrimite { get; set; } = new List<Notificare>();
         public virtual ICollection<Follow> Followers { get; set; }
-        public virtual ICollection<Follow> Following { get; set; } 
+        public virtual ICollection<Follow> Following { get; set; }
+        public virtual ICollection<Mesaj> MesajeTrimise{ get; set; } = new List<Mesaj>();
+
+        public virtual ICollection<Mesaj> MesajePrimite { get; set; } = new List<Mesaj>();
+
+        public virtual ICollection<VizualizareMesaj> MesajeSeen { get; set; } = new List<VizualizareMesaj>();
     }
 }

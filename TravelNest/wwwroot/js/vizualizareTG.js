@@ -1086,3 +1086,13 @@ window.editeazaItinerariul = async function() {
         console.error(error);
     }
 };
+function afiseazaChat(stare) {
+    const chat = document.getElementById("fundalOverlay");
+    if (stare) {
+        chat.style.display = "flex";
+        document.body.style.overflow = "hidden";
+    } else {
+        chat.style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+}

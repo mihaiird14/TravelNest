@@ -47,6 +47,9 @@ builder.Services.AddSingleton(GraphDatabase.Driver(
     AuthTokens.Basic(neo4jConfig["User"], neo4jConfig["Password"])
 ));
 builder.Services.AddScoped<GrafInterfata, GraphService>();
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true; // Permite trimiterea mesajelor de eroare cãtre client
+});
 var app = builder.Build();
 //seed graf db
 using (var scope = app.Services.CreateScope())
@@ -62,8 +65,9 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine(ex.Message);
     }
 }
-//signalR ptr notificari
+//signalR ptr notificari + chat
 app.MapHub<NotificariHub>("/NotificariHub");
+app.MapHub<ChatHub>("/ChatHub");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

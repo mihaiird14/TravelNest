@@ -1699,3 +1699,116 @@ label[id^="etichetaRuta"], #etichetaPlecare {
 #confirmareData.visible {
     display: inline-block;
 }
+#deschideChatBtn:hover{
+    background-color: lightblue;
+}
+#fundalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: intrareFade 0.3s ease-out;
+}
+
+#fereastraChat {
+    width: 85%;
+    height: 85%;
+    background: #ffffff;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+#antetHeader {
+    padding: 20px 30px;
+    background: #A2E4C1;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#numeChat {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#inchideClose {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#inchideClose:hover {
+    color: white;
+}
+
+#listaMessages {
+    flex-grow: 1;
+    padding: 30px;
+    background: #f8fafc;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#zonaSend {
+    padding: 20px 30px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#inputMesaj {
+    flex-grow: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 15px;
+    resize: none;
+    height: 50px;
+    font-family: inherit;
+    outline: none;
+}
+
+#butonSend {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    #butonSend:hover {
+        background: #2563eb;
+    }
+
+@keyframes intrareFade {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

@@ -28,6 +28,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ZborGrupuri> ZborGrupuris { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<VizualizarePostare> VizualizarePostares { get; set; }
+    public DbSet<Mesaj>Mesaje { get; set; }
+    public DbSet<VizualizareMesaj> VizualizareMesaje { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -176,5 +178,34 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(pv => pv.PostareId)
             .OnDelete(DeleteBehavior.Cascade); 
         modelBuilder.Entity<VizualizarePostare>().HasIndex(pv => pv.PostareId);
+        //legaturi chat
+        modelBuilder.Entity<Mesaj>()
+            .HasOne(m => m.Expeditor)
+            .WithMany(p => p.MesajeTrimise) 
+            .HasForeignKey(m => m.ExpeditorProfilId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Mesaj>()
+            .HasOne(m => m.Destinatar)
+            .WithMany(p => p.MesajePrimite)
+            .HasForeignKey(m => m.DestinatarProfilId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Mesaj>()
+            .HasOne(m => m.TravelGroup)
+            .WithMany(g => g.MesajeGrupGroup) 
+            .HasForeignKey(m => m.TravelGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<VizualizareMesaj>()
+            .HasOne(v => v.Mesaj)
+            .WithMany(m => m.VizualizariMessages)
+            .HasForeignKey(v => v.MesajId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<VizualizareMesaj>()
+            .HasOne(v => v.Profil)
+            .WithMany(p => p.MesajeSeen) 
+            .HasForeignKey(v => v.ProfilId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
