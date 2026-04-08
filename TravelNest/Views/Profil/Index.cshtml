@@ -35,6 +35,12 @@
                 </a>
             </div>
             <div id="butonMeniu">
+                <a asp-controller="Chat" asp-action="Index">
+                    <p>Chat</p>
+                    <span id="punctRosu" style="display:none;">0</span>
+                </a>
+            </div>
+            <div id="butonMeniu">
                 <a asp-controller="ForYou" asp-action="Index">
                     <p>For You</p>
                 </a>
@@ -493,4 +499,5 @@
 <script src="~/js/map.js" asp-append-version="true"></script>
 <script src="~/js/popUpPostare.js" asp-append-version="true"></script>
 <script src="~/js/replysComs.js" asp-append-version="true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
 </html>

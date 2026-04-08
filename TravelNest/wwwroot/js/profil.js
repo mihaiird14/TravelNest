@@ -1,7 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     let currentIndex = 0;
     let totalSlides = 0;
-    //bucata ptr a deschide postarea automat prin view din notificare
     const urlViewPost = new URLSearchParams(window.location.search);
     const postIdDeDeschis = urlViewPost.get('openPost');
     if (postIdDeDeschis) {
@@ -232,3 +231,34 @@ function updateBtnFollow(status) {
         btn.classList.remove('following', 'requested');
     }
 }
+const conexiuneNotificari = new signalR.HubConnectionBuilder()
+    .withUrl("/ChatHub")
+    .build();
+
+window.actualizeazaBulinaSidebarChat = async function() {
+    const raspuns = await fetch('/Chat/GetTotalNecititePrivat');
+    const date = await raspuns.json();
+    const bulinaChat = document.querySelector('a[href*="/Chat"] #punctRosu');
+
+    if (bulinaChat) {
+        if (date.count > 0) {
+            bulinaChat.innerText = date.count;
+            bulinaChat.style.display = "inline-flex";
+        } else {
+            bulinaChat.style.display = "none";
+        }
+    }
+}
+
+conexiuneNotificari.on("PrimesteMesajPrivat", () => {
+    actualizeazaBulinaSidebarChat();
+});
+
+async function pornesteNotificari() {
+    try {
+        await conexiuneNotificari.start();
+        actualizeazaBulinaSidebarChat();
+    } catch (err) {
+    }
+}
+pornesteNotificari();

@@ -1,0 +1,145 @@
+﻿<html>
+    <head>
+        <link rel="stylesheet" href="~/css/Profil.css">
+        <link rel="stylesheet" href="~/css/chatPrivat.css"> 
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="sideMenu">
+            <img id="logoMenu" src="~/images/logoMenu.png" />
+            <div id="butonMeniu">
+                <a asp-controller="Profil" asp-action="Index" asp-route-id="">
+                    <p>Profile</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="Notifications" asp-action="Index">
+                    <p>Notifications</p>
+                    <span id="punctRosu" style="display:none;">0</span>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="Chat" asp-action="Index">
+                    <p id="paginaCurenta">Chat</p>
+                    <span id="punctRosu" style="display:none;">0</span>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="ForYou" asp-action="Index">
+                    <p>For You</p>
+                </a>
+            </div>
+            <div id="butonMeniu" class="AddPost2">
+                <p>New Post</p>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelGroup" asp-action="Index">
+                    <p>New Travel Group</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <a asp-controller="TravelAssistant" asp-action="Index">
+                    <p>Travel Assistant</p>
+                </a>
+            </div>
+            <div id="butonMeniu">
+                <p>Travel Map</p>
+            </div>
+            <div class="butoaneJos">
+
+                <div id="butonMeniu">
+                    <a asp-controller="Settings" asp-action="Index">
+                        <p>Settings</p>
+                    </a>
+                </div>
+                <div id="butonMeniu" class="logoutBtn">
+                    <a asp-area="Identity" asp-page="/Account/Logout">
+                        <p>Logout</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="paginaChatIndividual">
+            <div id="mainChatContainer" data-current-id="@ViewBag.ProfilEuId">
+                <div id="listaContacteRecent">
+                    <div id="zonaSearchUser">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="inputSearchUser" placeholder="Search friends..." onkeyup="cautaPrieteniChat()">
+                        <div id="rezultateSearch" class="dropdown-search"></div>
+                    </div>
+
+                    <div id="containerConversatii">
+                        @foreach (var conv in ViewBag.ConversatiiRecente)
+                        {
+                            <div class="randContactConversatie @(conv.Necitite > 0 ? "conversatie-necitita" : "")"
+                                 onclick="deschideChatPrivat(@conv.ProfilId, '@conv.Nume', '@conv.Imagine')"
+                                 id="conv_@conv.ProfilId">
+
+                                <img src="@conv.Imagine" class="avatarContactList">
+                                <div class="infoContactText">
+                                    <div class="numeSiOraConversatie">
+                                        <strong class="numeUtilizator">@conv.Nume</strong>
+                                        <small class="oraTrimisData">@conv.Data</small>
+                                    </div>
+                                    <p class="snippetUltimulMesaj">@conv.UltimulMesaj</p>
+                                </div>
+
+                                @if (conv.Necitite > 0)
+                                {
+                                    <span class="badgeNecititeConversatie">@conv.Necitite</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div id="zonaConversatieActiva">
+                    <div id="ecranGolSelecteaza" style="display: flex;">
+                        <i class="fa-regular fa-comments"></i>
+                        <p>Select a friend to start a conversation</p>
+                    </div>
+
+                    <div id="fereastraChatPrivat" style="display: none;">
+                        <div id="headerChatPrivat">
+                            <img id="avatarDestinatarHeader" src="">
+                            <h5 id="numeDestinatarHeader">Username</h5>
+                        </div>
+
+                        <div id="listaMesajePrivat">
+                        </div>
+
+                        <div id="zonaInputPrivat">
+                            <textarea id="msgInputPrivat" placeholder="Type a message..."></textarea>
+                            <button id="btnTrimitePrivat" onclick="trimiteMesajPrivat()">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalStergereChat" class="modal-chat-overlay" style="display:none;">
+            <div class="modal-chat-box">
+                <h4 id="titluModalTitle">Delete Message</h4>
+                <p id="mesajModalMessage">This action is permanent. Do you want to proceed?</p>
+                <div class="modal-chat-buttons">
+                    <button id="butonAnulareCancel" onclick="inchideModalStergere()">Cancel</button>
+                    <button id="butonConfirmaConfirm" class="btn-confirm-red">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalEditareChat" class="modal-chat-overlay" style="display:none;">
+            <div class="modal-chat-box">
+                <h4>Edit Message</h4>
+                <textarea id="textEditareNou" class="input-edit-textarea"></textarea>
+                <div class="modal-chat-buttons">
+                    <button id="butonAnulareEdit" onclick="inchideModalEditare()">Cancel</button>
+                    <button id="butonConfirmaEdit" class="btn-confirm-blue">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+</html>

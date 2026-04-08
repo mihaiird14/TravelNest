@@ -112,7 +112,7 @@
     margin-top: 20px;
 }
 
-#butonConfirma {
+#butonConfirmaConfirm {
     background: #ef4444;
     color: white;
     border: none;
@@ -136,16 +136,16 @@
     cursor: pointer;
 }
 .bulina-rosie-pulse {
-    display: block; /* Pentru test, pune block în loc de none să vezi dacă apare fizic */
+    display: block; 
     position: absolute;
-    top: -5px; /* Scoate-o puțin în afara cercului pentru vizibilitate */
+    top: -5px; 
     right: -5px;
     width: 15px;
     height: 15px;
     background-color: #ff0000;
     border-radius: 50%;
     border: 2px solid white;
-    z-index: 999; /* Pune-o deasupra oricărui alt element */
+    z-index: 999;
 }
 @keyframes bulinaPulse {
     0% {
