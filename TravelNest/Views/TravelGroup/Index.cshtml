@@ -72,7 +72,9 @@
                         <h5 id="locatieTitlu"><i class="fa-solid fa-location-dot"></i> Where are we going?</h5>
                         <div id="locatieButoane">
                             <button type="button" id="locatieManual"><i class="fa-solid fa-location-dot"></i> Enter Manually</button>
-                            <button type="button" id="locatieAI"><i class="fa-solid fa-wand-magic-sparkles"></i> Ask the AI</button>
+                            <a asp-controller="TravelAssistant" asp-action="Index" id="locatieAI" class="btn-create-fab" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Ask the AI
+                            </a>
                         </div>
                     </div>
 

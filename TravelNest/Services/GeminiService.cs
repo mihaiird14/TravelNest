@@ -31,16 +31,26 @@ public class GeminiService
             var excludere = string.IsNullOrEmpty(oraseExcluse)
                 ? ""
                 : $"Do NOT suggest any of these cities: {oraseExcluse}. ";
-            //prompt ptr ai
-            var cererePrompt = $"Identify 5 specific cities and 5 vibe tags for: '{prompText}'. " +
-                               excludere + 
+            var cererePrompt = "First, evaluate the user's input. " +
+                               $"User input: '{prompText}'. " +
+                               "IF the input is offensive, toxic, nonsensical, or completely unrelated to travel and vacation planning, " +
+                               "return ONLY an empty JSON object: {}. " +
+                               "OTHERWISE, identify 5 specific cities and 5 vibe tags for the request. " +
+                               excludere +
                                "Each city MUST have a major international airport in or very close to it. " +
                                "Return ONLY a raw JSON object with this exact structure: " +
                                "{ \"orase\": [\"City1\", \"City2\"...], \"descrieri\": [\"Short city description max 10 words for City1\", ...], \"tags\": [\"Tag1\", \"Tag2\"...] }. " +
                                "The descrieri array must contain a short description for each city (maximum 10 words each), in the same order as orase. " +
                                "No markdown, no talk, just the JSON.";
+
             var raspuns = await _asistentAI.GenerateContent(cererePrompt);
-            return ParsareDate(raspuns.Text);
+            var textRaspuns = raspuns.Text.Trim();
+            if (textRaspuns == "{}" || string.IsNullOrEmpty(textRaspuns))
+            {
+                return null;
+            }
+
+            return ParsareDate(textRaspuns);
         }
         catch (Exception ex)
         {

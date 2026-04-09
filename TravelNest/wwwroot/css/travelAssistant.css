@@ -136,3 +136,141 @@
 #imaginePostare:hover {
     filter: brightness(0.8);
 }
+
+#listaCities {
+    display: grid;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.selectable-city {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 2px solid transparent !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.selectable-city:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.selectable-city.selected {
+    background: #f0f7ff !important;
+    border-color: #3b82f6 !important;
+}
+
+.selection-indicator i {
+    font-size: 1.4rem;
+    color: #cbd5e1;
+    transition: color 0.3s;
+}
+
+.selected .selection-indicator i {
+    color: #3b82f6;
+}
+
+.city-details-wrapper {
+    flex: 1;
+}
+
+#numeOras {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+#detaliiCity {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+}
+
+#distantaTrip {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #10b981;
+    text-transform: uppercase;
+}
+
+#btnAutomatGrup {
+    position: fixed;
+    bottom: 35px;
+    right: 35px;
+    background: #0f172a; 
+    padding: 8px 10px 8px 24px;
+    border-radius: 100px;
+    display: none;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideInFab 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#nrOraseSelectate {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#countSelectate {
+    color: #3b82f6;
+    margin-right: 4px;
+}
+
+.btn-create-fab {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.btn-create-fab:hover {
+    background: #2563eb;
+    transform: scale(1.02);
+}
+
+.btn-create-fab i {
+    font-size: 0.8rem;
+    transition: transform 0.3s;
+}
+
+.btn-create-fab:hover i {
+    transform: translateX(4px);
+}
+
+@keyframes slideInFab {
+    from {
+        transform: translateY(100px) scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}

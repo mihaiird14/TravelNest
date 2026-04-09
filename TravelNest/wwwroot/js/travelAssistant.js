@@ -1,4 +1,5 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+﻿let oraseSelectate = [];
+document.addEventListener("DOMContentLoaded", () => {
     const butonGenereaza = document.getElementById("butonGenereaza");
     const butonRefresh = document.getElementById("refreshOrase");
     const inputVibe = document.getElementById("inputVibe");
@@ -35,10 +36,15 @@
                 dateRezultat.orase.forEach((oras, index) => {
                     const descriere = dateRezultat.descrieri?.[index] ?? "A wonderful destination.";
                     const htmlOras = `
-                        <div id="itemOras">
-                            <span id="numeOras">${oras}</span>
-                            <p id="detaliiCity">${descriere}</p>
-                            <span id="distantaTrip">OPTION 0${index + 1}</span>
+                        <div class="itemOras selectable-city" onclick="toggleCitySelection(this, '${oras}')">
+                            <div class="selection-indicator">
+                                <i class="fa-regular fa-circle"></i>
+                            </div>
+                            <div class="city-content">
+                                <span id="numeOras">${oras}</span>
+                                <p id="detaliiCity">${descriere}</p>
+                                <span id="distantaTrip">OPTION 0${index + 1}</span>
+                            </div>
                         </div>
                     `;
                     listaCities.insertAdjacentHTML('beforeend', htmlOras);
@@ -104,4 +110,54 @@ function afiseazaPostari(postari) {
 
     butonGenereaza.addEventListener("click", genereazaSugestii);
     butonRefresh.addEventListener("click", genereazaSugestii);
+});
+function toggleCitySelection(element, oras) {
+    element.classList.toggle('selected');
+    const icon = element.querySelector('.selection-indicator i');
+
+    if (element.classList.contains('selected')) {
+        oraseSelectate.push(oras);
+        icon.className = "fa-solid fa-circle-check";
+    } else {
+        oraseSelectate = oraseSelectate.filter(o => o !== oras);
+        icon.className = "fa-regular fa-circle";
+    }
+    
+    actualizeazaButonPlutitor();
+}
+
+function actualizeazaButonPlutitor() {
+    const container = document.getElementById('btnAutomatGrup'); 
+    const count = document.getElementById('countSelectate');
+    
+    if (oraseSelectate.length > 0) {
+        container.style.display = 'flex';
+        count.innerText = oraseSelectate.length;
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+document.getElementById('btnCreeazaGrup')?.addEventListener('click', async () => {
+    if (oraseSelectate.length === 0) 
+        return;
+
+    const btn = document.getElementById('btnCreeazaGrup');
+    btn.innerHTML = 'Creating... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+        const response = await fetch('/TravelGroup/CreareAutomata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(oraseSelectate)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            window.location.href = `/TravelGroup/Vizualizare/${result.groupId}`;
+        }
+    } catch (err) {
+        console.error(err);
+        btn.innerHTML = 'Create Travel Group <i class="fa-solid fa-arrow-right"></i>';
+    }
 });

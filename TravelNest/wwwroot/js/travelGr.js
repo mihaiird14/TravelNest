@@ -428,3 +428,11 @@ document.getElementById('formCreateGroup').onsubmit = async function(e) {
     });
     this.submit();
 };
+document.addEventListener("DOMContentLoaded", () => {
+    const btnNavigare = document.getElementById("locatieAI");
+    if (btnNavigare) {
+        btnNavigare.addEventListener("click", (e) => {
+            window.location.href = '/TravelAssistant'; 
+        });
+    }
+});

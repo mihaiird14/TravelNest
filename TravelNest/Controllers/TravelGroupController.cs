@@ -721,6 +721,54 @@ namespace TravelNest.Controllers
 
             return File(pdfBytes, "application/pdf", $"Itinerariu_TravelNest_{idGrup}.pdf");
         }
+        [HttpPost]
+        public async Task<IActionResult> CreareAutomata([FromBody] List<string> orase)
+        {
+            if (orase == null || !orase.Any()) 
+                return BadRequest();
+
+            var userId = _userManager.GetUserId(User);
+            var profilAdmin = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userId);
+
+            string thumbnail = "/images/default-trip.jpg";
+            string primulOras = orase[0];
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (TravelNest/1.0)");
+                    string url = $"https://en.wikipedia.org/w/api.php?action=query&titles={Uri.EscapeDataString(primulOras)}&prop=pageimages&format=json&pithumbsize=1000";
+                    var resp = await client.GetStringAsync(url);
+                    using var doc = System.Text.Json.JsonDocument.Parse(resp);
+                    var pages = doc.RootElement.GetProperty("query").GetProperty("pages");
+                    foreach (var page in pages.EnumerateObject())
+                    {
+                        if (page.Value.TryGetProperty("thumbnail", out var t))
+                            thumbnail = t.GetProperty("source").GetString();
+                    }
+                }
+                catch { }
+            }
+
+            var grup = new TravelGroup
+            {
+                Nume = "Trip to " + primulOras,
+                Descriere = "Automatic plan from Travel Assistant.",
+                AdminId = profilAdmin.Id,
+                DataPlecare = null, 
+                DataIntoarcere = null,
+                Thumbnail = thumbnail,
+                Locatii = orase.Select(loc => new LocatieGrup { Locatie = loc }).ToList(),
+                ListaParticipanti = new List<MembruGrup> {
+            new MembruGrup { ProfilId = profilAdmin.Id, Confirmare = "ORGANIZER", DataInscrierii = DateTime.Now }
+        }
+            };
+
+            _context.TravelGroups.Add(grup);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, groupId = grup.Id });
+        }
     }
 
 }
