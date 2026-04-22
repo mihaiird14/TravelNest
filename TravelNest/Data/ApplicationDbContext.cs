@@ -30,6 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<VizualizarePostare> VizualizarePostares { get; set; }
     public DbSet<Mesaj>Mesaje { get; set; }
     public DbSet<VizualizareMesaj> VizualizareMesaje { get; set; }
+    public DbSet<ActivitateItinerariu> ActivitatiItinerariu { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -207,5 +208,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(p => p.MesajeSeen) 
             .HasForeignKey(v => v.ProfilId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ActivitateItinerariu>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Titlu)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Ora)
+                .IsRequired();
+
+            entity.HasOne(d => d.TravelGroup)
+                .WithMany(p => p.ActivitatiItinerariu)
+                .HasForeignKey(d => d.TravelGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

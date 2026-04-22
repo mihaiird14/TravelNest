@@ -2,6 +2,7 @@
 using Mscc.GenerativeAI;
 using Mscc.GenerativeAI.Microsoft;
 using System.Text.Json;
+using TravelNest.Models;
 
 public class GeminiService
 {
@@ -111,5 +112,28 @@ public class GeminiService
                      "Return ONLY the keyword separated by spaces, no punctuation.";
         var raspuns = await _asistentAI.GenerateContent(cerere);
         return raspuns.Text?.Trim() ?? "travel";
+    }
+    //prompt ptr itinerariu
+    public async Task<List<ActivitateItinerariu>> GenerareItinerariu(int nrZile, string orase, string preferinte)
+    {
+        try
+        {
+            var cererePrompt = $"Generate a travel itinerary for a {nrZile}-day trip to {orase}. " +
+                               $"User preferences: {preferinte}. " +
+                               "Return ONLY a raw JSON array of objects with this exact structure: " +
+                               "[{\"Zi\": 1, \"Ora\": \"HH:mm\", \"Titlu\": \"Activity Name\", \"Descriere\": \"Max 20 words description\"}]. " +
+                               "Ensure the time is in 24h format (e.g. 09:00, 14:30). No markdown, no extra talk.";
+
+            var raspuns = await _asistentAI.GenerateContent(cererePrompt);
+            var textRaspuns = raspuns.Text.Trim().Replace("```json", "").Replace("```", "").Trim();
+
+            return JsonSerializer.Deserialize<List<ActivitateItinerariu>>(textRaspuns,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<ActivitateItinerariu>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Eroare AI Itinerariu: {ex.Message}");
+            return new List<ActivitateItinerariu>();
+        }
     }
 }

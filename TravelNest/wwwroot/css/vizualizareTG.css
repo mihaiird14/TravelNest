@@ -1812,3 +1812,17 @@ label[id^="etichetaRuta"], #etichetaPlecare {
         transform: scale(1);
     }
 }
+.planned-trip {
+    background-color: #2ecc71 !important;
+    color: white;
+}
+
+.active-trip {
+    background-color: #3498db;
+    color: white;
+}
+
+.ended-trip {
+    background-color: #e74c3c !important;
+    color: white;
+}

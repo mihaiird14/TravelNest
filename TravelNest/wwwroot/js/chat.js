@@ -1,8 +1,7 @@
-﻿if (typeof window.conexiuneChat === 'undefined') {
+﻿
     window.conexiuneChat = new signalR.HubConnectionBuilder()
         .withUrl("/ChatHub")
         .build();
-}
 
 window.idDestinatarActiv = window.idDestinatarActiv || null;
 window.elIdGrup = document.getElementById("idGrup");
@@ -246,7 +245,8 @@ async function trimiteMesajPrivat() {
 
 window.trimiteMesajPrivat = trimiteMesajPrivat;
 async function verificaNotificareInitiala() {
-    if (!window.idGrup) return;
+    if (!window.idGrup)
+        return;
     const raspuns = await fetch(`/Chat/GetNumarNecitite?idGrup=${window.idGrup}`);
     if (raspuns.ok) {
         const date = await raspuns.json();
@@ -254,9 +254,9 @@ async function verificaNotificareInitiala() {
         if (bulina) bulina.style.display = date.count > 0 ? "block" : "none";
     }
 }
-const btnSendGrup = document.getElementById("butonSend");
-if (btnSendGrup) {l
-    btnSendGrup.onclick = () => {
+const bsg = document.getElementById("butonSend");
+if (bsg) {
+    bsg.onclick = () => {
         const input = document.getElementById("inputMesaj");
         if (!input || !window.idProfilCurent || !window.idGrup) 
             return;
@@ -274,11 +274,13 @@ if (btnSendGrup) {l
     };
 }
 async function incarcaIstoricGrup() {
-    if (!window.idGrup) return;
+    if (!window.idGrup)
+        return;
 
     try {
         const response = await fetch(`/Chat/GetIstoricGrup?idGrup=${window.idGrup}`);
-        if (!response.ok) return;
+        if (!response.ok)
+            return;
         
         const mesaje = await response.json();
         const container = document.getElementById("listaMessages");
@@ -292,6 +294,7 @@ async function incarcaIstoricGrup() {
         }
 
         await fetch(`/Chat/MarcheazaCititeGrup?idGrup=${window.idGrup}`, { method: 'POST' });
+        
     } catch (err) {
         console.error(err);
     }
@@ -299,7 +302,7 @@ async function incarcaIstoricGrup() {
 window.pornesteConexiune().then(() => {
     updateNrMesajeNecitite();
     if (window.idGrup) {
-        incarcaIstoricGrup(); 
+       // incarcaIstoricGrup(); 
         verificaNotificareInitiala();
     }
 });

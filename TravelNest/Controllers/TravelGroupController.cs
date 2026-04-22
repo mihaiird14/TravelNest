@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MailKit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,15 +7,16 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
+using QuestPDF.Helpers;
+using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Text.Json;
 using TravelNest.Data;
 using TravelNest.Data.Migrations;
 using TravelNest.Hubs;
 using TravelNest.Models;
 using TravelNest.Services;
 using TravelNest.ViewModels;
-using QuestPDF.Helpers;
-using System.Net.Http;
 namespace TravelNest.Controllers
 {
     [Authorize]
@@ -25,13 +27,15 @@ namespace TravelNest.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IHubContext<NotificariHub> _hubContext;
         private readonly FlightService _flightService;
-        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService)
+        private readonly GeminiService _serviciuGemini;
+        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService, GeminiService serviciuGemini)
         {
             _userManager = userManager;
             _context = context;
             _env = env;
             _hubContext = hubContext;
             _flightService = flightService;
+            _serviciuGemini = serviciuGemini;
         }
         public IActionResult Index()
         {
@@ -165,6 +169,7 @@ namespace TravelNest.Controllers
                 .Include(x => x.Locatii)
                 .Include(x => x.Documente)
                 .Include(x=>x.Zboruri)
+                .Include(x => x.ActivitatiItinerariu)
                 .Include(x => x.ListaParticipanti)
                     .ThenInclude(x => x.Profil)
                         .ThenInclude(pr => pr.User)
@@ -761,13 +766,119 @@ namespace TravelNest.Controllers
                 Thumbnail = thumbnail,
                 Locatii = orase.Select(loc => new LocatieGrup { Locatie = loc }).ToList(),
                 ListaParticipanti = new List<MembruGrup> {
-            new MembruGrup { ProfilId = profilAdmin.Id, Confirmare = "ORGANIZER", DataInscrierii = DateTime.Now }
-        }
-            };
+                new MembruGrup { ProfilId = profilAdmin.Id, Confirmare = "ORGANIZER", DataInscrierii = DateTime.Now }
+            }
+                };
 
             _context.TravelGroups.Add(grup);
             await _context.SaveChangesAsync();
             return Json(new { success = true, groupId = grup.Id });
+        }
+        //functii ptr itinerariu
+        [HttpPost]
+        public async Task<IActionResult> AdaugaActivitateManual([FromBody] ActivitateItinerariu model)
+        {
+            if (model == null || string.IsNullOrEmpty(model.Titlu))
+            {
+                return BadRequest("Datele activității sunt incomplete.");
+            }
+
+            try
+            {
+                _context.ActivitatiItinerariu.Add(model);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, id = model.Id });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> StergeActivitate(int id)
+        {
+          
+            var activitate = await _context.ActivitatiItinerariu
+                .Include(a => a.TravelGroup)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (activitate == null) 
+                return NotFound();
+            var userCurent = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userCurent.Id);
+
+            if (activitate.TravelGroup.AdminId != profil?.Id)
+            {
+                return Json(new { success = false, message = "Access denied. Only the admin can delete activities." });
+            }
+
+            _context.ActivitatiItinerariu.Remove(activitate);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+        //edit itinerariu
+        [HttpPost]
+        public async Task<IActionResult> EditeazaActivitate([FromBody] ActivitateItinerariu model)
+        {
+            var activitate = await _context.ActivitatiItinerariu
+                .Include(a => a.TravelGroup)
+                .FirstOrDefaultAsync(a => a.Id == model.Id);
+
+            if (activitate == null)
+                return NotFound();
+
+            var userCurent = await _userManager.GetUserAsync(User);
+            var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userCurent.Id);
+
+            //numai admin-ul
+            if (activitate.TravelGroup.AdminId != profil?.Id)
+            {
+                return Json(new { success = false, message = "Access denied. Only the admin can edit activities." });
+            }
+
+            //update
+            activitate.Zi = model.Zi;
+            activitate.Ora = model.Ora;
+            activitate.Titlu = model.Titlu;
+            activitate.Descriere = model.Descriere;
+
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
+        [HttpPost]
+        public async Task<IActionResult> ItinerariuAI([FromForm] int idGrup, [FromForm] string promptUtilizator)
+        {
+            var grup = await _context.TravelGroups
+                .Include(g => g.Locatii)
+                .Include(g => g.ActivitatiItinerariu)
+                .FirstOrDefaultAsync(g => g.Id == idGrup);
+
+            if (grup == null) 
+                return NotFound();
+            var orase = string.Join(", ", grup.Locatii.Select(l => l.Locatie));
+            int nrZile = (grup.DataIntoarcere.Value.ToDateTime(TimeOnly.MinValue) -
+                          grup.DataPlecare.Value.ToDateTime(TimeOnly.MinValue)).Days + 1;
+
+            var activitatiAIGenerate = await _serviciuGemini.GenerareItinerariu(nrZile, orase, promptUtilizator);
+
+            if (activitatiAIGenerate.Any())
+            {
+                // stergem daca exista alt itinerariu
+                _context.ActivitatiItinerariu.RemoveRange(grup.ActivitatiItinerariu);
+
+                foreach (var act in activitatiAIGenerate)
+                {
+                    act.TravelGroupId = idGrup;
+                    _context.ActivitatiItinerariu.Add(act);
+                }
+
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false, message = "AI could not generate the itinerary." });
         }
     }
 

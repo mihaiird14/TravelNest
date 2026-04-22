@@ -23,5 +23,6 @@ namespace TravelNest.Models
         public List<DocumenteTG> Documente { get; set; } = new List<DocumenteTG>();
         public List<ZborGrupuri> Zboruri { get; set; } = new List<ZborGrupuri>();
         public virtual ICollection<Mesaj> MesajeGrupGroup { get; set; } = new List<Mesaj>();
+        public virtual ICollection<ActivitateItinerariu> ActivitatiItinerariu { get; set; } = new List<ActivitateItinerariu>();
     }
 }

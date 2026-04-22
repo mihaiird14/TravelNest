@@ -1,0 +1,372 @@
+﻿#popUpItinerariu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+}
+
+#boxItinerariu {
+    width: 90%;
+    height: 85%;
+    background: #f8fafc;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+#headItinerariu {
+    padding: 20px 30px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+#titluItinerariu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+    #titluItinerariu i {
+        font-size: 1.8rem;
+        color: #3b82f6;
+    }
+
+    #titluItinerariu h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+#actiuniItinerariu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#aiItinerariu {
+    display: flex;
+    background: #f1f5f9;
+    padding: 5px;
+    border-radius: 50px;
+    border: 1px solid #cbd5e1;
+}
+
+#inputItinerariu {
+    border: none;
+    background: transparent;
+    padding: 8px 15px;
+    width: 250px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+#btnAIItinerariu {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#btnManualItinerariu {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#btnInchideItinerariu {
+    background: none;
+    border: none;
+    font-size: 2.2rem;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#bodyItinerariu {
+    flex: 1;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px);
+    padding: 60px 20px;
+    position: relative;
+    background: #f8fafc;
+}
+
+    #bodyItinerariu.fara-scroll {
+        overflow: hidden !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+#timelineItinerariu {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    min-height: 100%;
+}
+
+    #timelineItinerariu.has-content::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 100%;
+        background-image: linear-gradient(to bottom, #3b82f6 50%, rgba(255,255,255,0) 0%);
+        background-position: center;
+        background-size: 2px 10px;
+        background-repeat: repeat-y;
+        z-index: 1;
+    }
+
+.zi-container {
+    position: relative;
+    width: 50%;
+    margin-bottom: 40px;
+    min-height: 100px;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+    .zi-container.stanga {
+        left: 0;
+        padding-right: 70px;
+        text-align: right;
+    }
+
+    .zi-container.dreapta {
+        left: 50%;
+        padding-left: 70px;
+        text-align: left;
+    }
+
+.zi-cerc {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    z-index: 10;
+    top: 0;
+    border: 4px solid #f8fafc;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.stanga .zi-cerc {
+    right: -28px;
+}
+
+.dreapta .zi-cerc {
+    left: -28px;
+}
+
+.activitate-card {
+    display: inline-block;
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    width: 100%;
+    max-width: 320px;
+    position: relative;
+    text-align: left;
+}
+
+.ora-text {
+    display: block;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.activitate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.activitate-header h5 {
+    margin: 0;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.btn-delete-act {
+    cursor: pointer;
+    color: #cbd5e1;
+    transition: color 0.2s, transform 0.2s;
+    font-size: 1rem;
+}
+
+.btn-delete-act:hover {
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+.itinerariu-gol-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    border: 2px dashed #e2e8f0;
+    margin: 40px auto;
+    max-width: 600px;
+}
+
+.gol-icon {
+    width: 80px;
+    height: 80px;
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.itinerariu-gol-container h4 {
+    color: #1e293b;
+    font-weight: 800;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+
+.itinerariu-gol-container p {
+    color: #64748b;
+    max-width: 400px;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.itinerariu-gol-container strong {
+    color: #3b82f6;
+}
+
+#popUpManual {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+}
+
+#boxManual {
+    background: white;
+    width: 400px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+#boxManual h4 {
+    margin: 0 0 20px 0;
+    font-size: 1.3rem;
+    text-align: center;
+    color: #1e293b;
+}
+
+#formManual {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#formManual input,
+#formManual select,
+#formManual textarea {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+#formManual textarea {
+    height: 80px;
+    resize: none;
+}
+
+#btnsManual {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+#btnsManual button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+#btnsManual button:first-child {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+#btnSalveazaManual {
+    background: #3b82f6;
+    color: white;
+}
+.actiuni-admin-itinerariu {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-edit-act {
+    cursor: pointer;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.btn-edit-act:hover {
+    color: #3b82f6; /* Albastru pentru editare */
+}
