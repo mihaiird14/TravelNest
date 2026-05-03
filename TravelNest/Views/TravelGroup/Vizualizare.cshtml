@@ -370,19 +370,42 @@
                         </div>
                     </section>
                     <section id="hotelBox">
+                        <input type="hidden" id="groupId" value="@Model.Id" />
                         <h5 id="hotelTitle">Booking Accommodation</h5>
-                        <p id="hotelName">Grace Hotel Santorini</p>
-                        <div id="stayDates">
-                            <div id="checkIn">
-                                <span id="inLabel">Check-in</span>
-                                <p id="inDate">@Model.DataPlecare?.ToString("MMMM dd, yyyy")</p>
-                            </div>
-                            <div id="checkOut">
-                                <span id="outLabel">Check-out</span>
-                                <p id="outDate">@Model.DataIntoarcere?.ToString("MMMM dd, yyyy")</p>
-                            </div>
+
+                        <div id="zonaCautare">
+                            <select id="orasSelectat">
+                                @foreach (var loc in Model.Locatii)
+                                {
+                                    <option value="@loc.Locatie">@loc.Locatie</option>
+                                }
+                            </select>
+                            <button id="butonCauta" onclick="window.cautaHotel()">
+                                <i class="fa-solid fa-magnifying-glass"></i> Search
+                            </button>
                         </div>
-                        <button id="addressBtn">Address</button>
+                        <div id="hartaHoteluri" style="display:none;"></div>
+
+                        <div id="listaRezultate" style="display:none;">
+                            <div id="containerHoteluri"></div>
+                        </div>
+
+                        <div id="detaliiSelectie">
+                            <p id="hotelName"></p>
+                            <div id="stayDates">
+                                <div id="checkIn">
+                                    <span id="inLabel">Check-in</span>
+                                    <input type="date" id="inputCheckIn" value="@Model.DataPlecare?.ToString("yyyy-MM-dd")" />
+                                </div>
+                                <div id="checkOut">
+                                    <span id="outLabel">Check-out</span>
+                                    <input type="date" id="inputCheckOut" value="@Model.DataIntoarcere?.ToString("yyyy-MM-dd")" />
+                                </div>
+                            </div>
+                            <button id="saveSelectionBtn" onclick="window.confirmareSalvare()" disabled>
+                                Confirm Selection
+                            </button>
+                        </div>
                     </section>
                 </div>
 
@@ -473,7 +496,50 @@
                             </p>
                         }
                     </div>
-                </section>
+                    </section>
+                    @if (Model.Locatii.Any(l => !string.IsNullOrEmpty(l.HotelNume)))
+                    {
+                        <div id="cardCazari">
+                            <h5 id="titluSectiune">Your Accommodations</h5>
+
+                            @foreach (var loc in Model.Locatii.Where(l => !string.IsNullOrEmpty(l.HotelNume)))
+                            {
+                                <div id="randCazare_@loc.Id">
+                                    <div id="insignaData_@loc.Id">
+                                        <span id="lunaCazare_@loc.Id">@loc.CheckIn?.ToString("MMM").ToUpper()</span>
+                                        <span id="ziCazare_@loc.Id">@loc.CheckIn?.Day</span>
+                                    </div>
+                                    <div id="detaliiHotel_@loc.Id">
+                                        <div id="antetHotel_@loc.Id">
+                                            <a id="linkHotel_@loc.Id" href="@loc.HotelLink" target="_blank">
+                                                @loc.HotelNume (@loc.Locatie)
+                                            </a>
+
+                                            @if (Model.AdminId == currentProfilId)
+                                            {
+                                                <button id="butonStergere_@loc.Id" onclick="stergeCazare(@loc.Id)">×</button>
+                                            }
+                                        </div>
+
+                                        <div id="sedereEditor_@loc.Id">
+                                            @if (Model.AdminId == currentProfilId)
+                                            {
+                                                <input type="date" id="dataIntrare_@loc.Id" value="@loc.CheckIn?.ToString("yyyy-MM-dd")"
+                                                       onchange="updateDateCazare(@loc.Id, this.value, document.getElementById('dataIesire_@loc.Id').value)" />
+                                                <span id="separatorData_@loc.Id"> - </span>
+                                                <input type="date" id="dataIesire_@loc.Id" value="@loc.CheckOut?.ToString("yyyy-MM-dd")"
+                                                       onchange="updateDateCazare(@loc.Id, document.getElementById('dataIntrare_@loc.Id').value, this.value)" />
+                                            }
+                                            else
+                                            {
+                                                <p id="textPerioada_@loc.Id">@loc.CheckIn?.ToString("dd MMM") - @loc.CheckOut?.ToString("dd MMM, yyyy")</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
                     <section id="mapBox">
                         <div id="mapHeader">
                             <h5 id="mapTitle">Trip Map</h5>
@@ -717,7 +783,7 @@
     </body>
     @section Scripts {
         <script src="~/js/calendar.js" asp-append-version="true"></script>
-        <script src="~/js/vizualizareTG.js"></script>
+        <script src="~/js/vizualizareTG.js" asp-append-version="true"></script>
         <script src="~/js/butonSideMenu.js" asp-append-version="true"></script>
         <script src="~/js/inviteTG.js" asp-append-version="true"></script>
         <script src="~/js/itinerariu.js" asp-append-version="true"></script>

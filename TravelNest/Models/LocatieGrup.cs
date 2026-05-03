@@ -11,5 +11,9 @@ namespace TravelNest.Models
         public string Locatie {  get; set; }
         public int GroupId { get; set; }
         public TravelGroup TravelGroup { get; set; }
+        public string? HotelNume { get; set; }
+        public string? HotelLink { get; set; }
+        public DateOnly? CheckIn { get; set; }
+        public DateOnly? CheckOut { get; set; }
     }
 }

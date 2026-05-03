@@ -1826,3 +1826,211 @@ label[id^="etichetaRuta"], #etichetaPlecare {
     background-color: #e74c3c !important;
     color: white;
 }
+/*cod ptr sectiune hotel*/
+#hotelBox {
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+#hartaHoteluri {
+    height: 300px;
+    width: 100%;
+    margin: 15px 0;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    z-index: 1;
+}
+
+#containerHoteluri {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.hotel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.hotel-item:hover {
+    background: #fff;
+    border-color: #EE5607;
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(238, 86, 7, 0.1);
+}
+
+.hotel-nume-lista {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.hotel-pret-indicator {
+    color: #EE5607;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.leaflet-popup-content b {
+    color: #EE5607;
+}
+
+.btn-alege-hotel {
+    background: #EE5607;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    width: 100%;
+}
+#butonCauta {
+    background: #EE5607;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#butonCauta:hover {
+    background: #d44d06;
+}
+
+#orasSelectat {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    margin-right: 10px;
+    min-width: 150px;
+}
+#saveSelectionBtn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: #e2e8f0;
+    color: #64748b;
+}
+
+#saveSelectionBtn:not(:disabled):hover {
+    background-color: #d44d06;
+    transform: translateY(-2px);
+}
+
+#cardCazari {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    margin: 20px 0;
+}
+
+#titluSectiune {
+    font-size: 1.25rem;
+    color: #1a202c;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+[id^="randCazare"] {
+    display: flex;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #edf2f7;
+}
+
+[id^="insignaData"] {
+    background: #f7fafc;
+    border-radius: 14px;
+    padding: 12px;
+    min-width: 75px;
+    text-align: center;
+    margin-right: 25px;
+}
+
+[id^="lunaCazare"] {
+    display: block;
+    color: #EE5607;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+[id^="ziCazare"] {
+    font-size: 24px;
+    font-weight: 900;
+    color: #2d3748;
+}
+
+[id^="detaliiHotel"] {
+    flex-grow: 1;
+}
+
+[id^="antetHotel"] {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+[id^="linkHotel"] {
+    color: #2d3748;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    transition: 0.2s;
+}
+
+[id^="linkHotel"]:hover {
+    color: #EE5607;
+}
+
+[id^="butonStergere"] {
+    background: transparent;
+    border: none;
+    color: #e53e3e;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 10px;
+}
+
+[id^="sedereEditor"] {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+[id^="dataIntrare"], [id^="dataIesire"] {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    color: #4a5568;
+    outline: none;
+}
+
+[id^="dataIntrare"]:focus, [id^="dataIesire"]:focus {
+    border-color: #EE5607;
+}

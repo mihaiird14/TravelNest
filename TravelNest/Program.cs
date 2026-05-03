@@ -27,9 +27,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 .AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
-//api ptr zboruri
+//api ptr zboruri + cazare
 builder.Services.Configure<AmadeusSettings>(builder.Configuration.GetSection("Amadeus"));
 builder.Services.AddHttpClient<FlightService>();
+builder.Services.AddHttpClient<HotelService>();
 builder.Services.AddHttpClient<RecomandariForYou>();
 //add api gemini +  serviciu ptr functii
 builder.Services.AddScoped<GeminiService>();

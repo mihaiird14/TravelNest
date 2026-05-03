@@ -27,8 +27,9 @@ namespace TravelNest.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IHubContext<NotificariHub> _hubContext;
         private readonly FlightService _flightService;
+        private readonly HotelService _hotelService;
         private readonly GeminiService _serviciuGemini;
-        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService, GeminiService serviciuGemini)
+        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService, GeminiService serviciuGemini, HotelService hotelService)
         {
             _userManager = userManager;
             _context = context;
@@ -36,6 +37,7 @@ namespace TravelNest.Controllers
             _hubContext = hubContext;
             _flightService = flightService;
             _serviciuGemini = serviciuGemini;
+            _hotelService = hotelService;
         }
         public IActionResult Index()
         {
@@ -49,14 +51,15 @@ namespace TravelNest.Controllers
             var admin = _userManager.GetUserId(User);
             var prieteni = await _userManager.Users
                         .Where(u => u.Id != admin && u.UserName.Contains(username))
-                        .Select(u => new {
+                        .Select(u => new
+                        {
                             id = u.Profil != null ? u.Profil.Id : 0,
                             userName = u.UserName,
                             pozaProfil = u.Profil != null && !string.IsNullOrEmpty(u.Profil.ImagineProfil)
                                          ? u.Profil.ImagineProfil
                                          : "/images/profilDefault.png"
                         })
-                        .Where(x => x.id != 0) 
+                        .Where(x => x.id != 0)
                         .Take(5)
                         .ToListAsync();
 
@@ -168,7 +171,7 @@ namespace TravelNest.Controllers
             var grup = await _context.TravelGroups
                 .Include(x => x.Locatii)
                 .Include(x => x.Documente)
-                .Include(x=>x.Zboruri)
+                .Include(x => x.Zboruri)
                 .Include(x => x.ActivitatiItinerariu)
                 .Include(x => x.ListaParticipanti)
                     .ThenInclude(x => x.Profil)
@@ -177,7 +180,7 @@ namespace TravelNest.Controllers
             ViewBag.CurrentProfilId = profil?.Id;
             if (grup == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
             grup.ListaParticipanti = grup.ListaParticipanti
                 .OrderBy(m => m.Confirmare == "ORGANIZER" ? 0 :
@@ -197,7 +200,7 @@ namespace TravelNest.Controllers
             try
             {
                 var grup = await _context.TravelGroups.FindAsync(int.Parse(id));
-                if (grup == null) 
+                if (grup == null)
                     return NotFound();
                 var utilizatorConectat = await _userManager.GetUserAsync(User);
                 var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
@@ -242,7 +245,7 @@ namespace TravelNest.Controllers
         {
             var grup = await _context.TravelGroups.FindAsync(int.Parse(id));
             if (grup == null)
-                    return NotFound();
+                return NotFound();
             var utilizatorConectat = await _userManager.GetUserAsync(User);
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == utilizatorConectat.Id);
             bool esteMembru = grup.ListaParticipanti.Any(p => p.ProfilId == profil.Id);
@@ -276,10 +279,10 @@ namespace TravelNest.Controllers
             {
                 foreach (var oras in oraseSelectate)
                 {
-                    grup.Locatii.Add(new LocatieGrup 
-                    {   
-                        Locatie = oras, 
-                        GroupId = id 
+                    grup.Locatii.Add(new LocatieGrup
+                    {
+                        Locatie = oras,
+                        GroupId = id
                     });
                 }
                 if (!string.IsNullOrEmpty(thumbnailLink))
@@ -391,7 +394,7 @@ namespace TravelNest.Controllers
             }
             var notificare = new Notificare
             {
-                destinatarId = idDestinatar, 
+                destinatarId = idDestinatar,
                 expeditorId = profilExpeditor.Id,
                 TitluNotificare = "Travel Group Invite",
                 MesajNotificare = $"{profilExpeditor.User.UserName} invited you to join {grup.Nume ?? "a travel group"}!",
@@ -406,7 +409,7 @@ namespace TravelNest.Controllers
                 notificare.MesajNotificare,
                 notificare.TipNotificare,
                 profilExpeditor.User.UserName,
-                notificare.Id); 
+                notificare.Id);
             return Json(new { success = true });
         }
         [HttpGet]
@@ -424,7 +427,7 @@ namespace TravelNest.Controllers
             var rezultate = await _context.Profils
                 .Include(p => p.User)
                 .Where(p => (p.User.UserName.Contains(username))
-                            && p.UserId != utilizatorConectat 
+                            && p.UserId != utilizatorConectat
                             && !membriiTG.Contains(p.Id))
                 .Take(10)
                 .Select(p => new
@@ -443,7 +446,7 @@ namespace TravelNest.Controllers
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userConectat);
             var grup = await _context.TravelGroups
                 .Include(g => g.ListaParticipanti)
-                .Include(g => g.Locatii) 
+                .Include(g => g.Locatii)
                 .FirstOrDefaultAsync(g => g.Id == groupId);
 
             if (grup == null || profil == null)
@@ -498,7 +501,7 @@ namespace TravelNest.Controllers
         {
             var orase = await _context.LocatieGrups
                 .Where(loc => loc.GroupId == idGrup)
-                .OrderBy(loc => loc.Id) 
+                .OrderBy(loc => loc.Id)
                 .Select(loc => loc.Locatie)
                 .ToListAsync();
 
@@ -515,7 +518,7 @@ namespace TravelNest.Controllers
                 var zboruriUnice = new Dictionary<string, ZborGrupuri>();
                 var tAmadeus = _flightService.SearchFlights(ruta.IataDeLa, ruta.IataLa, ruta.DataZbor);
                 var tKiwi = _flightService.cautaKiwi(ruta.IataDeLa, ruta.IataLa, ruta.DataZbor, ruta.IdGrup);
-               try
+                try
                 {
                     await Task.WhenAll(tAmadeus, tKiwi);
                 }
@@ -577,7 +580,7 @@ namespace TravelNest.Controllers
                 return Ok(new { succes = true, mesaj = "Tickets have been updated!" });
             }
             catch (Exception ex)
-            {          
+            {
                 await tranzactie.RollbackAsync();
                 return BadRequest(new { eroare = "Database error: " + ex.Message });
             }
@@ -678,13 +681,15 @@ namespace TravelNest.Controllers
                                         else
                                             r.ConstantItem(45).Placeholder();
 
-                                        r.RelativeItem().PaddingLeft(15).Column(c => {
+                                        r.RelativeItem().PaddingLeft(15).Column(c =>
+                                        {
                                             c.Item().Text($"{z.NumeCompanie} • Flight {z.NumarZbor}").Bold().FontSize(13);
                                             /*c.Item().Hyperlink(LinkZbor(z))
                                                     .Text("Book on Google FLights →")
                                                     .FontColor("#EE5607").Underline().FontSize(10);*/
                                         });
-                                        r.ConstantItem(120).AlignRight().Column(c => {
+                                        r.ConstantItem(120).AlignRight().Column(c =>
+                                        {
                                             c.Item().Text("Total Price").FontSize(9).AlignRight();
                                             c.Item().Text($"{z.Pret} EUR").FontSize(18).ExtraBold().FontColor("#EE5607");
                                         });
@@ -692,17 +697,20 @@ namespace TravelNest.Controllers
                                     flightCol.Item().PaddingVertical(15).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
                                     flightCol.Item().Row(row =>
                                     {
-                                        row.RelativeItem().Column(c => {
+                                        row.RelativeItem().Column(c =>
+                                        {
                                             c.Item().Text(z.OrasPlecare).ExtraBold().FontSize(15);
                                             c.Item().Text(z.AeroportPlecare).Bold().FontColor(Colors.Grey.Medium);
                                             c.Item().PaddingTop(5).Text(z.DataPlecare.ToString("HH:mm")).FontSize(14).Bold();
                                             c.Item().Text(z.DataPlecare.ToString("ddd, dd MMM yyyy")).FontSize(9);
                                         });
 
-                                        row.RelativeItem(1.2f).AlignCenter().Column(c => {
+                                        row.RelativeItem(1.2f).AlignCenter().Column(c =>
+                                        {
                                             c.Item().AlignCenter().Text("----------------------").FontColor(Colors.Grey.Lighten1);
                                         });
-                                        row.RelativeItem().AlignRight().Column(c => {
+                                        row.RelativeItem().AlignRight().Column(c =>
+                                        {
                                             c.Item().Text(z.OrasSosire).ExtraBold().FontSize(15);
                                             c.Item().Text(z.AeroportSosire).Bold().FontColor(Colors.Grey.Medium);
                                             c.Item().PaddingTop(5).Text(z.DataSosire.ToString("HH:mm")).FontSize(14).Bold();
@@ -712,7 +720,8 @@ namespace TravelNest.Controllers
                                 });
                         }
                     });
-                    page.Footer().PaddingTop(20).AlignCenter().Text(x => {
+                    page.Footer().PaddingTop(20).AlignCenter().Text(x =>
+                    {
                         x.Span("Generated by ").FontSize(10);
                         x.Span("TravelNest").Bold().FontColor("#EE5607").FontSize(10);
                         x.Span($" on {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(10);
@@ -729,7 +738,7 @@ namespace TravelNest.Controllers
         [HttpPost]
         public async Task<IActionResult> CreareAutomata([FromBody] List<string> orase)
         {
-            if (orase == null || !orase.Any()) 
+            if (orase == null || !orase.Any())
                 return BadRequest();
 
             var userId = _userManager.GetUserId(User);
@@ -761,14 +770,14 @@ namespace TravelNest.Controllers
                 Nume = "Trip to " + primulOras,
                 Descriere = "Automatic plan from Travel Assistant.",
                 AdminId = profilAdmin.Id,
-                DataPlecare = null, 
+                DataPlecare = null,
                 DataIntoarcere = null,
                 Thumbnail = thumbnail,
                 Locatii = orase.Select(loc => new LocatieGrup { Locatie = loc }).ToList(),
                 ListaParticipanti = new List<MembruGrup> {
                 new MembruGrup { ProfilId = profilAdmin.Id, Confirmare = "ORGANIZER", DataInscrierii = DateTime.Now }
             }
-                };
+            };
 
             _context.TravelGroups.Add(grup);
             await _context.SaveChangesAsync();
@@ -798,12 +807,12 @@ namespace TravelNest.Controllers
         [HttpPost]
         public async Task<IActionResult> StergeActivitate(int id)
         {
-          
+
             var activitate = await _context.ActivitatiItinerariu
                 .Include(a => a.TravelGroup)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (activitate == null) 
+            if (activitate == null)
                 return NotFound();
             var userCurent = await _userManager.GetUserAsync(User);
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userCurent.Id);
@@ -855,7 +864,7 @@ namespace TravelNest.Controllers
                 .Include(g => g.ActivitatiItinerariu)
                 .FirstOrDefaultAsync(g => g.Id == idGrup);
 
-            if (grup == null) 
+            if (grup == null)
                 return NotFound();
             var orase = string.Join(", ", grup.Locatii.Select(l => l.Locatie));
             int nrZile = (grup.DataIntoarcere.Value.ToDateTime(TimeOnly.MinValue) -
@@ -879,6 +888,59 @@ namespace TravelNest.Controllers
             }
 
             return Json(new { success = false, message = "AI could not generate the itinerary." });
+        }
+        [HttpGet]
+        public async Task<IActionResult> CautaHoteluriAPI(string oras)
+        {
+            if (string.IsNullOrEmpty(oras)) 
+                return BadRequest();
+            var dateHotel = await _hotelService.CautareHotelOras(oras);
+            return Content(dateHotel.RootElement.GetProperty("results").ToString(), "application/json");
+        }
+        [HttpPost]
+        public async Task<IActionResult> SalveazaCazare(int idGrup, string numeOras, string numeHotel, string linkMaps, DateOnly checkIn, DateOnly checkOut)
+        {
+            var locatieGrup = await _context.LocatieGrups
+                .FirstOrDefaultAsync(l => l.GroupId == idGrup && l.Locatie == numeOras);
+
+            if (locatieGrup == null) return NotFound();
+
+            locatieGrup.HotelNume = numeHotel;
+            locatieGrup.HotelLink = linkMaps;
+            locatieGrup.CheckIn = checkIn;  
+            locatieGrup.CheckOut = checkOut;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateDateCazare(int idLocatie, DateOnly checkIn, DateOnly checkOut)
+        {
+            var locatie = await _context.LocatieGrups.FindAsync(idLocatie);
+            if (locatie == null) 
+                return NotFound();
+
+            locatie.CheckIn = checkIn;
+            locatie.CheckOut = checkOut;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> StergeCazare(int idLocatie)
+        {
+            var locatie = await _context.LocatieGrups.FindAsync(idLocatie);
+            if (locatie == null) 
+                return NotFound();
+
+            locatie.HotelNume = null;
+            locatie.HotelLink = null;
+            locatie.CheckIn = null;
+            locatie.CheckOut = null;
+
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 

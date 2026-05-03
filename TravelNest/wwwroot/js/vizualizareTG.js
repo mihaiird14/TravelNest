@@ -1096,3 +1096,169 @@ function afiseazaChat(stare) {
         document.body.style.overflow = "auto";
     }
 }
+//cod ptr hotel
+let hartaHotel;
+let grupMarkeri = L.layerGroup();
+
+window.cautaHotel = async function () {
+    const numeOras = document.getElementById('orasSelectat').value;
+    const container = document.getElementById('containerHoteluri');
+    const divHarta = document.getElementById('hartaHoteluri');
+
+    divHarta.style.display = 'block';
+    document.getElementById('listaRezultate').style.display = 'block';
+    container.innerHTML = '<p>Se caută...</p>';
+
+    if (!hartaHotel) {
+        hartaHotel = L.map('hartaHoteluri').setView([45, 25], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(hartaHotel);
+        grupMarkeri.addTo(hartaHotel);
+    }
+
+    try {
+        const raspuns = await fetch(`/TravelGroup/CautaHoteluriAPI?oras=${encodeURIComponent(numeOras)}`);
+        const date = await raspuns.json();
+
+        grupMarkeri.clearLayers();
+        container.innerHTML = '';
+
+        if (date && date.length > 0) {
+            const puncteHarta = [];
+
+            date.slice(0, 10).forEach((item, i) => {
+                if (item.geometry && item.geometry.location) {
+                    const lat = item.geometry.location.lat;
+                    const lng = item.geometry.location.lng;
+                    const linkGoogle = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)}&query_place_id=${item.place_id}`;
+                    const marker = L.marker([lat, lng])
+                        .bindPopup(`
+                            <div style="min-width:180px; text-align:center;">
+                                <strong style="display:block; margin-bottom:5px;">${item.name}</strong>
+                                
+                             
+                                <a href="${linkGoogle}" target="_blank" style="display:inline-block; margin-bottom:10px; color:#2563eb; font-size:0.85rem; text-decoration:none; font-weight:600;">
+                                    <i class="fa-solid fa-map-location-dot"></i> View On Google Maps
+                                </a>
+
+                                <button class="btn-alege-hotel" 
+                                        onclick="window.alegeHotel('${item.name.replace(/'/g, "\\'")}', '${linkGoogle}', this)" 
+                                        style="width:100%; background:#EE5607; color:white; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                                    Pick Hotel
+                                </button>
+                            </div>
+                    `);
+                    grupMarkeri.addLayer(marker);
+                    puncteHarta.push([lat, lng]);
+
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="hotel-item" id="hotel_item_${i}" onclick="window.alegeHotel('${item.name.replace(/'/g, "\\'")}', '${linkGoogle}')">
+                            <span class="hotel-nume-lista">${item.name}</span>
+                            <i class="fa-solid fa-plus-circle"></i>
+                        </div>
+                    `);
+                }
+            });
+            if (puncteHarta.length > 0) {
+                hartaHotel.fitBounds(puncteHarta, { padding: [30, 30] });
+            }
+        }
+    } catch (e) {
+        console.error("Eroare:", e);
+        container.innerHTML = '<p>Eroare la încărcare.</p>';
+    }
+    setTimeout(() => { hartaHotel.invalidateSize(); }, 400);
+};
+window.panToHotel = function (lat, lng) {
+    if (hartaHotel) {
+        hartaHotel.flyTo([lat, lng], 16, { duration: 1.5 });
+    }
+};
+
+window.selectieTemporara = { nume: null, link: null };
+window.alegeHotel = function (nume, link, element) {
+    window.selectieTemporara = { nume: nume, link: link };
+    if (element && element.tagName === 'BUTTON') {
+        element.style.backgroundColor = "#22c55e"; 
+        element.innerHTML = '<i class="fa-solid fa-check"></i> Selected';
+    }
+    const label = document.getElementById('hotelName');
+    if (label) {
+        label.innerText = nume;
+        label.style.color = "#22c55e";
+    }
+    const btnSalvare = document.getElementById('saveSelectionBtn');
+    if (btnSalvare) {
+        btnSalvare.disabled = false;
+        btnSalvare.style.backgroundColor = "#22c55e";
+        btnSalvare.style.color = "white";
+    }
+};
+
+window.confirmareSalvare = async function () {
+    const idGrup = document.getElementById('groupId').value;
+    const numeOras = document.getElementById('orasSelectat').value;
+    const dataIn = document.getElementById('inputCheckIn').value;
+    const dataOut = document.getElementById('inputCheckOut').value;
+    
+    const { nume, link } = window.selectieTemporara;
+
+    if (!nume || !dataIn || !dataOut) {
+        return;
+    }
+
+    const bodyData = `idGrup=${idGrup}&numeOras=${encodeURIComponent(numeOras)}&numeHotel=${encodeURIComponent(nume)}&linkMaps=${encodeURIComponent(link)}&checkIn=${dataIn}&checkOut=${dataOut}`;
+
+    try {
+        const raspuns = await fetch('/TravelGroup/SalveazaCazare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyData
+        });
+
+        if (raspuns.ok) {
+            location.reload();
+        } else {
+        }
+    } catch (e) {
+        console.error("Eroare server:", e);
+    }
+};
+async function updateDateCazare(idLocatie, checkIn, checkOut) {
+    if (!checkIn || !checkOut)
+        return;
+    
+    try {
+        await fetch('/TravelGroup/UpdateDateCazare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `idLocatie=${idLocatie}&checkIn=${checkIn}&checkOut=${checkOut}`
+        });
+       
+        const dataObiect = new Date(checkIn);
+        const elZi = document.getElementById(`ziCazare_${idLocatie}`);
+        if(elZi) elZi.innerText = dataObiect.getDate();
+        
+    } catch (e) {
+        console.error("Eroare la actualizarea datei:", e);
+    }
+}
+
+async function stergeCazare(idLocatie) {
+    const raspuns = await fetch('/TravelGroup/StergeCazare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `idLocatie=${idLocatie}`
+    });
+
+    if (raspuns.ok) {
+        const elRand = document.getElementById(`randCazare_${idLocatie}`);
+        if (elRand) 
+            elRand.style.opacity = '0';
+        setTimeout(() => elRand?.remove(), 300);
+        
+        const card = document.getElementById('cardCazari');
+        const ramanente = document.querySelectorAll('[id^="randCazare"]');
+        if (ramanente.length <= 1 && card) 
+            card.remove();
+    }
+}
