@@ -31,6 +31,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Mesaj>Mesaje { get; set; }
     public DbSet<VizualizareMesaj> VizualizareMesaje { get; set; }
     public DbSet<ActivitateItinerariu> ActivitatiItinerariu { get; set; }
+    public DbSet<TaraVizitata> TariVizitate { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

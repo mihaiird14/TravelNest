@@ -1,5 +1,6 @@
 ﻿let imagineOriginala = "";
 let thumbnailOriginal = "";
+let oraseCuCoduri = {};
 function actualizeazaVizibilitateButonAI() {
     const inputHidden = document.getElementById('inputThumbnail');
     const btnAI = document.getElementById('btnAI');
@@ -311,7 +312,9 @@ async function cautaOras() {
     const cautare = document.getElementById('mapSearchInput').value;
     if (cautare.length < 3) return;
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cautare)}`);
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(cautare)}`
+        );
         const results = await response.json();
         if (results.length > 0) {
             const city = results[0];
@@ -319,8 +322,11 @@ async function cautaOras() {
             if (marker) harta.removeLayer(marker);
             marker = L.marker([city.lat, city.lon]).addTo(harta);
             const cityName = city.display_name.split(',')[0];
+            const countryCode = (city.address && city.address.country_code) ? city.address.country_code : "";
             if (!selectedCities.includes(cityName)) {
                 selectedCities.push(cityName);
+                window.selectedCities = selectedCities;
+                oraseCuCoduri[cityName] = countryCode;
                 afisareOraseSelectate();
             }
         }
@@ -329,6 +335,7 @@ async function cautaOras() {
 
 window.removeCity = function(cityName) {
     selectedCities = selectedCities.filter(c => c !== cityName);
+    window.selectedCities = selectedCities;
     afisareOraseSelectate();
 };
 
@@ -384,6 +391,12 @@ async function salveazaLocatiiNoi(id, orase) {
     const formData = new FormData();
     formData.append("id", id);
     orase.forEach(oras => formData.append("oraseSelectate", oras));
+    for (const oras of orase) {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(oras)}&addressdetails=1&limit=1`);
+        const data = await res.json();
+        const cod = (data[0] && data[0].address) ? data[0].address.country_code : "";
+        formData.append("coduriTaraSelectate", cod);
+    }
     if (thumbnailLink !== "") {
         formData.append("thumbnailLink", thumbnailLink);
     }
@@ -418,15 +431,43 @@ async function hartaVizualizareTG() {
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Esri'
     }).addTo(tripMap);
+    // 1. Obține codurile de țară pentru orașele vizitate
+    const tariVizitate = new Set();
+    for (const oras of window.selectedCities) {
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(oras)}`
+            );
+            const data = await res.json();
+            if (data[0]?.address?.country_code) {
+                tariVizitate.add(data[0].address.country_code.toUpperCase());
+            }
+        } catch (e) { }
+    }
+
+    // 2. Dacă avem coduri salvate în DB (window.selectedCountryCodes), folosește-le ca fallback
+    if (window.selectedCountryCodes) {
+        window.selectedCountryCodes.forEach(cod => {
+            if (cod) tariVizitate.add(cod.toUpperCase());
+        });
+    }
+
+    // 3. Încarcă GeoJSON și colorează țările vizitate
     fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson')
         .then(res => res.json())
         .then(data => {
             L.geoJson(data, {
-                style: {
-                    color: "#000",      
-                    weight: 1.5,
-                    opacity: 0.6,
-                    fillOpacity: 0       
+                style: function (feature) {
+                    // GeoJSON-ul folosește ISO_A2 pentru codul de țară
+                    const cod = (feature.properties.ISO_A2 || "").toUpperCase();
+                    const esteVizitata = tariVizitate.has(cod);
+                    return {
+                        color: "#555",
+                        weight: 1,
+                        opacity: 0.6,
+                        fillColor: esteVizitata ? "#EE5607" : "#d1d5db",
+                        fillOpacity: esteVizitata ? 0.6 : 0.2
+                    };
                 }
             }).addTo(tripMap);
         });

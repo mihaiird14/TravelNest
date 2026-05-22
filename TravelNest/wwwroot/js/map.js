@@ -4,7 +4,8 @@
     const miniHarta = document.getElementById('miniHarta');
     const editInput = document.getElementById('edit-inputLocatie');
     function aplicaStiluriDropdown(lista) {
-        if (!lista) return;
+        if (!lista)
+            return;
         lista.style.display = 'none';
         lista.style.position = 'absolute';
         lista.style.top = '100%';
@@ -93,7 +94,8 @@
                     if (loc.address) {
                         const oras = loc.address.city || loc.address.town || loc.address.village || loc.address.county;
                         const tara = loc.address.country;
-                        if (oras && tara) label = oras + ', ' + tara;
+                        if (oras && tara)
+                            label = oras + ', ' + tara;
                     }
 
                     const item = document.createElement('div');
@@ -114,6 +116,10 @@
                     item.onclick = function () {
                         inputField.value = label;
                         listContainer.style.display = 'none';
+                        const hiddenCodTara = document.getElementById('inputCodTara');
+                        if (hiddenCodTara && loc.address && loc.address.country_code) {
+                            hiddenCodTara.value = loc.address.country_code;
+                        }
                         callbackHarta(loc.lat, loc.lon);
                     };
                     listContainer.appendChild(item);
@@ -130,8 +136,10 @@
             harta.setView([lat, lon], 12);
             harta.invalidateSize();
         }
-        if (markerCurent) markerCurent.setLatLng([lat, lon]);
-        else markerCurent = L.marker([lat, lon]).addTo(harta);
+        if (markerCurent)
+            markerCurent.setLatLng([lat, lon]);
+        else
+            markerCurent = L.marker([lat, lon]).addTo(harta);
     }
 
     function afiseazaHartaEdit(lat, lon) {
@@ -143,7 +151,9 @@
             hartaEdit.setView([lat, lon], 12);
             setTimeout(() => { hartaEdit.invalidateSize(); }, 100);
         }
-        if (markerEdit) markerEdit.setLatLng([lat, lon]);
-        else markerEdit = L.marker([lat, lon]).addTo(hartaEdit);
+        if (markerEdit)
+            markerEdit.setLatLng([lat, lon]);
+        else markerEdit =
+            L.marker([lat, lon]).addTo(hartaEdit);
     }
 });

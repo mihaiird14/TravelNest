@@ -1,0 +1,26 @@
+﻿@model List<string>
+@using System.Text.Json
+<html>
+<head>
+    <link rel="stylesheet" href="~/css/map.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <script>
+        window.tariVizitate = @Html.Raw(JsonSerializer.Serialize(Model));
+    </script>
+
+    <div id="mapWrapper">
+        <div id="controlPanel">
+            <h2 id="mapTitle">Travel Map</h2>
+            <p id="countryStats">Explored: <b id="totalCount">0</b></p>
+            <small id="helperText">Countries visited across all your trips.</small>
+        </div>
+        <div id="globalMap"></div>
+    </div>
+</body>
+    @section Scripts{
+    <script src="~/js/scratchMap.js" asp-append-version="true"></script>
+    }
+</html>

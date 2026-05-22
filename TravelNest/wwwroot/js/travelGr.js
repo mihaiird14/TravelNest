@@ -1,6 +1,7 @@
 ﻿let selectedCities = window.selectedCities || [];
 let harta, marker;
 let listaIdPrieteni = new Set();
+let oraseCuCoduri = {};
 document.addEventListener('DOMContentLoaded', () => {
     afisareLocatii();
 });
@@ -150,16 +151,20 @@ async function cautaOras() {
     const cautare = document.getElementById('mapSearchInput').value;
     if (cautare.length < 3) return;
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cautare)}`);
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(cautare)}`
+        );
         const results = await response.json();
         if (results.length > 0) {
             const city = results[0];
             harta.setView([city.lat, city.lon], 12);
             if (marker) harta.removeLayer(marker);
             marker = L.marker([city.lat, city.lon]).addTo(harta);
+            const countryCode = (city.address && city.address.country_code) ? city.address.country_code : "unknown";
             const cityName = city.display_name.split(',')[0];
             if (!selectedCities.includes(cityName)) {
                 selectedCities.push(cityName);
+                oraseCuCoduri[cityName] = countryCode;
                 afisareOraseSelectate();
             }
         }
@@ -422,6 +427,7 @@ document.getElementById('formCreateGroup').onsubmit = async function(e) {
     }
     selectedCities.forEach(oras => {
         container.innerHTML += `<input type="hidden" name="oraseSelectate" value="${oras}">`;
+        container.innerHTML += `<input type="hidden" name="coduriTaraSelectate" value="${oraseCuCoduri[oras] || ''}">`;
     });
     listaIdPrieteni.forEach(id => {
         container.innerHTML += `<input type="hidden" name="idPrieteni" value="${id}">`;

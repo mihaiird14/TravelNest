@@ -66,7 +66,7 @@ namespace TravelNest.Controllers
             return Json(prieteni);
         }
         [HttpPost]
-        public async Task<IActionResult> AdaugaGrup(TravelGroup grup, string[] oraseSelectate, int[] idPrieteni, IFormFile imagineFisier)
+        public async Task<IActionResult> AdaugaGrup(TravelGroup grup, string[] oraseSelectate, string[] coduriTaraSelectate, int[] idPrieteni, IFormFile imagineFisier)
         {
             var adminId = _userManager.GetUserId(User);
             var profilAdmin = await _context.Profils
@@ -116,9 +116,15 @@ namespace TravelNest.Controllers
 
             if (oraseSelectate != null)
             {
-                foreach (var loc in oraseSelectate)
+                for (int i = 0; i < oraseSelectate.Length; i++)
                 {
-                    grup.Locatii.Add(new LocatieGrup { Locatie = loc });
+                    string codTara = (coduriTaraSelectate != null && i < coduriTaraSelectate.Length) ? coduriTaraSelectate[i] : null;
+
+                    grup.Locatii.Add(new LocatieGrup
+                    {
+                        Locatie = oraseSelectate[i],
+                        CodTara = codTara 
+                    });
                 }
             }
 
@@ -260,7 +266,7 @@ namespace TravelNest.Controllers
             return Ok();
         }
         [HttpPost]
-        public async Task<IActionResult> ModificareDestinatieTG(int id, List<string> oraseSelectate, string thumbnailLink)
+        public async Task<IActionResult> ModificareDestinatieTG(int id, List<string> oraseSelectate, List<string> coduriTaraSelectate, string thumbnailLink)
         {
             var grup = await _context.TravelGroups
                 .Include(g => g.Locatii)
@@ -274,17 +280,20 @@ namespace TravelNest.Controllers
             {
                 _context.LocatieGrups.RemoveRange(grup.Locatii);
             }
-
             if (oraseSelectate != null && oraseSelectate.Any())
             {
-                foreach (var oras in oraseSelectate)
+                for (int i = 0; i < oraseSelectate.Count; i++)
                 {
+                    string codTara = (coduriTaraSelectate != null && i < coduriTaraSelectate.Count) ? coduriTaraSelectate[i] : null;
+
                     grup.Locatii.Add(new LocatieGrup
                     {
-                        Locatie = oras,
+                        Locatie = oraseSelectate[i],
+                        CodTara = codTara,
                         GroupId = id
                     });
                 }
+
                 if (!string.IsNullOrEmpty(thumbnailLink))
                 {
                     grup.Thumbnail = thumbnailLink;

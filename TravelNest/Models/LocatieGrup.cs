@@ -15,5 +15,6 @@ namespace TravelNest.Models
         public string? HotelLink { get; set; }
         public DateOnly? CheckIn { get; set; }
         public DateOnly? CheckOut { get; set; }
+        public string? CodTara { get; set; }
     }
 }

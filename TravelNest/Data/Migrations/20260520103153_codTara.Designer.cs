@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelNest.Data;
 
@@ -11,9 +12,11 @@ using TravelNest.Data;
 namespace TravelNest.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260520103153_codTara")]
+    partial class codTara
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -759,32 +762,6 @@ namespace TravelNest.Data.Migrations
                     b.ToTable("ReplyComs");
                 });
 
-            modelBuilder.Entity("TravelNest.Models.TaraVizitata", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("AdaugatManual")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("CodTara")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
-
-                    b.Property<int>("ProfilId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfilId");
-
-                    b.ToTable("TariVizitate");
-                });
-
             modelBuilder.Entity("TravelNest.Models.TravelGroup", b =>
                 {
                     b.Property<int>("Id")
@@ -1259,17 +1236,6 @@ namespace TravelNest.Data.Migrations
                     b.Navigation("Comentariu");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TravelNest.Models.TaraVizitata", b =>
-                {
-                    b.HasOne("TravelNest.Models.Profil", "Profil")
-                        .WithMany()
-                        .HasForeignKey("ProfilId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Profil");
                 });
 
             modelBuilder.Entity("TravelNest.Models.TravelGroup", b =>
