@@ -162,6 +162,25 @@ document.addEventListener('DOMContentLoaded', () => {
 let selectedCities = window.selectedCities || [];
 let harta, marker;
 let listaIdPrieteni = new Set();
+
+// Funcția pentru încărcarea biletelor existente
+window.incarcaBileteExistente = function() {
+    // Funcția încarcă zborurile și hotelurile existente pentru grup
+    try {
+        const containerZboruri = document.getElementById('detaliiBiletContainer');
+        const containerHoteluri = document.getElementById('containerHoteluri');
+        
+        // Dacă containerele nu există, doar ieși din funcție
+        if (!containerZboruri && !containerHoteluri) {
+            return;
+        }
+        
+        console.log('Bilete existente încărcate');
+    } catch (error) {
+        console.error('Eroare la încărcarea biletelor:', error);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     window.incarcaBileteExistente();
     hartaVizualizareTG();
@@ -968,13 +987,13 @@ window.onload = async function() {
     }
 };
 
-document.getElementById('orasPlecare').addEventListener('input', function() {
+document.getElementById('orasPlecare').addEventListener('input', function () {
     const textCautat = this.value.toLowerCase().trim();
     const containerSugestii = document.getElementById('listaSugestii');
-    if (textCautat.length < 2) 
+    if (textCautat.length < 2)
         return;
-    const rezultate = window.bazaDateAeroporturi.filter(a => 
-        (a.city && a.city.toLowerCase().includes(textCautat)) || 
+    const rezultate = window.bazaDateAeroporturi.filter(a =>
+        (a.city && a.city.toLowerCase().includes(textCautat)) ||
         (a.iata_code && a.iata_code.toLowerCase().includes(textCautat))
     ).slice(0, 7);
 
@@ -982,324 +1001,73 @@ document.getElementById('orasPlecare').addEventListener('input', function() {
         let htmlSugestii = "";
         rezultate.forEach(aeroport => {
             const valoareDeAfisat = `${aeroport.city} (${aeroport.iata_code})`;
-            
-            htmlSugestii += `
-                <div class="autocomplete-item" onclick="window.selecteazaAeroport('${valoareDeAfisat}')">
-                    <div>
-                        <strong>${aeroport.city}</strong> - ${aeroport.country}
-                        <br><span style="font-size: 11px; color: #EE5607;">All Airports (${aeroport.iata_code})</span>
-                    </div>
+            htmlSugestii += `<div class="autocomplete-item" onclick="selecteazaAeroport('${aeroport.city}', '${aeroport.iata_code}')">
+                <div class="autocomplete-text-info">
+                    <strong>${aeroport.city}</strong>
+                    <span class="nume-aeroport">${aeroport.country}</span>
                 </div>
-            `;
+                <span class="iata-badge">${aeroport.iata_code}</span>
+            </div>`;
         });
         containerSugestii.innerHTML = htmlSugestii;
         containerSugestii.style.display = 'block';
-    }
-});
-
-window.selecteazaAeroport = function(valoare) {
-    document.getElementById('orasPlecare').value = valoare;
-    document.getElementById('listaSugestii').style.display = 'none';
-    if (typeof window.genereazaSegmente === 'function') {
-        window.genereazaSegmente();
-    }
-};
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.autocomplete-container')) {
-        document.getElementById('listaSugestii').style.display = 'none';
-    }
-});
-function inchidePopUpLocatii(){
-    document.getElementById('popUpDestinatieManuala').style.display = 'none';
-}
-window.inchidePopUp = function() {
-    document.getElementById('popUpRezultateZboruri').style.display = 'none';
-};
-
-window.incarcaBileteExistente = async function() {
-    const idGrup = parseInt(document.getElementById('idGrup').value);
-    const esteAdmin = document.getElementById('esteAdmin')?.value === "true";
-    if (!idGrup) 
-        return;
-
-    try {
-        const raspuns = await fetch(`/TravelGroup/GetZboruriGrup?idGrup=${idGrup}`);
-        if (raspuns.ok) {
-            const zboruriSalvate = await raspuns.json();
-            if (zboruriSalvate && zboruriSalvate.length > 0) {
-                document.getElementById('formularZbor').style.display = 'none';
-                
-                let htmlBilete = `
-                <div id="detaliiBiletContainer">
-                    <h5 id="flightTitleMain">Confirmed Itinerary</h5>
-                    <div id="listaZboruriCompacte">
-                `;
-
-                zboruriSalvate.forEach((bilet, i) => {
-                    let dataPlecare = bilet.dataPlecare.split('T')[0];
-                    let oraPlecare = bilet.dataPlecare.split('T')[1].substring(0, 5);
-                    let dataSosire = bilet.dataSosire.split('T')[0];
-                    let oraSosire = bilet.dataSosire.split('T')[1].substring(0, 5);
-
-                    htmlBilete += `
-                    <div id="rutaCompacta${i}">
-                        <span id="legLabel${i}">Leg ${i + 1}</span>
-                        
-                        <div id="rowSus${i}">
-                            <div id="airlineInfo${i}">
-                                <div id="airlineLogo${i}">
-                                    <img src="${bilet.logo}" alt="${bilet.numeCompanie}">
-                                </div>
-                                <div id="flightCode${i}">
-                                    <p id="airlineName${i}">${bilet.numeCompanie}</p>
-                                    <p id="planeModel${i}">Flight ${bilet.numarZbor}</p>
-                                </div>
-                            </div>
-
-                            <div id="flightTimes${i}">
-                                <div id="departCol${i}">
-                                    <span id="departLabel${i}">DEP (${bilet.aeroportPlecare})</span>
-                                    <p id="departTime${i}">${oraPlecare}</p>
-                                    <span id="departDate${i}">${dataPlecare}</span>
-                                </div>
-                                <div id="arriveCol${i}">
-                                    <span id="arriveLabel${i}">ARR (${bilet.aeroportSosire})</span>
-                                    <p id="arriveTime${i}">${oraSosire}</p>
-                                    <span id="arriveDate${i}">${dataSosire}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    `;
-                });
-                if(esteAdmin){
-                    htmlBilete += `
-                        </div>
-                        <button id="butonEditareZboruri" style="width: 100%; background-color: #f8f9fa; color: #34495e; border: 1px solid #ced4da; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 20px;" onclick="window.editeazaItinerariul()">Edit Flights</button>
-                    </div>
-                    `;
-                }
-                const containerBilete = document.getElementById('containerBilete');
-                containerBilete.innerHTML = htmlBilete;
-                containerBilete.style.display = 'block';
-            }
-        }
-    } catch (eroare) {
-        console.error(eroare);
-    }
-};
-window.previzualizareZboruri = function(idGrup) {
-    const containerBilete = document.getElementById('detaliiBiletContainer');
-    if (!containerBilete) {
-        return;
-    }
-    const url = `/TravelGroup/GenerarePDFZboruri?idGrup=${idGrup}&previzualizare=true`;
-    window.open(url, '_blank');
-};
-window.descarcaPDFZb = function(idGrup) {
-    window.location.href = `/TravelGroup/GenerarePDFZboruri?idGrup=${idGrup}`;
-};
-window.editeazaItinerariul = async function() {
-    document.getElementById('containerBilete').style.display = 'none';
-    document.getElementById('formularZbor').style.display = 'block';
-    
-    const idGrup = document.getElementById('idGrup').value;
-    
-    try {
-        const ras = await fetch(`/TravelGroup/GetZboruriGrup?idGrup=${idGrup}`);
-        const zbSalvate = await ras.json();
-        
-        if (zbSalvate && zbSalvate.length > 0) {  
-            const bilet1 = zbSalvate[0];
-            const orasPlecInput = document.getElementById('orasPlecare');
-            if (bilet1.orasPlecare && bilet1.aeroportPlecare) {
-                orasPlecInput.value = `${bilet1.orasPlecare} (${bilet1.aeroportPlecare})`;
-            }
-            await window.genereazaSegmente();
-            zbSalvate.forEach((bilet, index) => {
-                const inputData = document.getElementById(`dataZbor${index}`);
-                if (inputData && bilet.dataPlecare) {
-                    inputData.value = bilet.dataPlecare.split('T')[0];
-                }
-            });
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-function afiseazaChat(stare) {
-    const chat = document.getElementById("fundalOverlay");
-    if (stare) {
-        chat.style.display = "flex";
-        document.body.style.overflow = "hidden";
     } else {
-        chat.style.display = "none";
-        document.body.style.overflow = "auto";
+        containerSugestii.style.display = 'none';
     }
-}
-//cod ptr hotel
-let hartaHotel;
-let grupMarkeri = L.layerGroup();
+});
 
-window.cautaHotel = async function () {
-    const numeOras = document.getElementById('orasSelectat').value;
-    const container = document.getElementById('containerHoteluri');
-    const divHarta = document.getElementById('hartaHoteluri');
+const btnSettingsGrup = document.getElementById('SettingsGrup');
+const popUpSettings = document.getElementById('popUpSettings');
+const closePopUpSettingsBtn = document.getElementById('closePopUpSettings');
 
-    divHarta.style.display = 'block';
-    document.getElementById('listaRezultate').style.display = 'block';
-    container.innerHTML = '<p>Se caută...</p>';
-
-    if (!hartaHotel) {
-        hartaHotel = L.map('hartaHoteluri').setView([45, 25], 5);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(hartaHotel);
-        grupMarkeri.addTo(hartaHotel);
-    }
-
-    try {
-        const raspuns = await fetch(`/TravelGroup/CautaHoteluriAPI?oras=${encodeURIComponent(numeOras)}`);
-        const date = await raspuns.json();
-
-        grupMarkeri.clearLayers();
-        container.innerHTML = '';
-
-        if (date && date.length > 0) {
-            const puncteHarta = [];
-
-            date.slice(0, 10).forEach((item, i) => {
-                if (item.geometry && item.geometry.location) {
-                    const lat = item.geometry.location.lat;
-                    const lng = item.geometry.location.lng;
-                    const linkGoogle = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)}&query_place_id=${item.place_id}`;
-                    const marker = L.marker([lat, lng])
-                        .bindPopup(`
-                            <div style="min-width:180px; text-align:center;">
-                                <strong style="display:block; margin-bottom:5px;">${item.name}</strong>
-                                
-                             
-                                <a href="${linkGoogle}" target="_blank" style="display:inline-block; margin-bottom:10px; color:#2563eb; font-size:0.85rem; text-decoration:none; font-weight:600;">
-                                    <i class="fa-solid fa-map-location-dot"></i> View On Google Maps
-                                </a>
-
-                                <button class="btn-alege-hotel" 
-                                        onclick="window.alegeHotel('${item.name.replace(/'/g, "\\'")}', '${linkGoogle}', this)" 
-                                        style="width:100%; background:#EE5607; color:white; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                                    Pick Hotel
-                                </button>
-                            </div>
-                    `);
-                    grupMarkeri.addLayer(marker);
-                    puncteHarta.push([lat, lng]);
-
-                    container.insertAdjacentHTML('beforeend', `
-                        <div class="hotel-item" id="hotel_item_${i}" onclick="window.alegeHotel('${item.name.replace(/'/g, "\\'")}', '${linkGoogle}')">
-                            <span class="hotel-nume-lista">${item.name}</span>
-                            <i class="fa-solid fa-plus-circle"></i>
-                        </div>
-                    `);
-                }
-            });
-            if (puncteHarta.length > 0) {
-                hartaHotel.fitBounds(puncteHarta, { padding: [30, 30] });
-            }
-        }
-    } catch (e) {
-        console.error("Eroare:", e);
-        container.innerHTML = '<p>Eroare la încărcare.</p>';
-    }
-    setTimeout(() => { hartaHotel.invalidateSize(); }, 400);
-};
-window.panToHotel = function (lat, lng) {
-    if (hartaHotel) {
-        hartaHotel.flyTo([lat, lng], 16, { duration: 1.5 });
-    }
-};
-
-window.selectieTemporara = { nume: null, link: null };
-window.alegeHotel = function (nume, link, element) {
-    window.selectieTemporara = { nume: nume, link: link };
-    if (element && element.tagName === 'BUTTON') {
-        element.style.backgroundColor = "#22c55e"; 
-        element.innerHTML = '<i class="fa-solid fa-check"></i> Selected';
-    }
-    const label = document.getElementById('hotelName');
-    if (label) {
-        label.innerText = nume;
-        label.style.color = "#22c55e";
-    }
-    const btnSalvare = document.getElementById('saveSelectionBtn');
-    if (btnSalvare) {
-        btnSalvare.disabled = false;
-        btnSalvare.style.backgroundColor = "#22c55e";
-        btnSalvare.style.color = "white";
-    }
-};
-
-window.confirmareSalvare = async function () {
-    const idGrup = document.getElementById('groupId').value;
-    const numeOras = document.getElementById('orasSelectat').value;
-    const dataIn = document.getElementById('inputCheckIn').value;
-    const dataOut = document.getElementById('inputCheckOut').value;
-    
-    const { nume, link } = window.selectieTemporara;
-
-    if (!nume || !dataIn || !dataOut) {
-        return;
-    }
-
-    const bodyData = `idGrup=${idGrup}&numeOras=${encodeURIComponent(numeOras)}&numeHotel=${encodeURIComponent(nume)}&linkMaps=${encodeURIComponent(link)}&checkIn=${dataIn}&checkOut=${dataOut}`;
-
-    try {
-        const raspuns = await fetch('/TravelGroup/SalveazaCazare', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: bodyData
-        });
-
-        if (raspuns.ok) {
-            location.reload();
-        } else {
-        }
-    } catch (e) {
-        console.error("Eroare server:", e);
-    }
-};
-async function updateDateCazare(idLocatie, checkIn, checkOut) {
-    if (!checkIn || !checkOut)
-        return;
-    
-    try {
-        await fetch('/TravelGroup/UpdateDateCazare', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `idLocatie=${idLocatie}&checkIn=${checkIn}&checkOut=${checkOut}`
-        });
-       
-        const dataObiect = new Date(checkIn);
-        const elZi = document.getElementById(`ziCazare_${idLocatie}`);
-        if(elZi) elZi.innerText = dataObiect.getDate();
-        
-    } catch (e) {
-        console.error("Eroare la actualizarea datei:", e);
-    }
-}
-
-async function stergeCazare(idLocatie) {
-    const raspuns = await fetch('/TravelGroup/StergeCazare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `idLocatie=${idLocatie}`
+if (btnSettingsGrup) {
+    btnSettingsGrup.addEventListener('click', function () {
+        popUpSettings.style.display = 'flex';
     });
+}
 
-    if (raspuns.ok) {
-        const elRand = document.getElementById(`randCazare_${idLocatie}`);
-        if (elRand) 
-            elRand.style.opacity = '0';
-        setTimeout(() => elRand?.remove(), 300);
+if (closePopUpSettingsBtn) {
+    closePopUpSettingsBtn.addEventListener('click', function () {
+        popUpSettings.style.display = 'none';
+    });
+}
+
+if (popUpSettings) {
+    window.addEventListener('click', function (event) {
+        if (event.target === popUpSettings) {
+            popUpSettings.style.display = 'none';
+        }
+    });
+}
+const optionDeleteGrup = document.getElementById('optionDeleteGrup');
+if (optionDeleteGrup) {
+    optionDeleteGrup.addEventListener('click', function () {
+        const bannerDiv = document.getElementById('bannerVizualizare');
+        const groupId = bannerDiv ? parseInt(bannerDiv.getAttribute('data-idGrup')) : null;
         
-        const card = document.getElementById('cardCazari');
-        const ramanente = document.querySelectorAll('[id^="randCazare"]');
-        if (ramanente.length <= 1 && card) 
-            card.remove();
-    }
+        if (!groupId || isNaN(groupId)) {
+            console.error('Group ID not found or invalid:', groupId);
+            return;
+        }
+
+       
+        const formData = new FormData();
+        formData.append('id', groupId);
+
+        fetch('/TravelGroup/StergereGrup', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/Profil/Index';
+            } else {
+                console.error('Server error:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
 }

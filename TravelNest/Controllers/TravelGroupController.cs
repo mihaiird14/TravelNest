@@ -951,6 +951,99 @@ namespace TravelNest.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> StergereGrup(int id)
+        {
+            try
+            {
+                var userConectat = _userManager.GetUserId(User);
+                var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userConectat);
+                
+                if (profil == null)
+                    return Json(new { success = false, message = "User not found" });
+
+                var grup = await _context.TravelGroups
+                    .Include(g => g.ListaParticipanti)
+                    .Include(g => g.Locatii)
+                    .Include(g => g.Documente)
+                    .Include(g => g.Zboruri)
+                    .Include(g => g.ActivitatiItinerariu)
+                    .Include(g => g.MesajeGrupGroup)
+                    .FirstOrDefaultAsync(g => g.Id == id);
+
+                if (grup == null)
+                {
+                    return Json(new { success = false, message = "Group not found" });
+                }
+
+                if (grup.AdminId != profil.Id)
+                    return Json(new { success = false, message = "Only the admin can delete this group" });
+                if (grup.Documente != null && grup.Documente.Any())
+                {
+                    foreach (var doc in grup.Documente)
+                    {
+                        try
+                        {
+                            string caleFizica = Path.Combine(_env.WebRootPath, doc.CaleFisier.TrimStart('/'));
+                            if (System.IO.File.Exists(caleFizica))
+                            {
+                                System.IO.File.Delete(caleFizica);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error deleting file: {ex.Message}");
+                        }
+                    }
+                    _context.Documents.RemoveRange(grup.Documente);
+                }
+                if (grup.ListaParticipanti != null && grup.ListaParticipanti.Any())
+                {
+                    _context.MembruGrups.RemoveRange(grup.ListaParticipanti);
+                }
+                if (grup.Locatii != null && grup.Locatii.Any())
+                {
+                    _context.LocatieGrups.RemoveRange(grup.Locatii);
+                }
+                if (grup.Zboruri != null && grup.Zboruri.Any())
+                {
+                    _context.ZborGrupuris.RemoveRange(grup.Zboruri);
+                }
+                if (grup.ActivitatiItinerariu != null && grup.ActivitatiItinerariu.Any())
+                {
+                    _context.ActivitatiItinerariu.RemoveRange(grup.ActivitatiItinerariu);
+                }
+                if (grup.MesajeGrupGroup != null && grup.MesajeGrupGroup.Any())
+                {
+                    _context.Mesaje.RemoveRange(grup.MesajeGrupGroup);
+                }
+                if (!string.IsNullOrEmpty(grup.Thumbnail) && grup.Thumbnail.StartsWith("/images/trips/"))
+                {
+                    try
+                    {
+                        string caleThumbnail = Path.Combine(_env.WebRootPath, grup.Thumbnail.TrimStart('/'));
+                        if (System.IO.File.Exists(caleThumbnail))
+                        {
+                            System.IO.File.Delete(caleThumbnail);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error deleting thumbnail: {ex.Message}");
+                    }
+                }
+                _context.TravelGroups.Remove(grup);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Group deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception in StergereGrup: {ex.Message}");
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
     }
 
 }

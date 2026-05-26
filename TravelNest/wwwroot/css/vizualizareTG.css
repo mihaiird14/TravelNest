@@ -91,7 +91,7 @@
     overflow: hidden;
 }
 
-#EditGrup {
+#EditGrup, #SettingsGrup {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
@@ -106,7 +106,7 @@
     gap: 10px;
 }
 
-#EditGrup:hover {
+#EditGrup:hover, #SettingsGrup:hover {
     background: white;
     color: black;
     transform: translateY(-2px);
@@ -753,6 +753,7 @@
     height: 60px;
 }
 #detaliiButoane, #butoaneEditare {
+    gap: 15px;
     position: absolute;
     bottom: 30px;
     right: 0px; 
@@ -1192,7 +1193,7 @@ i[id^="StergeDoc"] {
     background: #dc2626;
     transform: translateY(-1px);
 }
-/*cod ptr cautare zbor*/
+
 #titluFormular {
     margin-top: 0;
     color: #2c3e50;
@@ -1228,7 +1229,7 @@ label[id^="etichetaRuta"], #etichetaPlecare {
     background-color: #ffffff;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-#orasPlecare:focus, input[type="date"]:focus {
+#orosPlecare:focus, input[type="date"]:focus {
     border-color: #EE5607;
     outline: none;
     box-shadow: 0 0 0 3px rgba(238, 86, 7, 0.15);
@@ -2014,23 +2015,49 @@ label[id^="etichetaRuta"], #etichetaPlecare {
     line-height: 1;
     padding: 0 10px;
 }
-
-[id^="sedereEditor"] {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+#popUpSettings {
+    animation: fadeInPopUp 0.3s ease-out;
 }
 
-[id^="dataIntrare"], [id^="dataIesire"] {
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 0.85rem;
-    color: #4a5568;
-    outline: none;
+#contentPopUpSettings {
+    animation: slideUpPopUp 0.3s ease-out;
 }
 
-[id^="dataIntrare"]:focus, [id^="dataIesire"]:focus {
-    border-color: #EE5607;
+@keyframes fadeInPopUp {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpPopUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+#optionDeleteGrup:hover,
+#optionRemoveMap:hover {
+    background-color: rgba(238, 86, 7, 0.08) !important;
+    border-color: #EE5607 !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+#optionDeleteGrup:hover {
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+}
+
+#optionRemoveMap:hover {
+    background: #fef3c7 !important;
+    border-color: #fcd34d !important;
 }
