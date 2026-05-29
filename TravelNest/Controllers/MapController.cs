@@ -26,17 +26,43 @@ namespace TravelNest.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userId);
-            if (profil == null) return View(new List<string>());
-
-            var coduri = await _context.TravelGroups
-                .Where(g => g.AdminId == profil.Id ||
-                            g.ListaParticipanti.Any(m => m.ProfilId == profil.Id && m.Confirmare == "MEMBER"))
+            if (profil == null) 
+                return View(new List<string>());
+            var grupuriVizibile = await _context.TravelGroups
                 .Include(g => g.Locatii)
+                .Include(g => g.ListaParticipanti)
+                .Where(g => (g.AdminId == profil.Id ||
+                             g.ListaParticipanti.Any(m => m.ProfilId == profil.Id && m.Confirmare == "MEMBER")))
+                .ToListAsync();
+
+            var hartiAscunse = await _context.HartiAscunse
+                .Where(h => h.ProfilId == profil.Id)
+                .Select(h => h.TravelGroupId)
+                .ToListAsync();
+
+            var coduri = grupuriVizibile
+                .Where(g => !hartiAscunse.Contains(g.Id))
                 .SelectMany(g => g.Locatii)
                 .Where(l => !string.IsNullOrEmpty(l.CodTara))
                 .Select(l => l.CodTara.ToUpper())
                 .Distinct()
-                .ToListAsync();
+                .ToList();
+            Console.WriteLine("=== DEBUG MAP ===");
+            Console.WriteLine($"ProfilId: {profil.Id}");
+            Console.WriteLine($"Grupuri vizibile ({grupuriVizibile.Count}):");
+            foreach (var g in grupuriVizibile)
+            {
+                Console.WriteLine($"  Grup ID={g.Id}, Locatii={string.Join(",", g.Locatii.Select(l => l.CodTara))}");
+            }
+            Console.WriteLine($"Harti ascunse ({hartiAscunse.Count}): {string.Join(",", hartiAscunse)}");
+            var dupafiltru = grupuriVizibile.Where(g => !hartiAscunse.Contains(g.Id)).ToList();
+            Console.WriteLine($"Dupa filtru ({dupafiltru.Count}):");
+            foreach (var g in dupafiltru)
+            {
+                Console.WriteLine($"  Grup ID={g.Id}");
+            }
+            Console.WriteLine($"Coduri finale: {string.Join(",", coduri)}");
+            Console.WriteLine("=== END DEBUG ===");
 
             // Add manually added countries
             var manualCountries = await _context.TariVizitate
@@ -57,16 +83,25 @@ namespace TravelNest.Controllers
             var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userId);
             if (profil == null) 
                 return Json(new List<string>());
-
-            var coduri = await _context.TravelGroups
-                .Where(g => g.AdminId == profil.Id ||
-                            g.ListaParticipanti.Any(m => m.ProfilId == profil.Id && m.Confirmare == "MEMBER"))
+            var grupuriVizibile = await _context.TravelGroups
                 .Include(g => g.Locatii)
+                .Include(g => g.ListaParticipanti)
+                .Where(g => (g.AdminId == profil.Id ||
+                             g.ListaParticipanti.Any(m => m.ProfilId == profil.Id && m.Confirmare == "MEMBER")))
+                .ToListAsync();
+
+            var hartiAscunse = await _context.HartiAscunse
+                .Where(h => h.ProfilId == profil.Id)
+                .Select(h => h.TravelGroupId)
+                .ToListAsync();
+
+            var coduri = grupuriVizibile
+                .Where(g => !hartiAscunse.Contains(g.Id))
                 .SelectMany(g => g.Locatii)
                 .Where(l => !string.IsNullOrEmpty(l.CodTara))
                 .Select(l => l.CodTara.ToUpper())
                 .Distinct()
-                .ToListAsync();
+                .ToList();
 
             var uniqueCountries = coduri.Distinct().ToList();
             
@@ -85,8 +120,9 @@ namespace TravelNest.Controllers
 
             // Check if country exists in any travel group
             var existsInGroup = await _context.TravelGroups
-                .Where(g => g.AdminId == profil.Id ||
-                            g.ListaParticipanti.Any(m => m.ProfilId == profil.Id && m.Confirmare == "MEMBER"))
+                .Where(g => !_context.HartiAscunse.Any(h => h.ProfilId == profil.Id && h.TravelGroupId == g.Id) &&
+                           (g.AdminId == profil.Id ||
+                            g.ListaParticipanti.Any(m => m.ProfilId == profil.Id && m.Confirmare == "MEMBER")))
                 .Include(g => g.Locatii)
                 .SelectMany(g => g.Locatii)
                 .AnyAsync(l => l.CodTara.ToUpper() == codTara);

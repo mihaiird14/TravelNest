@@ -163,14 +163,12 @@ let selectedCities = window.selectedCities || [];
 let harta, marker;
 let listaIdPrieteni = new Set();
 
-// Funcția pentru încărcarea biletelor existente
 window.incarcaBileteExistente = function() {
-    // Funcția încarcă zborurile și hotelurile existente pentru grup
+    //  încarcă zborurile și hotelurile existente pentru grup
     try {
         const containerZboruri = document.getElementById('detaliiBiletContainer');
         const containerHoteluri = document.getElementById('containerHoteluri');
-        
-        // Dacă containerele nu există, doar ieși din funcție
+
         if (!containerZboruri && !containerHoteluri) {
             return;
         }
@@ -450,7 +448,6 @@ async function hartaVizualizareTG() {
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Esri'
     }).addTo(tripMap);
-    // 1. Obține codurile de țară pentru orașele vizitate
     const tariVizitate = new Set();
     for (const oras of window.selectedCities) {
         try {
@@ -464,20 +461,19 @@ async function hartaVizualizareTG() {
         } catch (e) { }
     }
 
-    // 2. Dacă avem coduri salvate în DB (window.selectedCountryCodes), folosește-le ca fallback
+  
     if (window.selectedCountryCodes) {
         window.selectedCountryCodes.forEach(cod => {
             if (cod) tariVizitate.add(cod.toUpperCase());
         });
     }
 
-    // 3. Încarcă GeoJSON și colorează țările vizitate
     fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson')
         .then(res => res.json())
         .then(data => {
             L.geoJson(data, {
                 style: function (feature) {
-                    // GeoJSON-ul folosește ISO_A2 pentru codul de țară
+                    
                     const cod = (feature.properties.ISO_A2 || "").toUpperCase();
                     const esteVizitata = tariVizitate.has(cod);
                     return {
@@ -1020,13 +1016,13 @@ const btnSettingsGrup = document.getElementById('SettingsGrup');
 const popUpSettings = document.getElementById('popUpSettings');
 const closePopUpSettingsBtn = document.getElementById('closePopUpSettings');
 
-if (btnSettingsGrup) {
+if (btnSettingsGrup && popUpSettings) {
     btnSettingsGrup.addEventListener('click', function () {
         popUpSettings.style.display = 'flex';
     });
 }
 
-if (closePopUpSettingsBtn) {
+if (closePopUpSettingsBtn && popUpSettings) {
     closePopUpSettingsBtn.addEventListener('click', function () {
         popUpSettings.style.display = 'none';
     });
@@ -1071,3 +1067,82 @@ if (optionDeleteGrup) {
         });
     });
 }
+document.addEventListener('DOMContentLoaded', function () {
+    const optionRemoveMap = document.getElementById('optionRemoveMap');
+
+    if (!optionRemoveMap)
+        return; 
+
+    optionRemoveMap.addEventListener('click', function () {
+        const bannerDiv = document.getElementById('bannerVizualizare');
+        const groupId = bannerDiv ? parseInt(bannerDiv.getAttribute('data-idGrup')) : null;
+
+        if (!groupId || isNaN(groupId))
+            return;
+
+        const isCurrentlyHidden = bannerDiv.getAttribute('data-isHidden') === 'true';
+
+        if (isCurrentlyHidden) {
+                toggleMapVisibility(groupId, false);
+        } else {
+                toggleMapVisibility(groupId, true);
+        }
+    });
+});
+
+function toggleMapVisibility(groupId, hideFromMap) {
+    console.log('toggleMapVisibility called with:', { groupId, hideFromMap });
+    
+    const formData = new FormData();
+    formData.append('groupId', groupId);
+    formData.append('hideFromMap', hideFromMap);
+
+
+    console.log('Sending fetch request to /TravelGroup/VizibilitateMap');
+    fetch('/TravelGroup/VizibilitateMap', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('Response received:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            setTimeout(() => location.reload(), 100);
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+}
+
+// Update Settings Modal Text
+document.addEventListener('DOMContentLoaded', function() {
+    const optionRemoveMap = document.getElementById('optionRemoveMap');
+    const bannerDiv = document.getElementById('bannerVizualizare');
+    
+    if (optionRemoveMap && bannerDiv) {
+        const isHidden = bannerDiv.getAttribute('data-isHidden') === 'true';
+        
+        const textDiv = optionRemoveMap.querySelector('div:nth-child(2)');
+        if (textDiv) {
+            const titleP = textDiv.querySelector('p:nth-child(1)');
+            const descP = textDiv.querySelector('p:nth-child(2)');
+            
+            if (isHidden) {
+                titleP.textContent = 'Show on Scratch Map';
+                descP.textContent = 'Make this group visible on the map again';
+                optionRemoveMap.style.backgroundColor = '#ecfdf5';
+                optionRemoveMap.style.borderColor = '#a7f3d0';
+            } else {
+                titleP.textContent = 'Hide from Scratch Map';
+                descP.textContent = 'Remove this group from the map';
+                optionRemoveMap.style.backgroundColor = '#fef3c7';
+                optionRemoveMap.style.borderColor = '#fde68a';
+            }
+        }
+    }
+});

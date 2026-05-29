@@ -32,13 +32,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<VizualizareMesaj> VizualizareMesaje { get; set; }
     public DbSet<ActivitateItinerariu> ActivitatiItinerariu { get; set; }
     public DbSet<TaraVizitata> TariVizitate { get; set; }
+    public DbSet<HartaAscunsa> HartiAscunse { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         //cheie primara compusa ptr membru grup
         modelBuilder.Entity<MembruGrup>()
         .HasKey(mg => new { mg.ProfilId, mg.TravelGroupId });
-
+        modelBuilder.Entity<HartaAscunsa>()
+        .HasKey(h => new { h.ProfilId, h.TravelGroupId });
         modelBuilder.Entity<Comentariu>()
         .HasOne(c => c.Profil)
         .WithMany()

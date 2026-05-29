@@ -73,7 +73,8 @@ namespace TravelNest.Controllers
                                     .Include(p => p.User)
                                     .FirstOrDefaultAsync(p => p.UserId == adminId);
 
-            if (profilAdmin == null) return BadRequest();
+            if (profilAdmin == null) 
+                return BadRequest();
 
             grup.AdminId = profilAdmin.Id;
             grup.ListaParticipanti = new List<MembruGrup>();
@@ -184,6 +185,8 @@ namespace TravelNest.Controllers
                         .ThenInclude(pr => pr.User)
                 .FirstOrDefaultAsync(x => x.Id == id);
             ViewBag.CurrentProfilId = profil?.Id;
+            ViewBag.EsteAscuns = await _context.HartiAscunse
+                    .AnyAsync(h => h.ProfilId == profil.Id && h.TravelGroupId == id);
             if (grup == null)
             {
                 return NotFound();
@@ -1041,6 +1044,62 @@ namespace TravelNest.Controllers
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Exception in StergereGrup: {ex.Message}");
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // ascunde/afișa grup din ScratchMap
+        [HttpPost]
+        public async Task<IActionResult> VizibilitateMap(int groupId, bool hideFromMap)
+        {
+            try
+            {
+                var userConectat = _userManager.GetUserId(User);
+                var profil = await _context.Profils.FirstOrDefaultAsync(p => p.UserId == userConectat);
+                if (profil == null)
+                    return Json(new { success = false, message = "User not found" });
+
+                var grup = await _context.TravelGroups
+                    .Include(g => g.Locatii)
+                    .FirstOrDefaultAsync(g => g.Id == groupId);
+                if (grup == null)
+                    return Json(new { success = false, message = "Group not found" });
+
+                var esteAdmin = grup.AdminId == profil.Id;
+                var esteMembru = await _context.MembruGrups
+                    .AnyAsync(m => m.TravelGroupId == groupId && m.ProfilId == profil.Id && m.Confirmare == "MEMBER");
+                if (!esteAdmin && !esteMembru)
+                    return Json(new { success = false, message = "Not a member of this group" });
+
+                if (hideFromMap)
+                {
+                    var existaDeja = await _context.HartiAscunse
+                        .AnyAsync(h => h.ProfilId == profil.Id && h.TravelGroupId == groupId);
+                    if (!existaDeja)
+                    {
+                        _context.HartiAscunse.Add(new HartaAscunsa
+                        {
+                            ProfilId = profil.Id,
+                            TravelGroupId = groupId
+                        });
+                        await _context.SaveChangesAsync();
+                    }
+                    return Json(new { success = true, message = "Group hidden from your map" });
+                }
+                else
+                {
+                    var intrare = await _context.HartiAscunse
+                        .FirstOrDefaultAsync(h => h.ProfilId == profil.Id && h.TravelGroupId == groupId);
+                    if (intrare != null)
+                    {
+                        _context.HartiAscunse.Remove(intrare);
+                        await _context.SaveChangesAsync();
+                    }
+                    return Json(new { success = true, message = "Group visible on your map" });
+                }
+            }
+            catch (Exception ex)
+            {
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
