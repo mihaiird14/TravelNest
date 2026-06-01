@@ -83,7 +83,7 @@
                 {
                     @foreach (var x in Model)
                     {
-                        <div id="cardNotif" class="@(x.EsteCitita ? "" : "notificareNoua")" id="notif-@x.Id">
+                        <div class="cardNotif @(x.EsteCitita ? "" : "notificareNoua")" id="notif-@x.Id">
                             <div id="infoNotif">
                                 @if (x.TipNotificare == "FollowRequest" || x.TipNotificare == "Follow" || x.TipNotificare == "Like" || x.TipNotificare == "LikeComment" || x.TipNotificare == "LikeReply" || x.TipNotificare == "Comment" || x.TipNotificare == "Reply")
                                 {

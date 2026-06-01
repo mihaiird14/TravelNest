@@ -110,7 +110,24 @@ async function raspundeCerere(id, actiune) {
         const data = await raspuns.json();
 
         if (data.success) {
-            location.reload();
+            const cardNotificare = document.getElementById(`notif-${id}`);
+
+            if (cardNotificare) {
+                const zonaActiuni = cardNotificare.querySelector('#actiuniNotif');
+
+                if (zonaActiuni) {
+                    const butonView = zonaActiuni.querySelector('.btnView');
+                    zonaActiuni.innerHTML = '';
+                    const textStatus = actiune === 'Accept' ? 'Accepted ✓' : 'Declined ✗';
+                    const culoareStatus = actiune === 'Accept' ? '#10b981' : '#64748b'; // Verde sau Gri
+                    zonaActiuni.innerHTML = `<span style="color: ${culoareStatus}; font-weight: 600; margin-right: 15px; align-self: center; font-size: 0.9rem;">${textStatus}</span>`;
+
+                    if (butonView) {
+                        zonaActiuni.appendChild(butonView);
+                    }
+                }
+                    cardNotificare.classList.remove('notificareNoua');
+            }
         }
     } catch (err) {
         console.error("Eroare la procesare cerere:", err);

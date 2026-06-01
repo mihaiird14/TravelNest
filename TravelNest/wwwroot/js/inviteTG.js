@@ -22,7 +22,7 @@ async function cautaPrieteni() {
             const html = `
                 <div class="randPrieten">
                     <span class="numeUtilizator">${p.userName}</span>
-                    <button class="butonInvita" onclick="trimiteInvitatie(${p.id})">Invită</button>
+                    <button class="butonInvita" onclick="trimiteInvitatie(${p.id})">Invite</button>
                 </div>`;
             lista.insertAdjacentHTML('beforeend', html);
         });

@@ -575,7 +575,7 @@ namespace TravelNest.Controllers
                 continut = comm.Continut,
                 AutorComentariu = true,
                 esteProprietarPostare = postare.CreatorId == p.Id,
-                data = "ACUM"
+                data = "NOW"
             });
         }
         [HttpPost]
@@ -714,7 +714,7 @@ namespace TravelNest.Controllers
                     username = utilizator.UserName,
                     userImage = profilLogat.ImagineProfil ?? "/images/profilDefault.png",
                     mesaj = raspunsComentariu.Mesaj,
-                    data = "ACUM",
+                    data = "NOW",
                     esteAutor = true,
                     esteProprietarPostare = comentariuParinte.Postare.Profil.UserId == utilizator.Id,
                     esteAutorComentariuParinte = comentariuParinte.Profil.UserId == utilizator.Id
@@ -1169,7 +1169,17 @@ namespace TravelNest.Controllers
                     notificareAccept.Id,
                     profilLogat.ImagineProfil 
                 );
-
+                var notificare = await _context.Notificari.FindAsync(notificareId);
+                if (notificare != null)
+                {
+                    notificare.TipNotificare = "Follow"; 
+                                                       
+                    if (notificare.MesajNotificare.Contains("wants to follow you"))
+                    {
+                        notificare.MesajNotificare = notificare.MesajNotificare.Replace("wants to follow you", "started following you");
+                    }
+                    await _context.SaveChangesAsync();
+                }
                 return Json(new { success = true });
             }
 
@@ -1194,7 +1204,12 @@ namespace TravelNest.Controllers
             }
             _context.Notificari.Remove(notf);
             await _context.SaveChangesAsync();
-
+            var notificare = await _context.Notificari.FindAsync(notificareId);
+            if (notificare != null)
+            {
+                _context.Notificari.Remove(notificare);
+                await _context.SaveChangesAsync();
+            }
             return Json(new { success = true });
         }
     }

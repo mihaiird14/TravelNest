@@ -632,13 +632,17 @@ namespace TravelNest.Controllers
                 .OrderBy(z => z.DataPlecare)
                 .ToListAsync();
 
-            if (zboruri == null || !zboruri.Any())
-                return NotFound();
+              var cazari = await _context.LocatieGrups
+                .Where(l => l.GroupId == idGrup && !string.IsNullOrEmpty(l.HotelNume))
+                .OrderBy(l => l.CheckIn)
+                .ToListAsync();
+
+            if (!zboruri.Any() && !cazari.Any())
+                return NotFound("There are no flights or accommodations saved for this trip yet.");
             var logoZbor = new Dictionary<int, byte[]>();
             using (var cl = new HttpClient())
             {
                 cl.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; TravelNest/1.0)");
-
                 foreach (var z in zboruri)
                 {
                     try
@@ -649,12 +653,10 @@ namespace TravelNest.Controllers
                             logoZbor[z.Id] = imageBytes;
                         }
                     }
-                    catch
-                    {
-                        logoZbor[z.Id] = null;
-                    }
+                    catch { logoZbor[z.Id] = null; }
                 }
             }
+
             var document = QuestPDF.Fluent.Document.Create(container =>
             {
                 container.Page(page =>
@@ -668,7 +670,7 @@ namespace TravelNest.Controllers
                         r.RelativeItem().Column(x =>
                         {
                             x.Item().Text("TRAVEL NEST").FontSize(28).ExtraBold().FontColor("#EE5607");
-                            x.Item().Text("Official Trip Flights").FontSize(12).Italic().FontColor(Colors.Grey.Medium);
+                            x.Item().Text("Official Trip Itinerary").FontSize(12).Italic().FontColor(Colors.Grey.Medium);
                         });
                         string linkLogo = Path.Combine(_env.WebRootPath, "images", "logo.png");
                         if (System.IO.File.Exists(linkLogo))
@@ -678,58 +680,86 @@ namespace TravelNest.Controllers
                     });
                     page.Content().Column(column =>
                     {
-                        foreach (var z in zboruri)
+                        // Secțiunea ZBORURI
+                        if (zboruri.Any())
                         {
-                            column.Item().PaddingBottom(25).Container()
-                                .Border(1).BorderColor(Colors.Grey.Lighten3)
-                                .Background(Colors.Grey.Lighten5)
-                                .Padding(20)
-                                .Column(flightCol =>
-                                {
-                                    flightCol.Item().Row(r =>
+                            column.Item().PaddingBottom(10).Text("✈️ FLIGHTS").FontSize(16).SemiBold().FontColor("#2c3e50");
+                            foreach (var z in zboruri)
+                            {
+                                column.Item().PaddingBottom(15).Container()
+                                    .Border(1).BorderColor(Colors.Grey.Lighten3)
+                                    .Background(Colors.Grey.Lighten5)
+                                    .Padding(20)
+                                    .Column(flightCol =>
                                     {
-                                        if (logoZbor.ContainsKey(z.Id) && logoZbor[z.Id] != null)
-                                            r.ConstantItem(45).Image(logoZbor[z.Id]);
-                                        else
-                                            r.ConstantItem(45).Placeholder();
+                                        flightCol.Item().Row(r =>
+                                        {
+                                            if (logoZbor.ContainsKey(z.Id) && logoZbor[z.Id] != null)
+                                                r.ConstantItem(45).Image(logoZbor[z.Id]);
+                                            else
+                                                r.ConstantItem(45).Placeholder();
 
-                                        r.RelativeItem().PaddingLeft(15).Column(c =>
-                                        {
-                                            c.Item().Text($"{z.NumeCompanie} • Flight {z.NumarZbor}").Bold().FontSize(13);
-                                            /*c.Item().Hyperlink(LinkZbor(z))
-                                                    .Text("Book on Google FLights →")
-                                                    .FontColor("#EE5607").Underline().FontSize(10);*/
+                                            r.RelativeItem().PaddingLeft(15).Column(c =>
+                                            {
+                                                c.Item().Text($"{z.NumeCompanie} • Flight {z.NumarZbor}").Bold().FontSize(13);
+                                            });
+                                            r.ConstantItem(120).AlignRight().Column(c =>
+                                            {
+                                                c.Item().Text("Total Price").FontSize(9).AlignRight();
+                                                c.Item().Text($"{z.Pret} EUR").FontSize(18).ExtraBold().FontColor("#EE5607");
+                                            });
                                         });
-                                        r.ConstantItem(120).AlignRight().Column(c =>
+                                        flightCol.Item().PaddingVertical(15).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                                        flightCol.Item().Row(row =>
                                         {
-                                            c.Item().Text("Total Price").FontSize(9).AlignRight();
-                                            c.Item().Text($"{z.Pret} EUR").FontSize(18).ExtraBold().FontColor("#EE5607");
+                                            row.RelativeItem().Column(c =>
+                                            {
+                                                c.Item().Text(z.OrasPlecare).ExtraBold().FontSize(15);
+                                                c.Item().Text(z.AeroportPlecare).Bold().FontColor(Colors.Grey.Medium);
+                                                c.Item().PaddingTop(5).Text(z.DataPlecare.ToString("HH:mm")).FontSize(14).Bold();
+                                                c.Item().Text(z.DataPlecare.ToString("ddd, dd MMM yyyy")).FontSize(9);
+                                            });
+
+                                            row.RelativeItem(1.2f).AlignCenter().Column(c =>
+                                            {
+                                                c.Item().AlignCenter().Text("----------------------").FontColor(Colors.Grey.Lighten1);
+                                            });
+                                            row.RelativeItem().AlignRight().Column(c =>
+                                            {
+                                                c.Item().Text(z.OrasSosire).ExtraBold().FontSize(15);
+                                                c.Item().Text(z.AeroportSosire).Bold().FontColor(Colors.Grey.Medium);
+                                                c.Item().PaddingTop(5).Text(z.DataSosire.ToString("HH:mm")).FontSize(14).Bold();
+                                                c.Item().Text(z.DataSosire.ToString("ddd, dd MMM yyyy")).FontSize(9);
+                                            });
                                         });
                                     });
-                                    flightCol.Item().PaddingVertical(15).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                                    flightCol.Item().Row(row =>
-                                    {
-                                        row.RelativeItem().Column(c =>
-                                        {
-                                            c.Item().Text(z.OrasPlecare).ExtraBold().FontSize(15);
-                                            c.Item().Text(z.AeroportPlecare).Bold().FontColor(Colors.Grey.Medium);
-                                            c.Item().PaddingTop(5).Text(z.DataPlecare.ToString("HH:mm")).FontSize(14).Bold();
-                                            c.Item().Text(z.DataPlecare.ToString("ddd, dd MMM yyyy")).FontSize(9);
-                                        });
+                            }
+                        }
 
-                                        row.RelativeItem(1.2f).AlignCenter().Column(c =>
+                        // Secțiunea CAZĂRI 
+                        if (cazari.Any())
+                        {
+                           
+                            column.Item().PaddingTop(10).PaddingBottom(10).Text("🏨 ACCOMMODATIONS").FontSize(16).SemiBold().FontColor("#2c3e50");
+                            foreach (var c in cazari)
+                            {
+                                column.Item().PaddingBottom(15).Container()
+                                    .Border(1).BorderColor(Colors.Grey.Lighten3)
+                                    .Background(Colors.Grey.Lighten5)
+                                    .Padding(20)
+                                    .Column(hotelCol =>
+                                    {
+                                        hotelCol.Item().Text($"{c.HotelNume}").FontSize(15).ExtraBold().FontColor("#EE5607");
+                                        hotelCol.Item().Text($"Location: {c.Locatie}").FontSize(12).FontColor(Colors.Grey.Darken2);
+                                        hotelCol.Item().PaddingTop(5).Text($"Check-In:  {c.CheckIn?.ToString("dd MMM yyyy")}").FontSize(11).Bold();
+                                        hotelCol.Item().Text($"Check-Out: {c.CheckOut?.ToString("dd MMM yyyy")}").FontSize(11).Bold();
+
+                                        if (!string.IsNullOrEmpty(c.HotelLink))
                                         {
-                                            c.Item().AlignCenter().Text("----------------------").FontColor(Colors.Grey.Lighten1);
-                                        });
-                                        row.RelativeItem().AlignRight().Column(c =>
-                                        {
-                                            c.Item().Text(z.OrasSosire).ExtraBold().FontSize(15);
-                                            c.Item().Text(z.AeroportSosire).Bold().FontColor(Colors.Grey.Medium);
-                                            c.Item().PaddingTop(5).Text(z.DataSosire.ToString("HH:mm")).FontSize(14).Bold();
-                                            c.Item().Text(z.DataSosire.ToString("ddd, dd MMM yyyy")).FontSize(9);
-                                        });
+                                            hotelCol.Item().PaddingTop(10).Hyperlink(c.HotelLink).Text("View on Google Maps ↗").FontColor(Colors.Blue.Medium).Underline();
+                                        }
                                     });
-                                });
+                            }
                         }
                     });
                     page.Footer().PaddingTop(20).AlignCenter().Text(x =>
@@ -740,12 +770,13 @@ namespace TravelNest.Controllers
                     });
                 });
             });
+
             var pdfBytes = document.GeneratePdf();
 
             if (previzualizare)
-                return File(pdfBytes, "application/pdf");
+                return File(pdfBytes, "application/pdf"); // Afișează în browser
 
-            return File(pdfBytes, "application/pdf", $"Itinerariu_TravelNest_{idGrup}.pdf");
+            return File(pdfBytes, "application/pdf", $"Trip_Itinerary_TravelNest_{idGrup}.pdf"); // Descarcă
         }
         [HttpPost]
         public async Task<IActionResult> CreareAutomata([FromBody] List<string> orase)

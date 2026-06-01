@@ -1,7 +1,7 @@
 ﻿
-    window.conexiuneChat = new signalR.HubConnectionBuilder()
-        .withUrl("/ChatHub")
-        .build();
+window.conexiuneChat = new signalR.HubConnectionBuilder()
+    .withUrl("/ChatHub")
+    .build();
 
 window.idDestinatarActiv = window.idDestinatarActiv || null;
 window.elIdGrup = document.getElementById("idGrup");
@@ -79,7 +79,7 @@ function adaugaMesajPrivatInInterfata(expeditorId, text, ora, mesajId, dataFull)
     if (!container) return;
 
     const esteEu = Number(expeditorId) === Number(window.idProfilCurent);
-    const recent = esteMesajRecent(dataFull); 
+    const recent = esteMesajRecent(dataFull);
 
     const htmlMesaj = `
         <div class="mesajDivPrivat ${esteEu ? 'sent' : 'received'}" id="msg_${mesajId}">
@@ -88,7 +88,7 @@ function adaugaMesajPrivatInInterfata(expeditorId, text, ora, mesajId, dataFull)
                     <span id="text_${mesajId}">${text}</span>
                     ${(esteEu && recent) ? `
                         <div class="actiuniMesajPrivat">
-                            <i class="fa-solid fa-pen" onclick="deschideEditare(${mesajId}, '${text.replace(/'/g, "\\'")}')"></i>
+                           <i class="fa-solid fa-pen" onclick="deschideEditareMesaj(${mesajId}, this)"></i>
                             <i class="fa-solid fa-trash" onclick="deschideStergere(${mesajId})"></i>
                         </div>` : ''}
                 </div>
@@ -113,7 +113,8 @@ function adaugaMesajInInterfata(expeditorId, text, ora, userName, avatarUrl, mes
                 <div class="bulaChat">
                     <span id="text_${mesajId}">${text}</span>
                     ${(esteEu && recent) ? `
-                        <div class="actiuniMesaj" style="display:none;"> <i class="fa-solid fa-pen" onclick="deschideEditare(${mesajId}, '${text.replace(/'/g, "\\'")}')"></i>
+                        <div class="actiuniMesaj"> 
+                            <i class="fa-solid fa-pen" onclick="deschideEditareMesaj(${mesajId}, this)"></i>
                             <i class="fa-solid fa-trash" onclick="deschideStergere(${mesajId})"></i>
                         </div>` : ''}
                 </div>
@@ -159,20 +160,52 @@ function inchideModalStergere() {
     if (modal) modal.style.display = "none";
 }
 
-function deschideEditare(mesajId, textVechi) {
+window.deschideEditareMesaj = function (mesajId, elementButon) {
     const modal = document.getElementById("modalEditareChat");
     const textArea = document.getElementById("textEditareNou");
     const btnSalva = document.getElementById("butonConfirmaEdit");
+    const idCorect = parseInt(mesajId, 10);
+
+    if (isNaN(idCorect)) {
+        alert("Eroare internă: ID-ul mesajului nu este valid. Dă un refresh la pagină!");
+        return;
+    }
+
     if (modal && textArea && btnSalva) {
-        textArea.value = textVechi;
+        textArea.value = "";
+
+        let spanText = null;
+        if (elementButon) {
+            const bulaContainer = elementButon.closest('.bulaPrivat') || elementButon.closest('.bulaChat');
+            if (bulaContainer) {
+                spanText = bulaContainer.querySelector('span[id^="text_"]');
+            }
+        }
+
+        if (!spanText) {
+            spanText = document.getElementById(`text_${idCorect}`);
+        }
+
+        if (spanText) {
+            textArea.value = spanText.innerText || spanText.textContent;
+        }
+
         modal.style.display = "flex";
+
+        btnSalva.onclick = null;
         btnSalva.onclick = async () => {
-            await window.conexiuneChat.invoke("MesajEdit", Number(mesajId), textArea.value);
-            inchideModalEditare();
+   
+            const textNouCorect = String(textArea.value).trim();
+            try {
+                await window.conexiuneChat.invoke("MesajEdit", idCorect, textNouCorect);
+                inchideModalEditare();
+            } catch (err) {
+                console.error("Eroare SignalR la editare:", err);
+               
+            }
         };
     }
-}
-
+};
 function inchideModalEditare() {
     const modal = document.getElementById("modalEditareChat");
     if (modal) modal.style.display = "none";
