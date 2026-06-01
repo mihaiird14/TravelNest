@@ -1,29 +1,23 @@
-﻿@model List<string>
+﻿@model TravelNest.ViewModels.FriendsMapViewModel
 @using System.Text.Json
 <html>
 <head>
     <link rel="stylesheet" href="~/css/map.css">
+    <link rel="stylesheet" href="~/css/friendsMap.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <script>
-        window.tariVizitate = @Html.Raw(JsonSerializer.Serialize(Model));
+        window.friendsMapData = @Html.Raw(JsonSerializer.Serialize(Model.Friends));
     </script>
 
-    <div id="mapWrapper">
-        <div id="controlPanel">
-            <h2 id="mapTitle">Travel Map</h2>
-            <div id="statsContainer">
-                <div id="countryStats"><span id="totalCount">0</span>/<span id="totalCountries">195</span></div>
-                <div id="progressPercentage">0%</div>
-            </div>
-        </div>
-        <div id="globalMap"></div>
+    <div id="overlapLegend">
+        <h4>Visited by</h4>
     </div>
 
     <div id="mapSwitchBar">
-        <button class="map-switch-btn active" onclick="void(0)" title="My Travel Map">
+        <button class="map-switch-btn inactive" onclick="window.location.href='/Map/Index'" title="My Travel Map">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
@@ -31,7 +25,7 @@
             </svg>
             My Map
         </button>
-        <button class="map-switch-btn inactive" onclick="window.location.href='/Map/FriendsMap'" title="Friends Map">
+        <button class="map-switch-btn active" onclick="void(0)" title="Friends Map">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -43,7 +37,7 @@
     </div>
 
     @section Scripts{
-        <script src="~/js/scratchMap.js" asp-append-version="true"></script>
+        <script src="~/js/FriendsMap.js" asp-append-version="true"></script>
     }
 </body>
 </html>

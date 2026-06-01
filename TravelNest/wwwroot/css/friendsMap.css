@@ -1,0 +1,193 @@
+﻿/* ── Profile marker ─────────────────────────────────────────────────────── */
+.fm-marker-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.fm-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #EE5607;
+    overflow: hidden;
+    background: #f0f0f0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+}
+
+    .fm-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.fm-pin-tip {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid #EE5607;
+    margin-top: -1px;
+}
+
+.fm-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    border-radius: 8px;
+    padding: 2px 7px;
+    margin-top: 3px;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Badges ─────────────────────────────────────────────────────────────── */
+.fm-badge {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.fm-soon {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.fm-flying {
+    background: #3B82F6;
+    color: #fff;
+    animation: fm-pulse 1.4s infinite;
+}
+
+@keyframes fm-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.55;
+    }
+}
+
+/* ── Popup ───────────────────────────────────────────────────────────────── */
+.fm-popup-wrapper .leaflet-popup-content-wrapper {
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    padding: 0;
+    overflow: hidden;
+}
+
+.fm-popup-wrapper .leaflet-popup-content {
+    margin: 0;
+    min-width: 180px;
+}
+
+.fm-popup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+}
+
+.fm-popup-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #EE5607;
+    flex-shrink: 0;
+}
+
+.fm-popup-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+    .fm-popup-info strong {
+        font-size: 14px;
+        color: #111;
+    }
+
+    .fm-popup-info span {
+        font-size: 12px;
+        color: #666;
+    }
+
+.fm-popup-status {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+    .fm-popup-status.upcoming {
+        color: #f59e0b;
+    }
+
+    .fm-popup-status.active {
+        color: #10b981;
+    }
+
+    .fm-popup-status.flying {
+        color: #3B82F6;
+    }
+
+.fm-popup-flight {
+    font-size: 11px;
+    color: #888;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────────── */
+#overlapLegend {
+    position: fixed;
+    bottom: 88px;
+    right: 16px;
+    background: rgba(255,255,255,0.93);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    z-index: 900;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+    max-width: 200px;
+    display: none;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(220,220,220,0.6);
+}
+
+    #overlapLegend h4 {
+        margin: 0 0 8px 0;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #999;
+    }
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.legend-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #EE5607;
+    flex-shrink: 0;
+}
+
+.legend-status {
+    margin-left: auto;
+    font-size: 14px;
+}

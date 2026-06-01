@@ -7,6 +7,7 @@ using TravelNest.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TravelNest.ViewModels;
 
 namespace TravelNest.Controllers
 {
@@ -47,24 +48,9 @@ namespace TravelNest.Controllers
                 .Select(l => l.CodTara.ToUpper())
                 .Distinct()
                 .ToList();
-            Console.WriteLine("=== DEBUG MAP ===");
-            Console.WriteLine($"ProfilId: {profil.Id}");
-            Console.WriteLine($"Grupuri vizibile ({grupuriVizibile.Count}):");
-            foreach (var g in grupuriVizibile)
-            {
-                Console.WriteLine($"  Grup ID={g.Id}, Locatii={string.Join(",", g.Locatii.Select(l => l.CodTara))}");
-            }
-            Console.WriteLine($"Harti ascunse ({hartiAscunse.Count}): {string.Join(",", hartiAscunse)}");
+         
+         
             var dupafiltru = grupuriVizibile.Where(g => !hartiAscunse.Contains(g.Id)).ToList();
-            Console.WriteLine($"Dupa filtru ({dupafiltru.Count}):");
-            foreach (var g in dupafiltru)
-            {
-                Console.WriteLine($"  Grup ID={g.Id}");
-            }
-            Console.WriteLine($"Coduri finale: {string.Join(",", coduri)}");
-            Console.WriteLine("=== END DEBUG ===");
-
-            // Add manually added countries
             var manualCountries = await _context.TariVizitate
                 .Where(t => t.ProfilId == profil.Id)
                 .Select(t => t.CodTara.ToUpper())
@@ -75,7 +61,231 @@ namespace TravelNest.Controllers
             
             return View(allCountries);
         }
+        public async Task<IActionResult> FriendsMap()
+        {
+            var userId = _userManager.GetUserId(User);
+            var profil = await _context.Profils
+                .Include(p => p.Followers)
+                .Include(p => p.Following)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
 
+            if (profil == null)
+                return View(new FriendsMapViewModel());
+
+            // Mutual follow 
+            var followingIds = profil.Following.Select(f => f.FollowedId).ToHashSet();
+            var followerIds = profil.Followers.Select(f => f.FollowerId).ToHashSet();
+            var mutualIds = followingIds.Intersect(followerIds).ToHashSet();
+
+            // Prietenii cu ShowOnFriendsMap = true
+            var prieteni = await _context.Profils
+                .Include(p => p.User)
+                .Where(p => mutualIds.Contains(p.Id) && p.ShowOnFriendsMap)
+                .ToListAsync();
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var todayFull = DateTime.Today;
+
+            var vm = new FriendsMapViewModel();
+
+            foreach (var prieten in prieteni)
+            {
+                // Toate grupurile prietenului (admin sau member confirmat)
+                var grupuri = await _context.TravelGroups
+                    .Include(g => g.Locatii)
+                    .Include(g => g.Zboruri)
+                    .Include(g => g.ListaParticipanti)
+                    .Where(g => g.AdminId == prieten.Id ||
+                                g.ListaParticipanti.Any(m => m.ProfilId == prieten.Id && m.Confirmare == "MEMBER"))
+                    .ToListAsync();
+
+                var dto = new FriendMarkerDto
+                {
+                    ProfilId = prieten.Id,
+                    Nume = prieten.User?.UserName ?? $"User {prieten.Id}",
+                    ImagineProfil = prieten.ImagineProfil ?? "/images/profilDefault.png"
+                };
+
+                foreach (var grup in grupuri)
+                {
+                    
+                    string status;
+
+                    if (grup.DataPlecare.HasValue && grup.DataIntoarcere.HasValue)
+                    {
+                        if (today < grup.DataPlecare.Value)
+                            status = "upcoming";
+                        else if (today > grup.DataIntoarcere.Value)
+                            continue; // vacanta terminata, skip
+                        else
+                            status = "active";
+                    }
+                    else
+                    {
+                        // Fara date => tratam ca activ
+                        status = "active";
+                    }
+
+                    var locatii = grup.Locatii
+                        .Where(l => !string.IsNullOrEmpty(l.CodTara))
+                        .ToList();
+
+                    if (!locatii.Any()) continue;
+
+                 
+                    FlightDto? zborAzi = null;
+                    var zborAziDb = grup.Zboruri
+                        .FirstOrDefault(z => z.DataPlecare.Date == todayFull.Date);
+
+                    if (zborAziDb != null)
+                    {
+                        zborAzi = new FlightDto
+                        {
+                            OrasPlecare = zborAziDb.OrasPlecare,
+                            OrasSosire = zborAziDb.OrasSosire,
+                            AeroportPlecare = zborAziDb.AeroportPlecare,
+                            AeroportSosire = zborAziDb.AeroportSosire,
+                            NumarZbor = zborAziDb.NumarZbor,
+                            DataPlecare = zborAziDb.DataPlecare,
+                            DataSosire = zborAziDb.DataSosire
+                        };
+                    }
+
+                  
+                    string codTara;
+
+                    if (status == "upcoming")
+                    {
+                        // Intotdeauna prima tara (indiferent de zboruri)
+                        codTara = locatii
+                            .OrderBy(l => l.CheckIn ?? DateOnly.MaxValue)
+                            .ThenBy(l => l.Id)
+                            .First().CodTara!.ToUpper();
+                    }
+                    else // active
+                    {
+                        if (grup.Zboruri.Any())
+                        {
+                            // Exista bilete: determinam tara dupa ultimul zbor aterizat
+                            var ultimulZborAterizat = grup.Zboruri
+                                .Where(z => z.DataSosire <= DateTime.Now)
+                                .OrderByDescending(z => z.DataSosire)
+                                .FirstOrDefault();
+
+                            if (ultimulZborAterizat != null)
+                            {
+                                // Gasim locatia al carei CodTara corespunde orasului de sosire
+                                // Fallback: prima locatie dupa CheckIn cu CodTara
+                                var locatieDupaSosire = locatii
+                                    .Where(l => l.CheckIn.HasValue &&
+                                                l.CheckIn.Value >= DateOnly.FromDateTime(ultimulZborAterizat.DataSosire))
+                                    .OrderBy(l => l.CheckIn)
+                                    .ThenBy(l => l.Id)
+                                    .FirstOrDefault();
+
+                                codTara = (locatieDupaSosire?.CodTara ?? locatii
+                                    .OrderBy(l => l.CheckIn ?? DateOnly.MaxValue)
+                                    .ThenBy(l => l.Id)
+                                    .First().CodTara)!.ToUpper();
+                            }
+                            else
+                            {
+                                // Niciun zbor aterizat inca — prima tara
+                                codTara = locatii
+                                    .OrderBy(l => l.CheckIn ?? DateOnly.MaxValue)
+                                    .ThenBy(l => l.Id)
+                                    .First().CodTara!.ToUpper();
+                            }
+                        }
+                        else
+                        {
+                            // Fara zboruri — prima tara din lista
+                            codTara = locatii
+                                .OrderBy(l => l.Id)
+                                .First().CodTara!.ToUpper();
+                        }
+                    }
+
+                    dto.Grupuri.Add(new FriendGroupDto
+                    {
+                        GrupId = grup.Id,
+                        NumeGrup = grup.Nume,
+                        Status = status,
+                        CodTara = codTara,
+                        ZborAzi = zborAzi
+                    });
+                }
+
+                if (dto.Grupuri.Any())
+                    vm.Friends.Add(dto);
+            }
+
+            return View(vm);
+        }
+        [HttpGet]
+        public async Task<IActionResult> FriendsMapDebug()
+        {
+            var userId = _userManager.GetUserId(User);
+            var profil = await _context.Profils
+                .Include(p => p.Followers)
+                .Include(p => p.Following)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (profil == null)
+                return Json(new { error = "Profil null" });
+
+            var followingIds = profil.Following.Select(f => f.FollowedId).ToHashSet();
+            var followerIds = profil.Followers.Select(f => f.FollowerId).ToHashSet();
+            var mutualIds = followingIds.Intersect(followerIds).ToHashSet();
+
+            var prieteni = await _context.Profils
+                .Where(p => mutualIds.Contains(p.Id))
+                .ToListAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var result = new List<object>();
+
+            foreach (var p in prieteni)
+            {
+                var grupuri = await _context.TravelGroups
+                    .Include(g => g.Locatii)
+                    .Include(g => g.Zboruri)
+                    .Include(g => g.ListaParticipanti)
+                    .Where(g => g.AdminId == p.Id ||
+                                g.ListaParticipanti.Any(m => m.ProfilId == p.Id && m.Confirmare == "MEMBER"))
+                    .ToListAsync();
+
+                result.Add(new
+                {
+                    profilId = p.Id,
+                    showOnMap = p.ShowOnFriendsMap,
+                    followingCount = followingIds.Count,
+                    followerCount = followerIds.Count,
+                    mutualIds = mutualIds.ToList(),
+                    grupuri = grupuri.Select(g => new
+                    {
+                        g.Id,
+                        g.Nume,
+                        dataPlecare = g.DataPlecare?.ToString(),
+                        dataIntoarcere = g.DataIntoarcere?.ToString(),
+                        today = today.ToString(),
+                        isUpcoming = g.DataPlecare.HasValue && today < g.DataPlecare.Value,
+                        locatii = g.Locatii.Select(l => new { l.Id, l.CodTara, l.Locatie, checkIn = l.CheckIn?.ToString() }),
+                        zboruri = g.Zboruri.Select(z => new { z.Id, z.DataPlecare, z.DataSosire, z.AeroportPlecare, z.AeroportSosire })
+                    })
+                });
+            }
+
+            return Json(new
+            {
+                myProfilId = profil.Id,
+                followingIds = followingIds.ToList(),
+                followerIds = followerIds.ToList(),
+                mutualIds = mutualIds.ToList(),
+                prieteniGasiti = prieteni.Count,
+                prieteni = result
+            });
+        }
         [HttpGet]
         public async Task<IActionResult> IstoricTari()
         {
@@ -118,7 +328,6 @@ namespace TravelNest.Controllers
 
             var codTara = request.CountryCode.ToUpper();
 
-            // Check if country exists in any travel group
             var existsInGroup = await _context.TravelGroups
                 .Where(g => !_context.HartiAscunse.Any(h => h.ProfilId == profil.Id && h.TravelGroupId == g.Id) &&
                            (g.AdminId == profil.Id ||
@@ -126,14 +335,11 @@ namespace TravelNest.Controllers
                 .Include(g => g.Locatii)
                 .SelectMany(g => g.Locatii)
                 .AnyAsync(l => l.CodTara.ToUpper() == codTara);
-
-            // Find or create manual entry
             var manualEntry = await _context.TariVizitate
                 .FirstOrDefaultAsync(t => t.ProfilId == profil.Id && t.CodTara == codTara);
 
             if (request.IsAdding)
             {
-                // Add country
                 if (manualEntry == null)
                 {
                     _context.TariVizitate.Add(new TaraVizitata
@@ -148,7 +354,7 @@ namespace TravelNest.Controllers
             }
             else
             {
-                // Remove country - only if it doesn't exist in any group
+                
                 if (existsInGroup)
                     return Json(new { success = false, message = "Cannot remove country that is part of a travel group" });
 

@@ -1119,7 +1119,6 @@ function toggleMapVisibility(groupId, hideFromMap) {
     });
 }
 
-// Update Settings Modal Text
 document.addEventListener('DOMContentLoaded', function() {
     const optionRemoveMap = document.getElementById('optionRemoveMap');
     const bannerDiv = document.getElementById('bannerVizualizare');
@@ -1146,3 +1145,64 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+window.afiseazaChat = function (stare) {
+    const overlayChat = document.getElementById('fundalOverlay');
+
+    if (overlayChat) {
+        if (stare === true) {
+            overlayChat.style.display = 'flex'; 
+        } else {
+            overlayChat.style.display = 'none';
+        }
+    }
+};
+window.selecteazaAeroport = function (numeOras, codIata) {
+   
+    const inputPlecare = document.getElementById('orasPlecare');
+    if (inputPlecare) {
+        inputPlecare.value = `${numeOras} (${codIata})`;
+    }
+
+    const containerSugestii = document.getElementById('listaSugestii');
+    if (containerSugestii) {
+        containerSugestii.style.display = 'none';
+    }
+
+    if (typeof window.genereazaSegmente === 'function') {
+        window.genereazaSegmente();
+    }
+};
+
+document.addEventListener('click', function (e) {
+    const containerSugestii = document.getElementById('listaSugestii');
+    const inputPlecare = document.getElementById('orasPlecare');
+
+    if (containerSugestii && inputPlecare) {
+       
+        if (!inputPlecare.contains(e.target) && !containerSugestii.contains(e.target)) {
+            containerSugestii.style.display = 'none';
+        }
+    }
+});
+
+window.cautaHotel = async function () {
+  
+    const btnCautaHotel = event ? event.target : null;
+    let textInitial = "";
+    if (btnCautaHotel) {
+        textInitial = btnCautaHotel.innerText;
+        btnCautaHotel.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Searching...';
+        btnCautaHotel.disabled = true;
+    }
+
+    try {
+
+    } catch (eroare) {
+        console.error("Eroare la căutarea hotelurilor: ", eroare);
+    } finally {
+        if (btnCautaHotel) {
+            btnCautaHotel.innerText = textInitial || "Search Hotels";
+            btnCautaHotel.disabled = false;
+        }
+    }
+};
