@@ -155,17 +155,17 @@ namespace TravelNest.Controllers
 
                     if (status == "upcoming")
                     {
-                        // Intotdeauna prima tara (indiferent de zboruri)
+                       
                         codTara = locatii
                             .OrderBy(l => l.CheckIn ?? DateOnly.MaxValue)
                             .ThenBy(l => l.Id)
                             .First().CodTara!.ToUpper();
                     }
-                    else // active
+                    else 
                     {
                         if (grup.Zboruri.Any())
                         {
-                            // Exista bilete: determinam tara dupa ultimul zbor aterizat
+                            
                             var ultimulZborAterizat = grup.Zboruri
                                 .Where(z => z.DataSosire <= DateTime.Now)
                                 .OrderByDescending(z => z.DataSosire)
@@ -173,8 +173,7 @@ namespace TravelNest.Controllers
 
                             if (ultimulZborAterizat != null)
                             {
-                                // Gasim locatia al carei CodTara corespunde orasului de sosire
-                                // Fallback: prima locatie dupa CheckIn cu CodTara
+                               
                                 var locatieDupaSosire = locatii
                                     .Where(l => l.CheckIn.HasValue &&
                                                 l.CheckIn.Value >= DateOnly.FromDateTime(ultimulZborAterizat.DataSosire))
@@ -189,7 +188,6 @@ namespace TravelNest.Controllers
                             }
                             else
                             {
-                                // Niciun zbor aterizat inca — prima tara
                                 codTara = locatii
                                     .OrderBy(l => l.CheckIn ?? DateOnly.MaxValue)
                                     .ThenBy(l => l.Id)
@@ -198,7 +196,6 @@ namespace TravelNest.Controllers
                         }
                         else
                         {
-                            // Fara zboruri — prima tara din lista
                             codTara = locatii
                                 .OrderBy(l => l.Id)
                                 .First().CodTara!.ToUpper();
@@ -211,7 +208,8 @@ namespace TravelNest.Controllers
                         NumeGrup = grup.Nume,
                         Status = status,
                         CodTara = codTara,
-                        ZborAzi = zborAzi
+                        ZborAzi = zborAzi,
+                        Orase = locatii.Select(l => l.Locatie).Distinct().ToList()
                     });
                 }
 

@@ -33,6 +33,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ActivitateItinerariu> ActivitatiItinerariu { get; set; }
     public DbSet<TaraVizitata> TariVizitate { get; set; }
     public DbSet<HartaAscunsa> HartiAscunse { get; set; }
+    public DbSet<Cheltuiala> Cheltuieli { get; set; }
+    public DbSet<PlataMembru> PlatiMembri { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

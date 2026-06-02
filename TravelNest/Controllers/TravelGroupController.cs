@@ -581,15 +581,52 @@ namespace TravelNest.Controllers
             using var tranzactie = await _context.Database.BeginTransactionAsync();
             try
             {
-                //sterg zborurile vechi ca sa pot sa editez
-                //dupa adaug
                 var zboruriExistente = _context.ZborGrupuris.Where(z => z.GrupId == idGrup);
                 _context.ZborGrupuris.RemoveRange(zboruriExistente);
-                _context.ZborGrupuris.AddRange(biletePrimite);
-                await _context.SaveChangesAsync();
-                await tranzactie.CommitAsync();
 
-                return Ok(new { succes = true, mesaj = "Tickets have been updated!" });
+                var cheltuieliZborVechi = _context.Cheltuieli.Where(c => c.TravelGroupId == idGrup && c.Titlu.Contains("Flight:"));
+                _context.Cheltuieli.RemoveRange(cheltuieliZborVechi);
+                _context.ZborGrupuris.AddRange(biletePrimite);
+                await _context.SaveChangesAsync(); 
+
+                var membriActivi = await _context.MembruGrups
+                    .Where(m => m.TravelGroupId == idGrup && (m.Confirmare == "ORGANIZER" || m.Confirmare == "MEMBER"))
+                    .Select(m => m.ProfilId)
+                    .ToListAsync();
+
+                if (membriActivi.Any())
+                {
+                    foreach (var zbor in biletePrimite)
+                    {
+                        decimal sumaPerPersoana = (decimal)(zbor.Pret / membriActivi.Count);
+
+                        var cheltuialaZbor = new Cheltuiala
+                        {
+                            TravelGroupId = idGrup,
+                            Titlu = $"Flight: {zbor.OrasPlecare} - {zbor.OrasSosire}",
+                            SumaTotala = (decimal)zbor.Pret,
+                            EsteAutomata = true
+                        };
+                        _context.Cheltuieli.Add(cheltuialaZbor);
+                        await _context.SaveChangesAsync(); 
+
+                        // Împărțim datoria
+                        foreach (var profilId in membriActivi)
+                        {
+                            _context.PlatiMembri.Add(new PlataMembru
+                            {
+                                CheltuialaId = cheltuialaZbor.Id,
+                                ProfilId = profilId,
+                                SumaDatorata = sumaPerPersoana,
+                                EstePlatit = false 
+                            });
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+                await tranzactie.CommitAsync();
+                return Ok(new { succes = true, mesaj = "Tickets and budgets have been updated!" });
             }
             catch (Exception ex)
             {
@@ -1133,6 +1170,101 @@ namespace TravelNest.Controllers
             {
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
+        }
+        //functii buget
+        [HttpGet]
+        public async Task<IActionResult> GetBugetGrup(int idGrup)
+        {
+            var grup = await _context.TravelGroups
+                .Include(g => g.ListaParticipanti)
+                    .ThenInclude(m => m.Profil)
+                        .ThenInclude(p => p.User)
+                .FirstOrDefaultAsync(g => g.Id == idGrup);
+
+            if (grup == null) return NotFound();
+
+            var cheltuieli = await _context.Cheltuieli
+                .Include(c => c.PlatiMembri)
+                .Where(c => c.TravelGroupId == idGrup)
+                .ToListAsync();
+
+            var totalGrup = cheltuieli.Sum(c => c.SumaTotala);
+            var statisticiMembri = grup.ListaParticipanti
+                .Where(m => m.Confirmare == "ORGANIZER" || m.Confirmare == "MEMBER")
+                .Select(m => new {
+                    ProfilId = m.ProfilId,
+                    Nume = m.Profil.User.UserName,
+                    Poza = string.IsNullOrEmpty(m.Profil.ImagineProfil) ? "/images/profilDefault.png" : m.Profil.ImagineProfil,
+                    TotalDatorat = cheltuieli.SelectMany(c => c.PlatiMembri).Where(p => p.ProfilId == m.ProfilId).Sum(p => p.SumaDatorata),
+                    TotalPlatit = cheltuieli.SelectMany(c => c.PlatiMembri).Where(p => p.ProfilId == m.ProfilId && p.EstePlatit).Sum(p => p.SumaDatorata)
+                }).ToList();
+            var detaliiCheltuieli = cheltuieli.Select(c => new {
+                Id = c.Id,
+                Titlu = c.Titlu,
+                SumaTotala = c.SumaTotala,
+                EsteAutomata = c.EsteAutomata,
+                Plati = c.PlatiMembri.Select(p => new {
+                    IdPlata = p.Id,
+                    ProfilId = p.ProfilId,
+                    NumeMembru = grup.ListaParticipanti.First(m => m.ProfilId == p.ProfilId).Profil.User.UserName,
+                    SumaDatorata = p.SumaDatorata,
+                    EstePlatit = p.EstePlatit
+                }).ToList()
+            }).ToList();
+
+            return Json(new
+            {
+                total = totalGrup,
+                membri = statisticiMembri,
+                cheltuieli = detaliiCheltuieli
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AdaugaCheltuialaManuala(int idGrup, string titlu, decimal sumaTotala, [FromBody] List<int> membriImplicatiIds)
+        {
+            if (membriImplicatiIds == null || !membriImplicatiIds.Any())
+                return BadRequest("Trebuie selectat cel puțin un membru.");
+
+            var cheltuiala = new Cheltuiala
+            {
+                TravelGroupId = idGrup,
+                Titlu = titlu,
+                SumaTotala = sumaTotala,
+                EsteAutomata = false
+            };
+
+            _context.Cheltuieli.Add(cheltuiala);
+            await _context.SaveChangesAsync();
+
+            decimal sumaPerPersoana = sumaTotala / membriImplicatiIds.Count;
+
+            foreach (var profilId in membriImplicatiIds)
+            {
+                _context.PlatiMembri.Add(new PlataMembru
+                {
+                    CheltuialaId = cheltuiala.Id,
+                    ProfilId = profilId,
+                    SumaDatorata = sumaPerPersoana,
+                    EstePlatit = false
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatusPlata(int idPlata)
+        {
+            var plata = await _context.PlatiMembri.FindAsync(idPlata);
+            if (plata == null) 
+                return NotFound();
+
+            plata.EstePlatit = !plata.EstePlatit;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, noulStatus = plata.EstePlatit });
         }
     }
 

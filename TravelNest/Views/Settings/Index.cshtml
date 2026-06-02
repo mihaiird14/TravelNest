@@ -110,7 +110,7 @@
                 <button type="submit">Save Changes</button>
             </form>
             @section Scripts {
-                <script src="~/js/settings.js"></script>
+                <script src="~/js/settings.js" asp-append-version="true"></script>
                 <script src="~/js/butonSideMenu.js" asp-append-version="true"></script>
                 <script src="~/js/popUpPostare.js" asp-append-version="true"></script>
                 <script src="~/js/profil.js" asp-append-version="true"></script>
@@ -159,6 +159,13 @@
                     <span class="textBtn">Include Profile in Tagging Searches</span>
                     <label class="switch filled">
                         <input type="checkbox" name="manualTag" @(Model.manualTag ? "checked" : "")>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="randButonActivare">
+                    <span class="textBtn">Show me on Friends Map</span>
+                    <label class="switch filled">
+                        <input type="checkbox" name="showOnMap" @(Model.ShowOnFriendsMap ? "checked" : "")>
                         <span class="slider"></span>
                     </label>
                 </div>

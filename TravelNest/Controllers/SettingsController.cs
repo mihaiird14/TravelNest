@@ -197,5 +197,18 @@ namespace TravelNest.Controllers
 
             return Json(new { success = false, message = erori });
         }
+        [HttpPost]
+        public async Task<IActionResult> AllowShowOnMap(int profilId, bool status)
+        {
+            var profil = await _context.Profils.FindAsync(profilId);
+            if (profil == null)
+            {
+                return NotFound();
+            }
+
+            profil.ShowOnFriendsMap = status;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
     }
 }

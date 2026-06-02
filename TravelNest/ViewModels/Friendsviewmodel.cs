@@ -23,6 +23,7 @@
         public string CodTara { get; set; } = "";
 
         public FlightDto? ZborAzi { get; set; }
+        public List<string> Orase { get; set; } = new List<string>();
     }
 
     public class FlightDto

@@ -864,10 +864,19 @@ window.selecteazaZborPentruRuta = function(indexSegment, companieNumeComplet, mo
         document.getElementById('butonConfirmaItinerariu').style.display = 'block';
     }
 };
-
-window.confirmaItinerariul = function() {
-    window.inchidePopUp();
+window.inchidePopUpZbor = function () {
+    const popup = document.getElementById('popUpRezultateZboruri');
+    if (popup) {
+        popup.style.display = 'none';
+    }
+};
+window.confirmaItinerariul = function () {
+    const popup = document.getElementById('popUpRezultateZboruri');
+    if (popup) {
+        popup.style.display = 'none';
+    }
     document.getElementById('formularZbor').style.display = 'none';
+
     let htmlBilete = `
     <div id="detaliiBiletContainer">
         <h5 id="flightTitleMain">Confirmed Flights</h5>
@@ -1432,3 +1441,161 @@ window.previzualizareZboruri = function (idGrup) {
 window.descarcaPDFZb = function (idGrup) {
     window.location.href = `/TravelGroup/GenerarePDFZboruri?idGrup=${idGrup}&previzualizare=false`;
 };
+document.addEventListener('DOMContentLoaded', () => {
+    incarcaBugetGrup();
+});
+
+let membriGrupBuget = [];
+
+async function incarcaBugetGrup() {
+    const idGrup = document.getElementById('idGrup').value || document.getElementById('groupId').value;
+    if (!idGrup) return;
+
+    try {
+        const response = await fetch(`/TravelGroup/GetBugetGrup?idGrup=${idGrup}`);
+        if (!response.ok)
+            throw new Error("Eroare la încărcarea bugetului.");
+
+        const data = await response.json();
+        document.getElementById('pooledValue').innerText = `€ ${data.total.toFixed(2)}`;
+
+        let paidMembers = 0;
+        let unpaidMembers = 0;
+        let totalDatoratToti = 0;
+        let totalPlatitToti = 0;
+
+        membriGrupBuget = data.membri; 
+
+        data.membri.forEach(m => {
+            totalDatoratToti += m.totalDatorat;
+            totalPlatitToti += m.totalPlatit;
+            if (m.totalDatorat > 0 && m.totalPlatit >= m.totalDatorat) {
+                paidMembers++;
+            } else if (m.totalDatorat > 0) {
+                unpaidMembers++;
+            }
+        });
+
+        document.getElementById('paidValue').innerText = `${paidMembers} Members`;
+        document.getElementById('unpaidValue').innerText = `${unpaidMembers} Members`;
+        let procentaj = 0;
+        if (totalDatoratToti > 0) {
+            procentaj = Math.round((totalPlatitToti / totalDatoratToti) * 100);
+        }
+
+        document.getElementById('percentValue').innerText = `${procentaj}% Paid`;
+        const progressFill = document.getElementById('progressFill');
+        if (progressFill)
+            progressFill.style.width = `${procentaj}%`;
+        construiesteListaCheltuieli(data.cheltuieli);
+        construiesteCheckboxMembri();
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function construiesteListaCheltuieli(cheltuieli) {
+    const container = document.getElementById('listaCheltuieliGrup');
+    if (!cheltuieli || cheltuieli.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b;">No expenses tracked yet.</p>';
+        return;
+    }
+
+    let html = '';
+    cheltuieli.forEach(c => {
+        const iconita = c.esteAutomata ? '<i class="fa-solid fa-plane" style="color:#0ea5e9;" title="Auto-generated"></i>' : '<i class="fa-solid fa-user-pen" style="color:#10b981;" title="Manual"></i>';
+
+        html += `
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+            <div style="background: #f8fafc; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+                <strong style="color: #1e293b; font-size: 1.05rem;">${iconita} ${c.titlu}</strong>
+                <span style="font-weight: bold; color: #EE5607;">€ ${c.sumaTotala.toFixed(2)}</span>
+            </div>
+            <div style="padding: 10px 15px;">
+                <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Split breakdown:</p>
+        `;
+
+        c.plati.forEach(p => {
+            const isChecked = p.estePlatit ? 'checked' : '';
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="plata_${p.idPlata}" ${isChecked} onchange="togglePlata(${p.idPlata})" style="cursor: pointer; width: 16px; height: 16px;" />
+                        <label for="plata_${p.idPlata}" style="cursor: pointer; color: #334155; margin: 0;">${p.numeMembru}</label>
+                    </div>
+                    <span style="color: #475569; font-weight: 500;">€ ${p.sumaDatorata.toFixed(2)}</span>
+                </div>
+            `;
+        });
+
+        html += `</div></div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+function construiesteCheckboxMembri() {
+    const container = document.getElementById('listaMembriSplit');
+    container.innerHTML = '';
+    membriGrupBuget.forEach(m => {
+        container.innerHTML += `
+            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 5px 10px; border-radius: 20px; border: 1px solid #cbd5e1; font-size: 0.9rem;">
+                <input type="checkbox" value="${m.profilId}" class="checkbox-membru-split" checked />
+                ${m.nume}
+            </label>
+        `;
+    });
+}
+function deschidePopUpBuget() {
+    document.getElementById('popUpBuget').style.display = 'flex';
+}
+
+function inchidePopUpBuget() {
+    document.getElementById('popUpBuget').style.display = 'none';
+}
+
+async function togglePlata(idPlata) {
+    try {
+        await fetch(`/TravelGroup/ToggleStatusPlata?idPlata=${idPlata}`, { method: 'POST' });
+        incarcaBugetGrup();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function salveazaCheltuialaManuala() {
+    const idGrup = document.getElementById('idGrup').value || document.getElementById('groupId').value;
+    const titlu = document.getElementById('titluCheltuialaNoua').value;
+    const suma = parseFloat(document.getElementById('sumaCheltuialaNoua').value);
+    const checkboxuri = document.querySelectorAll('.checkbox-membru-split:checked');
+    const membriImplicatiIds = Array.from(checkboxuri).map(cb => parseInt(cb.value));
+
+    if (!titlu || isNaN(suma) || suma <= 0) {
+        alert("Te rog introdu un titlu valid și o sumă mai mare de 0.");
+        return;
+    }
+    if (membriImplicatiIds.length === 0) {
+        alert("Trebuie să selectezi cel puțin un membru care participă la această cheltuială.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/TravelGroup/AdaugaCheltuialaManuala?idGrup=${idGrup}&titlu=${encodeURIComponent(titlu)}&sumaTotala=${suma}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(membriImplicatiIds)
+        });
+
+        if (response.ok) {
+            document.getElementById('titluCheltuialaNoua').value = '';
+            document.getElementById('sumaCheltuialaNoua').value = '';
+
+            incarcaBugetGrup();
+        } else {
+            alert("Eroare la adăugarea cheltuielii!");
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}

@@ -1,4 +1,4 @@
-﻿/* ── Profile marker ─────────────────────────────────────────────────────── */
+﻿
 .fm-marker-wrap {
     display: flex;
     flex-direction: column;
@@ -46,7 +46,7 @@
     text-overflow: ellipsis;
 }
 
-/* ── Badges ─────────────────────────────────────────────────────────────── */
+
 .fm-badge {
     font-size: 9px;
     font-weight: 800;
@@ -78,7 +78,6 @@
     }
 }
 
-/* ── Popup ───────────────────────────────────────────────────────────────── */
 .fm-popup-wrapper .leaflet-popup-content-wrapper {
     border-radius: 14px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
@@ -146,7 +145,7 @@
     color: #888;
 }
 
-/* ── Legend ──────────────────────────────────────────────────────────────── */
+
 #overlapLegend {
     position: fixed;
     bottom: 88px;

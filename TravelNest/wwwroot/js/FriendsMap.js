@@ -6,8 +6,7 @@ let map = null;
 let geoJsonLayer = null;
 const flightPolylines = [];
 const profileMarkers = [];
-
-// Normalizeaza un obiect — accepta atat PascalCase cat si camelCase
+let coordCounts = {};
 function n(obj, ...keys) {
     for (const k of keys) {
         if (obj[k] !== undefined && obj[k] !== null)
@@ -18,7 +17,21 @@ function n(obj, ...keys) {
     }
     return undefined;
 }
-
+function getCurvedPoints(lat1, lng1, lat2, lng2) {
+    const points = [];
+    const midLat = (lat1 + lat2) / 2;
+    const midLng = (lng1 + lng2) / 2;
+    const distance = Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
+    const controlLat = midLat + (distance * 0.25);
+    const controlLng = midLng;
+    for (let i = 0; i <= 50; i++) {
+        const t = i / 50;
+        const lat = Math.pow(1 - t, 2) * lat1 + 2 * (1 - t) * t * controlLat + Math.pow(t, 2) * lat2;
+        const lng = Math.pow(1 - t, 2) * lng1 + 2 * (1 - t) * t * controlLng + Math.pow(t, 2) * lng2;
+        points.push([lat, lng]);
+    }
+    return points;
+}
 document.addEventListener('DOMContentLoaded', async function () {
     const mapDiv = document.createElement('div');
     mapDiv.id = 'friendsMap';
@@ -69,9 +82,8 @@ function getIso(props) {
         return props.ISO_A3.toUpperCase().trim();
     return '';
 }
-
 async function geocodeAirport(aeroport, oras) {
-    const q = encodeURIComponent(`${aeroport} airport ${oras}`);
+    const q = encodeURIComponent(oras);
     try {
         const r = await fetch(`${NOMINATIM}?format=json&q=${q}&limit=1`);
         const d = await r.json();
@@ -80,7 +92,6 @@ async function geocodeAirport(aeroport, oras) {
     } catch (_) { }
     return null;
 }
-
 function getCentroid(codTara) {
     if (!codTara)
         return null;
@@ -88,10 +99,11 @@ function getCentroid(codTara) {
 }
 
 function createProfileIcon(imgUrl, label, status) {
+  
     const badge = status === 'upcoming'
-        ? `<div class="fm-badge fm-soon">SOON</div>`
+        ? `<div class="fm-badge fm-soon" style="white-space: nowrap;">SOON</div>`
         : status === 'flying'
-            ? `<div class="fm-badge fm-flying">✈ FLYING</div>`
+            ? `<div class="fm-badge fm-flying" style="white-space: nowrap;">✈ FLYING</div>`
             : '';
 
     return L.divIcon({
@@ -103,14 +115,13 @@ function createProfileIcon(imgUrl, label, status) {
                     <img src="${imgUrl}" onerror="this.src='/images/profilDefault.png'" />
                 </div>
                 <div class="fm-pin-tip"></div>
-                <div class="fm-name">${label}</div>
+                <div class="fm-name" style="white-space: nowrap;">${label}</div>
             </div>`,
         iconSize: [56, 76],
         iconAnchor: [28, 70],
         popupAnchor: [0, -72]
     });
 }
-
 async function renderFriendGroup(friend, grup) {
     const status = n(grup, 'Status', 'status');
     const codTara = n(grup, 'CodTara', 'codTara');
@@ -127,50 +138,80 @@ async function renderFriendGroup(friend, grup) {
     const coords = getCentroid(codTara);
     if (!coords)
         return;
+    const [latFinal, lngFinal] = aplicaOffsetSuprapunere(coords[0], coords[1]);
+    const orase = n(grup, 'Orase', 'orase') || [];
+    const oraseFormatate = orase.length > 0 ? orase.join(' • ') : 'Destinație surpriză';
+
+    const popupHtml = `
+        <div style="text-align:center; min-width:140px; font-family: 'Poppins', sans-serif;">
+            <strong style="color:#1e293b; font-size:1.1em;">${nume}</strong><br/>
+            <span style="color:#EE5607; font-size:0.85em; font-weight:600;">📍 ${numeGrup || 'Trip'}</span><br/>
+            <span style="color:#64748b; font-size:0.85em; display:block; margin-top:4px;">🏙️: ${oraseFormatate}</span>
+        </div>`;
 
     const icon = createProfileIcon(imgUrl, nume, status);
-    const marker = L.marker(coords, { icon }).addTo(map);
+    const marker = L.marker([latFinal, lngFinal], { icon }).bindPopup(popupHtml).addTo(map);
     profileMarkers.push(marker);
 }
-
 async function renderFlightAnimation(friend, grup) {
     const zborAzi = n(grup, 'ZborAzi', 'zborAzi');
-    const codTara = n(grup, 'CodTara', 'codTara');
-    const numeGrup = n(grup, 'NumeGrup', 'numeGrup');
     const imgUrl = n(friend, 'ImagineProfil', 'imagineProfil') || '/images/profilDefault.png';
     const nume = n(friend, 'Nume', 'nume') || '';
 
-    const aeroportPlecare = n(zborAzi, 'AeroportPlecare', 'aeroportPlecare');
-    const aeroportSosire = n(zborAzi, 'AeroportSosire', 'aeroportSosire');
     const orasPlecare = n(zborAzi, 'OrasPlecare', 'orasPlecare');
     const orasSosire = n(zborAzi, 'OrasSosire', 'orasSosire');
-    const numarZbor = n(zborAzi, 'NumarZbor', 'numarZbor');
-    const dataPlecare = n(zborAzi, 'DataPlecare', 'dataPlecare');
-    const dataSosire = n(zborAzi, 'DataSosire', 'dataSosire');
 
-    const coordsFrom = await geocodeAirport(aeroportPlecare, orasPlecare) || getCentroid(codTara) || [0, 0];
-    const coordsTo = await geocodeAirport(aeroportSosire, orasSosire) || coordsFrom;
+    let coordsFrom = await geocodeAirport("", orasPlecare);
+    let coordsTo = await geocodeAirport("", orasSosire);
+
+    if (!coordsFrom)
+        coordsFrom = getCentroid(n(grup, 'CodTara', 'codTara')) || [0, 0];
+    if (!coordsTo)
+        coordsTo = coordsFrom;
 
     const [latFrom, lngFrom] = coordsFrom;
     const [latTo, lngTo] = coordsTo;
 
-    const polyline = L.polyline(
-        [[latFrom, lngFrom], [latTo, lngTo]],
-        { color: '#EE5607', weight: 2, dashArray: '6 8', opacity: 0.75 }
-    ).addTo(map);
+    if (latFrom === latTo && lngFrom === lngTo) {
+        const icon = createProfileIcon(imgUrl, nume, 'flying');
+        const marker = L.marker([latFrom, lngFrom], { icon }).addTo(map);
+        profileMarkers.push(marker);
+        return;
+    }
+    L.circleMarker([latFrom, lngFrom], {
+        color: '#0ea5e9', fillColor: '#38bdf8', fillOpacity: 1, radius: 4, weight: 2
+    }).addTo(map);
+
+    L.circleMarker([latTo, lngTo], {
+        color: '#0ea5e9', fillColor: '#38bdf8', fillOpacity: 1, radius: 4, weight: 2
+    }).addTo(map);
+    const curvedPoints = getCurvedPoints(latFrom, lngFrom, latTo, lngTo);
+    const polyline = L.polyline(curvedPoints, {
+        color: '#38bdf8', 
+        weight: 2.5,
+        dashArray: '6 8',
+        opacity: 0.8
+    }).addTo(map);
     flightPolylines.push(polyline);
 
-    const midLat = (latFrom + latTo) / 2;
-    const midLng = (lngFrom + lngTo) / 2;
+    const midLat = curvedPoints[25][0];
+    const midLng = curvedPoints[25][1];
+
+    const [latFinal, lngFinal] = aplicaOffsetSuprapunere(midLat, midLng);
+    const orase = n(grup, 'Orase', 'orase') || [];
+    const oraseFormatate = orase.length > 0 ? orase.join(' • ') : 'Destinație surpriză';
+
+    const popupHtml = `
+        <div style="text-align:center; min-width:150px; font-family: 'Poppins', sans-serif;">
+            <strong style="color:#1e293b; font-size:1.1em;">${nume}</strong><br/>
+            <span style="color:#0ea5e9; font-size:0.85em; font-weight:600;">✈️ Flight: ${orasPlecare} ➔ ${orasSosire}</span><br/>
+            <span style="color:#64748b; font-size:0.85em; display:block; margin-top:4px;">🏙️: ${oraseFormatate}</span>
+        </div>`;
 
     const icon = createProfileIcon(imgUrl, nume, 'flying');
-    const marker = L.marker([midLat, midLng], { icon }).addTo(map);
+    const marker = L.marker([latFinal, lngFinal], { icon }).bindPopup(popupHtml).addTo(map);
     profileMarkers.push(marker);
-
-    animateAlongLine(marker, [latFrom, lngFrom], [latTo, lngTo],
-        new Date(dataPlecare), new Date(dataSosire));
 }
-
 function animateAlongLine(marker, from, to, depDate, arrDate) {
     const totalMs = arrDate - depDate;
     if (totalMs <= 0)
@@ -212,4 +253,25 @@ function updateLegend(friends) {
             <span class="legend-status">${label}</span>`;
         legend.appendChild(row);
     });
+}
+function aplicaOffsetSuprapunere(lat, lng) {
+    const cheie = `${lat.toFixed(2)}_${lng.toFixed(2)}`;
+
+    if (!coordCounts[cheie]) {
+        coordCounts[cheie] = 0;
+    }
+
+    const numarSuprapuneri = coordCounts[cheie];
+    coordCounts[cheie]++; 
+
+    if (numarSuprapuneri === 0) {
+        return [lat, lng]; 
+    }
+    const raza = 2.5; 
+    const unghi = numarSuprapuneri * (Math.PI / 3); 
+
+    const nouLat = lat + (raza * Math.sin(unghi));
+    const nouLng = lng + (raza * Math.cos(unghi));
+
+    return [nouLat, nouLng];
 }

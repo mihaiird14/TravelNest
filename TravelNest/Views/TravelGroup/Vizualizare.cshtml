@@ -551,10 +551,38 @@
                         </div>
                     </section>
                     <section id="budgetBox">
-                        <div id="budgetHeader">
-                            <h5 id="budgetTitle">Budget Progress</h5>
-                        </div>
 
+                        <div id="budgetHeader" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h5 id="budgetTitle">Budget Progress</h5>
+                            <button onclick="deschidePopUpBuget()" style="background: none; border: none; color: #EE5607; font-weight: bold; cursor: pointer;"><i class="fa-solid fa-circle-info"></i> Details</button>
+                        </div>
+                        <div id="popUpBuget" class="popUp" style="display: none;">
+                            <div class="popUpbox" style="max-width: 600px; width: 90%; text-align: left; max-height: 85vh; overflow-y: auto;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                    <h3 id="popUpTitlu" style="margin: 0;">Budget Details</h3>
+                                    <button type="button" class="close-btn" onclick="inchidePopUpBuget()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                                </div>
+
+                                <div id="listaCheltuieliGrup">
+                                    <p style="text-align: center; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Loading data...</p>
+                                </div>
+
+                                <hr style="margin: 25px 0; border: 0; border-top: 1px solid #e2e8f0;" />
+
+                                <h4 style="margin-bottom: 15px; color: #1e293b;"><i class="fa-solid fa-plus"></i> Add Manual Expense</h4>
+                                <div id="formCheltuialaManuala" style="display: flex; flex-direction: column; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 8px;">
+                                    <input type="text" id="titluCheltuialaNoua" placeholder="Expense Title (e.g., Museum Tickets, Dinner)" style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;" />
+                                    <input type="number" id="sumaCheltuialaNoua" placeholder="Total Amount (EUR)" style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;" />
+
+                                    <div>
+                                        <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 0.9rem; color: #475569;">Split cost between:</p>
+                                        <div id="listaMembriSplit" style="display: flex; flex-wrap: wrap; gap: 15px;"></div>
+                                    </div>
+
+                                    <button onclick="salveazaCheltuialaManuala()" style="background: #EE5607; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;">Add Expense</button>
+                                </div>
+                            </div>
+                        </div>
                         <div id="budgetStats">
                             <div id="pooledInfo">
                                 <span id="pooledLabel">Total Pooled</span>

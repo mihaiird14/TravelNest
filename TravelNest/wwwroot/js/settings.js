@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const isPrivateCheckbox = document.querySelector('input[name="isPrivate"]');
     const noTagsCheckbox = document.querySelector('input[name="noTags"]');
     const manualTagCheckbox = document.querySelector('input[name="manualTag"]');
+    const showOnMapCheckbox = document.querySelector('input[name="showOnMap"]');
     if (isPrivateCheckbox) {
         isPrivateCheckbox.addEventListener('change', () => {
             updateSetting('/Settings/makePrivateProfile', profilId, isPrivateCheckbox.checked);
@@ -69,6 +70,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (manualTagCheckbox) {
         manualTagCheckbox.addEventListener('change', () => {
             updateSetting('/Settings/AllowManualTagSearch', profilId, manualTagCheckbox.checked);
+        });
+    }
+    if (showOnMapCheckbox) {
+        showOnMapCheckbox.addEventListener('change', () => {
+            updateSetting('/Settings/AllowShowOnMap', profilId, showOnMapCheckbox.checked);
         });
     }
 });
