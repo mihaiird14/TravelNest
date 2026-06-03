@@ -1504,27 +1504,36 @@ function construiesteListaCheltuieli(cheltuieli) {
 
     let html = '';
     cheltuieli.forEach(c => {
-        const iconita = c.esteAutomata ? '<i class="fa-solid fa-plane" style="color:#0ea5e9;" title="Auto-generated"></i>' : '<i class="fa-solid fa-user-pen" style="color:#10b981;" title="Manual"></i>';
+        const iconita = c.esteAutomata
+            ? '<i class="fa-solid fa-plane" style="color:#0ea5e9;" title="Auto-generated"></i>'
+            : '<i class="fa-solid fa-user-pen" style="color:#10b981;" title="Manual"></i>';
+
+        const btnSterge = !c.esteAutomata
+            ? `<button onclick="stergeCheltuiala(${c.id})" title="Delete expense" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:1rem;padding:2px 4px;"><i class="fa-solid fa-trash-can"></i></button>`
+            : '';
 
         html += `
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
-            <div style="background: #f8fafc; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
-                <strong style="color: #1e293b; font-size: 1.05rem;">${iconita} ${c.titlu}</strong>
-                <span style="font-weight: bold; color: #EE5607;">€ ${c.sumaTotala.toFixed(2)}</span>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden;">
+            <div style="background:#f8fafc;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;">
+                <strong style="color:#1e293b;font-size:1.05rem;">${iconita} ${c.titlu}</strong>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-weight:bold;color:#EE5607;">€ ${c.sumaTotala.toFixed(2)}</span>
+                    ${btnSterge}
+                </div>
             </div>
-            <div style="padding: 10px 15px;">
-                <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Split breakdown:</p>
+            <div style="padding:10px 15px;">
+                <p style="margin:0 0 10px 0;font-size:0.85rem;color:#64748b;text-transform:uppercase;font-weight:bold;">Split breakdown:</p>
         `;
 
         c.plati.forEach(p => {
             const isChecked = p.estePlatit ? 'checked' : '';
             html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="plata_${p.idPlata}" ${isChecked} onchange="togglePlata(${p.idPlata})" style="cursor: pointer; width: 16px; height: 16px;" />
-                        <label for="plata_${p.idPlata}" style="cursor: pointer; color: #334155; margin: 0;">${p.numeMembru}</label>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed #e2e8f0;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <input type="checkbox" id="plata_${p.idPlata}" ${isChecked} onchange="togglePlata(${p.idPlata})" style="cursor:pointer;width:16px;height:16px;" />
+                        <label for="plata_${p.idPlata}" style="cursor:pointer;color:#334155;margin:0;">${p.numeMembru}</label>
                     </div>
-                    <span style="color: #475569; font-weight: 500;">€ ${p.sumaDatorata.toFixed(2)}</span>
+                    <span style="color:#475569;font-weight:500;">€ ${p.sumaDatorata.toFixed(2)}</span>
                 </div>
             `;
         });
@@ -1534,7 +1543,20 @@ function construiesteListaCheltuieli(cheltuieli) {
 
     container.innerHTML = html;
 }
-
+async function stergeCheltuiala(idCheltuiala) {
+    try {
+        const response = await fetch(`/TravelGroup/StergeCheltuiala?idCheltuiala=${idCheltuiala}`, {
+            method: 'POST'
+        });
+        if (response.ok) {
+            incarcaBugetGrup();
+        } else {
+            alert('Error deleting expense.');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
 function construiesteCheckboxMembri() {
     const container = document.getElementById('listaMembriSplit');
     container.innerHTML = '';
@@ -1597,5 +1619,87 @@ async function salveazaCheltuialaManuala() {
         }
     } catch (err) {
         console.error(err);
+    }
+}
+let instantaGrafic = null;
+const CULORI_CATEGORII = [
+    '#6366f1', '#0ea5e9', '#10b981', '#f59e0b',
+    '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'
+];
+
+async function genereazaGraficCategorii() {
+    const btn = document.getElementById('btnGraficCategorii');
+    const idGrup = document.getElementById('idGrup')?.value
+        || document.getElementById('groupId')?.value;
+
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`/TravelGroup/GetCategoriiBuget?idGrup=${idGrup}`);
+        const categorii = await response.json();
+
+        if (!categorii?.length || categorii.error) {
+            btn.innerHTML = '<i class="fa-solid fa-chart-pie"></i> No data yet';
+            btn.disabled = false;
+            return;
+        }
+
+        const total = categorii.reduce((s, c) => s + c.amount, 0);
+
+        document.getElementById('containerGraficCategorii').style.display = 'block';
+
+        if (instantaGrafic)
+            instantaGrafic.destroy();
+
+        instantaGrafic = new Chart(document.getElementById('graficCategorii'), {
+            type: 'doughnut',
+            data: {
+                labels: categorii.map(c => c.category),
+                datasets: [{
+                    data: categorii.map(c => c.amount),
+                    backgroundColor: CULORI_CATEGORII.slice(0, categorii.length),
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                                return ` €${ctx.parsed.toFixed(2)} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const legenda = document.getElementById('legendaGrafic');
+        legenda.innerHTML = categorii.map((c, i) => {
+            const pct = ((c.amount / total) * 100).toFixed(1);
+            return `
+                <span style="display:flex;align-items:center;gap:4px;
+                             background:#f8fafc;padding:4px 8px;
+                             border-radius:20px;border:1px solid #e2e8f0;">
+                    <span style="width:10px;height:10px;border-radius:2px;
+                                 background:${CULORI_CATEGORII[i]};
+                                 display:inline-block;flex-shrink:0;"></span>
+                    ${c.category} — €${c.amount.toFixed(2)} (${pct}%)
+                </span>`;
+        }).join('');
+
+        btn.innerHTML = '<i class="fa-solid fa-chart-pie"></i> Spending breakdown';
+        btn.disabled = false;
+
+    } catch (err) {
+        console.error(err);
+        btn.innerHTML = '<i class="fa-solid fa-chart-pie"></i> Spending breakdown';
+        btn.disabled = false;
     }
 }

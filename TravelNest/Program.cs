@@ -32,6 +32,7 @@ builder.Services.Configure<AmadeusSettings>(builder.Configuration.GetSection("Am
 builder.Services.AddHttpClient<FlightService>();
 builder.Services.AddHttpClient<HotelService>();
 builder.Services.AddHttpClient<RecomandariForYou>();
+builder.Services.AddHttpClient<BudgetClassifierService>();
 //add api gemini +  serviciu ptr functii
 builder.Services.AddScoped<GeminiService>();
 //Adaugare serviciu Python

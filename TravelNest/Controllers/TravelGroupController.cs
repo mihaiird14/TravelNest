@@ -29,7 +29,8 @@ namespace TravelNest.Controllers
         private readonly FlightService _flightService;
         private readonly HotelService _hotelService;
         private readonly GeminiService _serviciuGemini;
-        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService, GeminiService serviciuGemini, HotelService hotelService)
+        private readonly BudgetClassifierService _classifierService;
+        public TravelGroupController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment env, IHubContext<NotificariHub> hubContext, FlightService flightService, GeminiService serviciuGemini, HotelService hotelService, BudgetClassifierService classifierService)
         {
             _userManager = userManager;
             _context = context;
@@ -38,6 +39,7 @@ namespace TravelNest.Controllers
             _flightService = flightService;
             _serviciuGemini = serviciuGemini;
             _hotelService = hotelService;
+            _classifierService = classifierService;
         }
         public IActionResult Index()
         {
@@ -1265,6 +1267,47 @@ namespace TravelNest.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true, noulStatus = plata.EstePlatit });
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetCategoriiBuget(int idGrup)
+        {
+            var cheltuieli = await _context.Cheltuieli
+                .Where(c => c.TravelGroupId == idGrup)
+                .ToListAsync();
+
+            if (!cheltuieli.Any())
+                return Json(new List<object>());
+
+            var input = cheltuieli.Select(c => (c.Titlu, c.SumaTotala));
+
+            try
+            {
+                var categorii = await _classifierService.ClassifyAsync(input);
+                return Json(categorii);
+            }
+            catch (HttpRequestException)
+            {
+                return Json(new { error = "Classifier service unavailable" });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> StergeCheltuiala(int idCheltuiala)
+        {
+            var cheltuiala = await _context.Cheltuieli
+                .Include(c => c.PlatiMembri)
+                .FirstOrDefaultAsync(c => c.Id == idCheltuiala);
+
+            if (cheltuiala == null)
+                return NotFound();
+
+            if (cheltuiala.EsteAutomata)
+                return BadRequest("Cheltuielile automate nu pot fi șterse manual.");
+
+            _context.PlatiMembri.RemoveRange(cheltuiala.PlatiMembri);
+            _context.Cheltuieli.Remove(cheltuiala);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
         }
     }
 

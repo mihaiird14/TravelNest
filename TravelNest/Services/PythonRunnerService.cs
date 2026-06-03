@@ -18,8 +18,13 @@ namespace TravelNest.Services
         {
             string caleFaceEmb = Path.Combine(Directory.GetCurrentDirectory(), "FaceRecognition", "faceEmb.py");
             string caleTagging = Path.Combine(Directory.GetCurrentDirectory(), "RecomandariForYou", "main.py");
+            string caleClassifier = Path.Combine(Directory.GetCurrentDirectory(), "BudgetClassifier", "classifier.py");
+            _logger.LogInformation($"[DEBUG] CWD: {Directory.GetCurrentDirectory()}");
+            _logger.LogInformation($"[DEBUG] Classifier path: {caleClassifier}");
+            _logger.LogInformation($"[DEBUG] Exists: {File.Exists(caleClassifier)}");
             PornesteProcesPython(caleFaceEmb, "FaceRecognition");
             PornesteProcesPython(caleTagging, "RecomandariForYou");
+            PornesteProcesPython(caleClassifier, "BudgetClassifier");
             return Task.CompletedTask;
         }
 
@@ -33,7 +38,7 @@ namespace TravelNest.Services
 
             string directorRadacina = Path.Combine(Directory.GetCurrentDirectory(), folderLucru);
             string pythonExe = Path.Combine(directorRadacina, "venv", "Scripts", "python.exe");
-            if (!File.Exists(pythonExe)) 
+            if (!File.Exists(pythonExe))
                 pythonExe = "python";
 
             var startInfo = new ProcessStartInfo
