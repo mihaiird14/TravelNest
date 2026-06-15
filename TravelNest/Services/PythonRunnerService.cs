@@ -32,12 +32,13 @@ namespace TravelNest.Services
         {
             if (!File.Exists(caleScript))
             {
-                _logger.LogError(caleScript);
+                _logger.LogError($"Fisierul nu exista: {caleScript}");
                 return;
             }
 
             string directorRadacina = Path.Combine(Directory.GetCurrentDirectory(), folderLucru);
             string pythonExe = Path.Combine(directorRadacina, "venv", "Scripts", "python.exe");
+
             if (!File.Exists(pythonExe))
                 pythonExe = "python";
 
@@ -46,23 +47,36 @@ namespace TravelNest.Services
                 FileName = pythonExe,
                 Arguments = $"\"{caleScript}\"",
                 WorkingDirectory = directorRadacina,
-                RedirectStandardOutput = false,
-                UseShellExecute = true,
-                CreateNoWindow = false
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false, 
+                CreateNoWindow = true
             };
 
             try
             {
-                var proces = Process.Start(startInfo);
-                if (proces != null)
+                var proces = new Process { StartInfo = startInfo };
+                proces.OutputDataReceived += (sender, args) =>
                 {
-                    _proceseActive.Add(proces);
-                    _logger.LogInformation($"S-a pornit {Path.GetFileName(caleScript)} (PID: {proces.Id})");
-                }
+                    if (!string.IsNullOrEmpty(args.Data))
+                        _logger.LogInformation($"[{Path.GetFileName(caleScript)}] {args.Data}");
+                };
+                proces.ErrorDataReceived += (sender, args) =>
+                {
+                    if (!string.IsNullOrEmpty(args.Data))
+                        _logger.LogError($"[{Path.GetFileName(caleScript)} ERROR] {args.Data}");
+                };
+
+                proces.Start();
+                proces.BeginOutputReadLine();
+                proces.BeginErrorReadLine();
+
+                _proceseActive.Add(proces);
+                _logger.LogInformation($"S-a pornit {Path.GetFileName(caleScript)} (PID: {proces.Id})");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError($"Eroare la pornirea procesului: {ex.Message}");
             }
         }
 
