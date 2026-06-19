@@ -430,6 +430,14 @@
                                     </div>
                                     <div id="stopInfo_@loc.Id">
                                         <p id="stopName_@loc.Id">@loc.Locatie</p>
+                                        @if (Model.DataPlecare.HasValue)
+                                        {
+                                            <a class="forecast-link"
+                                               onclick="deschideForecast('@loc.Locatie', '@loc.CodTara')"
+                                               title="View weather forecast">
+                                                <i class="fa-solid fa-cloud-sun"></i> Forecast
+                                            </a>
+                                        }
                                     </div>
                                 </div>
                             }
@@ -853,6 +861,16 @@
                     <i class="fa-solid fa-chevron-right"></i>
                 </div>
             </div>
+        </div>
+    </div>
+    <input type="hidden" id="owKey" value="@Configuration["OpenWeather:ApiKey"]" />
+    <div id="popupForecast" style="display:none;">
+        <div id="boxForecast">
+            <div id="headerForecast">
+                <h4 id="titluForecast"><i class="fa-solid fa-cloud-sun"></i> <span id="orasForecast"></span></h4>
+                <button onclick="inchideForecast()">&times;</button>
+            </div>
+            <div id="zileForecast"></div>
         </div>
     </div>
     </body>

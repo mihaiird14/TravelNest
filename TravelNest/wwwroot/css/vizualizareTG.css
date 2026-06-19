@@ -2194,6 +2194,99 @@ label[id^="etichetaRuta"], #etichetaPlecare {
     background: #d1fae5;
     border-color: #6ee7b7;
 }
+.forecast-link {
+    font-size: 0.72rem;
+    color: #EE5607;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+    text-decoration: none;
+}
+
+.forecast-link:hover {
+    text-decoration: underline;
+}
+
+#popupForecast {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#boxForecast {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    width: 360px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+#headerForecast {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#headerForecast button {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #64748b;
+}
+
+#zileForecast {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.forecast-zi {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.forecast-zi img {
+    width: 40px;
+    height: 40px;
+}
+
+.forecast-zi-info {
+    flex: 1;
+}
+
+.forecast-zi-data {
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.forecast-zi-desc {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-transform: capitalize;
+}
+
+.forecast-zi-temp {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #EE5607;
+    white-space: nowrap;
+}
 @media (max-width: 480px) {
     #contentPopUpSettings {
         width: 85%;

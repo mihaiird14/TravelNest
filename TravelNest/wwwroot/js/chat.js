@@ -339,3 +339,59 @@ window.pornesteConexiune().then(() => {
         verificaNotificareInitiala();
     }
 });
+let timeoutSearchUser = null;
+
+function cautaPrieteniChat() {
+    const input = document.getElementById("inputSearchUser");
+    const container = document.getElementById("rezultateSearch");
+    if (!input || !container) return;
+
+    const termen = input.value.trim();
+
+    clearTimeout(timeoutSearchUser);
+
+    if (termen.length < 2) {
+        container.innerHTML = "";
+        container.style.display = "none";
+        return;
+    }
+
+    timeoutSearchUser = setTimeout(async () => {
+        try {
+            const raspuns = await fetch(`/Chat/CautaUtilizatori?un=${encodeURIComponent(termen)}`);
+            if (!raspuns.ok) return;
+
+            const useri = await raspuns.json();
+
+            if (useri.length === 0) {
+                container.innerHTML = `<div class="rezultatSearchGol">No users found.</div>`;
+            } else {
+                container.innerHTML = useri.map(u => `
+                    <div class="randRezultatSearch" onclick="selecteazaUserDinSearch(${u.id}, '${u.nume}', '${u.imagine}')">
+                        <img src="${u.imagine}" class="avatarSearchRezultat">
+                        <span>${u.nume}</span>
+                    </div>
+                `).join('');
+            }
+            container.style.display = "block";
+        } catch (err) {
+            console.error("Eroare cautare useri:", err);
+        }
+    }, 300);
+}
+
+function selecteazaUserDinSearch(id, nume, imagine) {
+    document.getElementById("inputSearchUser").value = "";
+    document.getElementById("rezultateSearch").innerHTML = "";
+    document.getElementById("rezultateSearch").style.display = "none";
+
+    deschideChatPrivat(id, nume, imagine);
+}
+
+document.addEventListener("click", function (e) {
+    const zona = document.getElementById("zonaSearchUser");
+    const dropdown = document.getElementById("rezultateSearch");
+    if (zona && dropdown && !zona.contains(e.target)) {
+        dropdown.style.display = "none";
+    }
+});

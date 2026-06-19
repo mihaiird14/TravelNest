@@ -1703,3 +1703,59 @@ async function genereazaGraficCategorii() {
         btn.disabled = false;
     }
 }
+const OPENWEATHER_KEY = document.getElementById('owKey')?.value;
+async function deschideForecast(oras, codTara) {
+    document.getElementById('orasForecast').textContent = oras;
+    document.getElementById('zileForecast').innerHTML =
+        '<p style="text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>';
+    document.getElementById('popupForecast').style.display = 'flex';
+
+    try {
+        const q = codTara ? `${oras},${codTara}` : oras;
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(q)}&units=metric&cnt=40&appid=${OPENWEATHER_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.cod !== '200') {
+            document.getElementById('zileForecast').innerHTML =
+                '<p style="color:red;text-align:center">Could not load forecast.</p>';
+            return;
+        }
+
+        const peDzi = {};
+        for (const item of data.list) {
+            const data_zi = item.dt_txt.split(' ')[0];
+            const ora = item.dt_txt.split(' ')[1];
+            if (!peDzi[data_zi] || ora === '12:00:00') {
+                peDzi[data_zi] = item;
+            }
+        }
+
+        const zile = Object.values(peDzi).slice(0, 5);
+        document.getElementById('zileForecast').innerHTML = zile.map(item => {
+            const d = new Date(item.dt * 1000);
+            const ziua = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+            const icon = item.weather[0].icon;
+            const desc = item.weather[0].description;
+            const minT = Math.round(item.main.temp_min);
+            const maxT = Math.round(item.main.temp_max);
+            return `
+                <div class="forecast-zi">
+                    <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}">
+                    <div class="forecast-zi-info">
+                        <div class="forecast-zi-data">${ziua}</div>
+                        <div class="forecast-zi-desc">${desc}</div>
+                    </div>
+                    <div class="forecast-zi-temp">${minT}° / ${maxT}°</div>
+                </div>`;
+        }).join('');
+
+    } catch (e) {
+        document.getElementById('zileForecast').innerHTML =
+            '<p style="color:red;text-align:center">Network error.</p>';
+    }
+}
+
+function inchideForecast() {
+    document.getElementById('popupForecast').style.display = 'none';
+}

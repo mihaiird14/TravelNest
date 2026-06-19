@@ -259,7 +259,7 @@ namespace TravelNest.Controllers
                                         if (dist < distMinimaUser) 
                                             distMinimaUser = dist;
                                     }
-
+                                    Console.WriteLine($"[DEBUG] Distanta minima fata de profilId={profilId}: {distMinimaUser}");
                                     if (distMinimaUser < 0.6)
                                     {
                                         faceEmb.PersonId = profilId;
